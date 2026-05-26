@@ -185,7 +185,7 @@ function AdminWorkspace() {
   }
 
   return (
-    <main className="min-h-screen bg-[#07111f] text-slate-100">
+    <main className="min-h-screen bg-[#07111f] text-[12px] text-slate-100">
       <div className="grid min-h-screen lg:grid-cols-[196px_1fr]">
         <aside className="border-b border-white/10 bg-[#0a1525] p-3 lg:sticky lg:top-0 lg:h-screen lg:border-b-0 lg:border-r">
           <div className="flex items-center gap-2.5">
@@ -217,11 +217,11 @@ function AdminWorkspace() {
         </aside>
 
         <section className="min-w-0">
-          <header className="border-b border-white/10 bg-[#07111f]/92 px-4 py-3 backdrop-blur-xl lg:px-5">
+          <header className="border-b border-white/10 bg-[#07111f]/92 px-4 py-2.5 backdrop-blur-xl lg:px-5">
             <div className="flex flex-col gap-2 xl:flex-row xl:items-end xl:justify-between">
               <div>
                 <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-cyan-200/75">Operations Command Center</p>
-                <h1 className="mt-1 text-[24px] font-semibold leading-7 tracking-[-0.025em] text-white">Panel ejecutivo ITSM</h1>
+                <h1 className="mt-0.5 text-[22px] font-semibold leading-7 tracking-[-0.025em] text-white">Panel ejecutivo ITSM</h1>
                 <p className="mt-1 max-w-2xl text-[12px] leading-4 text-slate-400">
                   Vista ejecutiva de incidentes, solicitudes, accesos, SLA, escalamiento y efectividad de conocimiento.
                 </p>
@@ -234,23 +234,23 @@ function AdminWorkspace() {
             </div>
           </header>
 
-          <div className="space-y-3 p-3 lg:p-4">
+          <div className="space-y-2.5 p-3">
             <section id="overview" className="scroll-mt-4">
-              <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
+              <div className="grid gap-2 sm:grid-cols-3 xl:grid-cols-6">
                 {operationalModel.executive.map((kpi) => (
                   <ExecutiveKpiCard key={kpi.label} kpi={kpi} />
                 ))}
               </div>
             </section>
 
-            <section className="grid gap-2.5 xl:grid-cols-4">
+            <section className="grid gap-2 xl:grid-cols-4">
               <DomainCard id="incidents" title="Incident Management" metrics={operationalModel.incident} />
               <DomainCard id="requests" title="Request Management" metrics={operationalModel.request} />
               <DomainCard id="access" title="Access Management" metrics={operationalModel.access} />
               <DomainCard id="knowledge" title="Knowledge Effectiveness" metrics={operationalModel.knowledge} />
             </section>
 
-            <div id="analytics" className="scroll-mt-4 grid gap-3 xl:grid-cols-[1.15fr_0.85fr_0.85fr]">
+            <div id="analytics" className="scroll-mt-4 grid gap-2.5 xl:grid-cols-[1.15fr_0.85fr_0.85fr]">
               <Panel title="Volumen por día" icon={Activity}>
                 <LineBars items={byDay} />
               </Panel>
@@ -262,7 +262,7 @@ function AdminWorkspace() {
               </Panel>
             </div>
 
-            <div className="grid gap-3 xl:grid-cols-4">
+            <div className="grid gap-2.5 xl:grid-cols-4">
               <Panel title="Distribution by category" icon={Gauge}>
                 <HorizontalBars items={byType} />
               </Panel>
@@ -277,7 +277,7 @@ function AdminWorkspace() {
               </Panel>
             </div>
 
-            <div id="cases" className="scroll-mt-4 grid gap-3 xl:grid-cols-[0.68fr_1.32fr]">
+            <div id="cases" className="scroll-mt-4 grid gap-2.5 xl:grid-cols-[0.68fr_1.32fr]">
               <Panel title="Casos escalados" icon={Ticket}>
                 <EscalatedList cases={escalated} />
               </Panel>
@@ -372,7 +372,7 @@ function ExecutiveKpiCard({ kpi }: { kpi: { label: string; value: string; meta: 
   return (
     <article className={`rounded-lg border px-2.5 py-2 shadow-sm shadow-black/10 ${tone}`}>
       <p className="text-[11px] font-medium text-slate-400">{kpi.label}</p>
-      <p className="mt-1 text-[22px] font-semibold leading-6 tracking-[-0.03em] text-white">{kpi.value}</p>
+      <p className="mt-1 text-[20px] font-semibold leading-6 tracking-[-0.03em] text-white">{kpi.value}</p>
       <p className="mt-1 text-[11px] text-slate-500">{kpi.meta}</p>
     </article>
   );
@@ -380,13 +380,13 @@ function ExecutiveKpiCard({ kpi }: { kpi: { label: string; value: string; meta: 
 
 function DomainCard({ id, title, metrics }: { id: string; title: string; metrics: Array<{ label: string; value: string }> }) {
   return (
-    <article id={id} className="scroll-mt-4 rounded-xl border border-white/10 bg-white/[0.035] p-3">
+    <article id={id} className="scroll-mt-4 rounded-lg border border-white/10 bg-white/[0.035] p-2.5">
       <h2 className="text-[13px] font-semibold text-white">{title}</h2>
       <div className="mt-2 grid grid-cols-2 gap-1.5">
         {metrics.map((metric) => (
           <div key={metric.label} className="rounded-md border border-white/8 bg-slate-950/18 px-2 py-1.5">
             <p className="text-[10px] uppercase tracking-[0.08em] text-slate-500">{metric.label}</p>
-            <p className="mt-0.5 text-[17px] font-semibold leading-5 text-slate-100">{metric.value}</p>
+            <p className="mt-0.5 text-[15px] font-semibold leading-5 text-slate-100">{metric.value}</p>
           </div>
         ))}
       </div>
@@ -396,9 +396,9 @@ function DomainCard({ id, title, metrics }: { id: string; title: string; metrics
 
 function Panel({ title, icon: Icon, children }: { title: string; icon: typeof Activity; children: ReactNode }) {
   return (
-    <article className="rounded-xl border border-white/10 bg-white/[0.04] p-3.5 shadow-sm shadow-black/10">
-      <div className="mb-3 flex items-center justify-between gap-3">
-        <h2 className="flex items-center gap-2 text-[14px] font-semibold text-white">
+    <article className="rounded-lg border border-white/10 bg-white/[0.04] p-3 shadow-sm shadow-black/10">
+      <div className="mb-2.5 flex items-center justify-between gap-3">
+        <h2 className="flex items-center gap-2 text-[13px] font-semibold text-white">
           <Icon size={15} className="text-cyan-200/80" aria-hidden />
           {title}
         </h2>
@@ -411,10 +411,10 @@ function Panel({ title, icon: Icon, children }: { title: string; icon: typeof Ac
 function LineBars({ items }: { items: ChartPoint[] }) {
   const max = Math.max(...items.map((item) => item.value));
   return (
-    <div className="flex h-40 items-end gap-1.5">
+    <div className="flex h-32 items-end gap-1.5">
       {items.map((item) => (
         <div key={item.label} className="flex flex-1 flex-col items-center gap-1.5">
-          <div className="flex h-32 w-full items-end rounded-lg bg-white/[0.04] p-1">
+          <div className="flex h-24 w-full items-end rounded-md bg-white/[0.04] p-1">
             <div
               className="w-full rounded-md bg-gradient-to-t from-cyan-400/90 to-sky-200/90"
               style={{ height: `${Math.max((item.value / max) * 100, 10)}%` }}
@@ -462,11 +462,11 @@ function PriorityStack({ items }: { items: ChartPoint[] }) {
           <div key={item.label} className={`${colors[item.label] ?? "bg-slate-400"} opacity-90`} style={{ width: `${(item.value / total) * 100}%` }} />
         ))}
       </div>
-      <div className="mt-4 grid grid-cols-2 gap-2.5">
+      <div className="mt-3 grid grid-cols-2 gap-2">
         {items.map((item) => (
-          <div key={item.label} className="rounded-lg bg-white/[0.04] p-2.5">
+          <div key={item.label} className="rounded-md bg-white/[0.04] p-2">
             <p className="text-xs text-slate-400">{item.label}</p>
-            <p className="mt-1 text-lg font-semibold text-white">{item.value}</p>
+            <p className="mt-1 text-base font-semibold text-white">{item.value}</p>
           </div>
         ))}
       </div>
@@ -532,7 +532,7 @@ function OperationalTable({ cases }: { cases: OperationalCase[] }) {
         </h2>
         <span className="text-[11px] text-slate-500">actualización operacional</span>
       </div>
-      <div className="thin-scrollbar max-h-[520px] overflow-auto">
+      <div className="thin-scrollbar max-h-[480px] overflow-auto">
         <table className="w-full min-w-[1040px] border-collapse text-left text-xs">
           <thead className="sticky top-0 bg-[#0b1727] text-slate-500">
             <tr>
