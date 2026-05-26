@@ -52,8 +52,8 @@ export async function generateMockITSMResponse(input: ITSMResponseInput): Promis
     const userName = mergedContext.collectedFields.nombre;
     const userArea = mergedContext.collectedFields.area;
     const greeting = userName
-      ? `¡Hola ${userName}! Soy Atlas, tu asistente de soporte TI de SONDA. Veo que estás registrado en el área de ${userArea || "Operaciones"}. ¿Qué inconveniente estás teniendo hoy?`
-      : "¡Hola! Soy Atlas, tu asistente de soporte TI de SONDA. Cuéntame qué está pasando y lo resolvemos juntos.";
+      ? `¡Hola ${userName}! Soy el asistente de soporte TI de SONDA. Veo que estás registrado en el área de ${userArea || "Operaciones"}. ¿Qué inconveniente estás teniendo hoy?`
+      : "¡Hola! Soy el asistente de soporte TI de SONDA. Cuéntame qué está pasando y lo resolvemos juntos.";
 
     return {
       assistantMessage: greeting,

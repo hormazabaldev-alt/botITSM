@@ -34,49 +34,49 @@ const smartActions = [
     topic: "No puedo entrar al correo",
     title: "Correo / Acceso",
     icon: KeyRound,
-    color: "#F59E0B",
-    bg: "rgba(245,158,11,0.1)",
-    border: "rgba(245,158,11,0.22)",
+    color: "#00FFFF",
+    bg: "rgba(0,255,255,0.06)",
+    border: "rgba(0,255,255,0.15)",
   },
   {
     topic: "VPN no funciona",
     title: "VPN / Red",
     icon: Wifi,
     color: "#3B82F6",
-    bg: "rgba(59,130,246,0.1)",
-    border: "rgba(59,130,246,0.22)",
+    bg: "rgba(59,130,246,0.06)",
+    border: "rgba(59,130,246,0.15)",
   },
   {
     topic: "Necesito instalar software",
     title: "Software",
     icon: PackageCheck,
     color: "#8B5CF6",
-    bg: "rgba(139,92,246,0.1)",
-    border: "rgba(139,92,246,0.22)",
+    bg: "rgba(139,92,246,0.06)",
+    border: "rgba(139,92,246,0.15)",
   },
   {
     topic: "Mi notebook está lenta",
     title: "Hardware",
     icon: Laptop,
     color: "#10B981",
-    bg: "rgba(16,185,129,0.1)",
-    border: "rgba(16,185,129,0.22)",
+    bg: "rgba(16,185,129,0.06)",
+    border: "rgba(16,185,129,0.15)",
   },
   {
     topic: "Necesito acceso",
     title: "Privilegios",
     icon: AlertTriangle,
     color: "#EF4444",
-    bg: "rgba(239,68,68,0.1)",
-    border: "rgba(239,68,68,0.22)",
+    bg: "rgba(239,68,68,0.06)",
+    border: "rgba(239,68,68,0.15)",
   },
   {
     topic: "Otro problema",
     title: "Otro caso",
     icon: MessageSquareText,
-    color: "#8DA0C4",
-    bg: "rgba(141,160,196,0.1)",
-    border: "rgba(141,160,196,0.18)",
+    color: "#FFFFFF",
+    bg: "rgba(255,255,255,0.04)",
+    border: "rgba(255,255,255,0.1)",
   },
 ];
 
@@ -88,15 +88,15 @@ const demoScreenshots = [
       "data:image/svg+xml;utf8," +
       encodeURIComponent(`
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 250" width="100%" height="100%">
-        <rect width="400" height="250" rx="8" fill="#1e1e2e"/>
-        <text x="20" y="30" fill="#cdd6f4" font-family="monospace" font-size="14" font-weight="bold">Task Manager - Resource Monitor</text>
-        <line x1="20" y1="45" x2="380" y2="45" stroke="#313244" stroke-width="2"/>
-        <rect x="20" y="60" width="360" height="40" rx="4" fill="#181825"/>
-        <text x="30" y="84" fill="#f38ba8" font-family="monospace" font-size="12" font-weight="bold">Google Chrome.exe</text>
-        <text x="200" y="84" fill="#f38ba8" font-family="monospace" font-size="12">CPU: 98.4%</text>
-        <text x="300" y="84" fill="#a6adc8" font-family="monospace" font-size="12">RAM: 7.2 GB</text>
-        <path d="M 20,230 L 100,210 L 180,225 L 260,160 L 340,90 L 380,80" fill="none" stroke="#f38ba8" stroke-width="3"/>
-        <text x="20" y="195" fill="#f38ba8" font-family="monospace" font-size="12" font-weight="bold">CPU SPIKE: 99.1%</text>
+        <rect width="400" height="250" rx="8" fill="#121212"/>
+        <text x="20" y="30" fill="#ffffff" font-family="monospace" font-size="14" font-weight="bold">Task Manager - Resource Monitor</text>
+        <line x1="20" y1="45" x2="380" y2="45" stroke="#333333" stroke-width="2"/>
+        <rect x="20" y="60" width="360" height="40" rx="4" fill="#1e1e1e"/>
+        <text x="30" y="84" fill="#00ffff" font-family="monospace" font-size="12" font-weight="bold">Google Chrome.exe</text>
+        <text x="200" y="84" fill="#00ffff" font-family="monospace" font-size="12">CPU: 98.4%</text>
+        <text x="300" y="84" fill="#888888" font-family="monospace" font-size="12">RAM: 7.2 GB</text>
+        <path d="M 20,230 L 100,210 L 180,225 L 260,160 L 340,90 L 380,80" fill="none" stroke="#00ffff" stroke-width="3"/>
+        <text x="20" y="195" fill="#00ffff" font-family="monospace" font-size="12" font-weight="bold">CPU SPIKE: 99.1%</text>
       </svg>
     `.trim()),
   },
@@ -107,11 +107,11 @@ const demoScreenshots = [
       "data:image/svg+xml;utf8," +
       encodeURIComponent(`
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 250" width="100%" height="100%">
-        <rect width="400" height="250" rx="8" fill="#1e1e2e"/>
-        <text x="20" y="30" fill="#cdd6f4" font-family="monospace" font-size="14" font-weight="bold">This PC - Drive Analyzer</text>
-        <rect x="95" y="98" width="280" height="15" rx="3" fill="#313244"/>
-        <rect x="95" y="98" width="265" height="15" rx="3" fill="#f38ba8"/>
-        <text x="95" y="132" fill="#f38ba8" font-family="sans-serif" font-size="11" font-weight="bold">1.82 GB free of 256 GB (CRITICAL)</text>
+        <rect width="400" height="250" rx="8" fill="#121212"/>
+        <text x="20" y="30" fill="#ffffff" font-family="monospace" font-size="14" font-weight="bold">This PC - Drive Analyzer</text>
+        <rect x="95" y="98" width="280" height="15" rx="3" fill="#333333"/>
+        <rect x="95" y="98" width="265" height="15" rx="3" fill="#00ffff"/>
+        <text x="95" y="132" fill="#00ffff" font-family="sans-serif" font-size="11" font-weight="bold">1.82 GB free of 256 GB (CRITICAL)</text>
       </svg>
     `.trim()),
   },
@@ -122,7 +122,7 @@ const demoScreenshots = [
       "data:image/svg+xml;utf8," +
       encodeURIComponent(`
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 250" rx="8" width="100%" height="100%">
-        <rect width="400" height="250" fill="#0078d7"/>
+        <rect width="400" height="250" fill="#0055ff"/>
         <text x="30" y="60" fill="#ffffff" font-family="sans-serif" font-size="48">:(</text>
         <text x="30" y="110" fill="#ffffff" font-family="sans-serif" font-size="13" font-weight="bold">Su PC sufrió un problema y necesita reiniciarse.</text>
         <text x="30" y="185" fill="#ffffff" font-family="monospace" font-size="9" font-weight="bold">Código: DRIVER_IRQL_NOT_LESS_OR_EQUAL</text>
@@ -266,6 +266,7 @@ export function SondaAssistant() {
     void sendMessage(input);
   }
 
+  // Se restablece todo limpiamente
   function startNewChat() {
     if (isLoading) return;
     clearStoredSessionContext();
@@ -308,7 +309,7 @@ export function SondaAssistant() {
     };
 
     const greetingMsg: ChatMessage = {
-      id: "atlas-welcome-personal",
+      id: "sonda-welcome-personal",
       role: "assistant",
       createdAt: new Date().toISOString(),
       content: `Hola ${userData.nombre}. Soy el asistente de soporte TI de SONDA.\n\nVeo en la CMDB que perteneces al área de ${userData.area}. Escríbeme qué falla con tus equipos y lo resolvemos juntos.`,
@@ -353,21 +354,29 @@ export function SondaAssistant() {
           setClosed(false);
           setExpanded(true);
         }}
-        className="inline-flex h-11 items-center gap-2.5 rounded-full px-4 text-sm font-semibold transition-all duration-200"
+        className="inline-flex h-11 items-center gap-2.5 rounded-full px-5 text-sm font-semibold transition-all duration-200"
         style={{
-          background: "linear-gradient(135deg, #111F3A 0%, #0C1629 100%)",
-          border: "1px solid rgba(245,158,11,0.28)",
-          color: "#FCD34D",
-          boxShadow: "0 8px 32px rgba(4,8,20,0.55), 0 0 0 1px rgba(245,158,11,0.1)",
+          background: "#000000",
+          border: "1px solid rgba(0, 255, 255, 0.35)",
+          color: "#00FFFF",
+          boxShadow: "0 8px 32px rgba(0, 255, 255, 0.15), inset 0 0 8px rgba(0, 255, 255, 0.05)",
+        }}
+        onMouseEnter={(e) => {
+          (e.currentTarget as HTMLElement).style.borderColor = "#00FFFF";
+          (e.currentTarget as HTMLElement).style.boxShadow = "0 0 20px rgba(0, 255, 255, 0.3)";
+        }}
+        onMouseLeave={(e) => {
+          (e.currentTarget as HTMLElement).style.borderColor = "rgba(0, 255, 255, 0.35)";
+          (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 32px rgba(0, 255, 255, 0.15), inset 0 0 8px rgba(0, 255, 255, 0.05)";
         }}
       >
-        <SondaIcon size={22} />
-        SONDA
+        <SondaIcon size={20} />
+        Soporte SONDA
       </button>
     );
   }
 
-  /* ── Vista principal ── */
+  /* ── Vista principal (Contenedor Chatbot) ── */
   return (
     <section
       className="relative flex flex-col overflow-hidden"
@@ -375,47 +384,47 @@ export function SondaAssistant() {
         width: "min(420px, calc(100vw - 32px))",
         height: "min(540px, calc(100dvh - 100px))",
         borderRadius: "20px",
-        background: "linear-gradient(160deg, #111F3A 0%, #0C1629 50%, #070E1C 100%)",
-        border: "1px solid rgba(255,255,255,0.07)",
-        boxShadow: "0 32px 80px rgba(4,8,20,0.7), 0 0 0 1px rgba(245,158,11,0.06) inset",
+        background: "linear-gradient(160deg, #0C0C0C 0%, #000000 100%)",
+        border: "1px solid rgba(0, 255, 255, 0.16)",
+        boxShadow: "0 32px 80px rgba(0,0,0,0.95), 0 0 0 1px rgba(0, 255, 255, 0.04) inset",
       }}
     >
-      {/* Borde ámbar superior */}
+      {/* Borde superior decorativo estilo Cyber HUD */}
       <div
         className="pointer-events-none absolute inset-x-0 top-0 h-[1.5px] rounded-t-[20px]"
-        style={{ background: "linear-gradient(90deg, transparent 5%, #F59E0B 35%, #FCD34D 65%, transparent 95%)" }}
+        style={{ background: "linear-gradient(90deg, transparent 5%, #00FFFF 35%, #FFFFFF 65%, transparent 95%)" }}
       />
 
-      {/* Brillo radial sutil */}
+      {/* Brillo radial soft cyan de fondo */}
       <div
         className="pointer-events-none absolute inset-0"
         style={{
-          background: "radial-gradient(ellipse 60% 40% at 30% 0%, rgba(27,61,140,0.18), transparent 55%)",
+          background: "radial-gradient(ellipse 60% 40% at 30% 0%, rgba(0,255,255,0.08), transparent 55%)",
         }}
       />
 
       {/* ── Header ── */}
       <header
-        className="relative flex h-[52px] shrink-0 items-center justify-between px-4"
+        className="relative flex h-[54px] shrink-0 items-center justify-between px-4"
         style={{
-          background: "rgba(7,14,28,0.6)",
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
-          backdropFilter: "blur(12px)",
+          background: "rgba(0, 0, 0, 0.75)",
+          borderBottom: "1px solid rgba(0, 255, 255, 0.12)",
+          backdropFilter: "blur(16px)",
         }}
       >
         <div className="flex items-center gap-2.5">
-          <SondaIcon size={26} />
+          <SondaIcon size={24} />
           <div>
             <h1
-              className="text-[13px] font-bold leading-tight tracking-[-0.02em]"
-              style={{ color: "#EEF2FF" }}
+              className="text-[13px] font-bold leading-tight tracking-[-0.01em]"
+              style={{ color: "#FFFFFF" }}
             >
               Soporte SONDA
               <span className="mx-1.5 font-normal opacity-30">·</span>
-              <span className="font-semibold opacity-60 text-[12px]">Mesa de Ayuda</span>
+              <span className="font-semibold text-[11px]" style={{ color: "rgba(255,255,255,0.7)" }}>Mesa de Ayuda</span>
             </h1>
-            <p className="text-[10px] font-medium" style={{ color: "#4A6091" }}>
-              Soporte ITSM inteligente
+            <p className="text-[9.5px] font-semibold uppercase tracking-wider" style={{ color: "#00FFFF", textShadow: "0 0 8px rgba(0,255,255,0.15)" }}>
+              Asistente TI Inteligente
             </p>
           </div>
         </div>
@@ -426,22 +435,24 @@ export function SondaAssistant() {
             onClick={startNewChat}
             disabled={isLoading}
             title="Nuevo caso"
-            className="inline-flex h-7 items-center gap-1.5 rounded-full px-2.5 text-[11px] font-semibold transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-40"
+            className="inline-flex h-7 items-center gap-1.5 rounded-full px-2.5 text-[10.5px] font-semibold transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-40"
             style={{
-              border: "1px solid rgba(255,255,255,0.08)",
-              background: "rgba(255,255,255,0.04)",
-              color: "#8DA0C4",
+              border: "1px solid rgba(0, 255, 255, 0.2)",
+              background: "rgba(0, 255, 255, 0.03)",
+              color: "rgba(255, 255, 255, 0.8)",
             }}
             onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.borderColor = "rgba(245,158,11,0.35)";
-              (e.currentTarget as HTMLElement).style.color = "#FCD34D";
+              (e.currentTarget as HTMLElement).style.borderColor = "#00FFFF";
+              (e.currentTarget as HTMLElement).style.color = "#00FFFF";
+              (e.currentTarget as HTMLElement).style.background = "rgba(0, 255, 255, 0.08)";
             }}
             onMouseLeave={(e) => {
-              (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.08)";
-              (e.currentTarget as HTMLElement).style.color = "#8DA0C4";
+              (e.currentTarget as HTMLElement).style.borderColor = "rgba(0, 255, 255, 0.2)";
+              (e.currentTarget as HTMLElement).style.color = "rgba(255, 255, 255, 0.8)";
+              (e.currentTarget as HTMLElement).style.background = "rgba(0, 255, 255, 0.03)";
             }}
           >
-            <RotateCcw size={11} aria-hidden />
+            <RotateCcw size={10} aria-hidden />
             Nuevo
           </button>
 
@@ -449,8 +460,10 @@ export function SondaAssistant() {
             type="button"
             onClick={() => setExpanded((c) => !c)}
             className="grid size-7 place-items-center rounded-full transition-all duration-200"
-            style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.04)", color: "#8DA0C4" }}
+            style={{ border: "1px solid rgba(255, 255, 255, 0.1)", background: "rgba(255, 255, 255, 0.03)", color: "rgba(255, 255, 255, 0.6)" }}
             aria-label={expanded ? "Minimizar" : "Expandir"}
+            onMouseEnter={(e) => (e.currentTarget as HTMLElement).style.borderColor = "rgba(0, 255, 255, 0.3)"}
+            onMouseLeave={(e) => (e.currentTarget as HTMLElement).style.borderColor = "rgba(255, 255, 255, 0.1)"}
           >
             {expanded ? <Minus size={14} aria-hidden /> : <ChevronUp size={14} aria-hidden />}
           </button>
@@ -459,21 +472,23 @@ export function SondaAssistant() {
             type="button"
             onClick={() => setClosed(true)}
             className="grid size-7 place-items-center rounded-full transition-all duration-200"
-            style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.04)", color: "#8DA0C4" }}
+            style={{ border: "1px solid rgba(255, 255, 255, 0.1)", background: "rgba(255, 255, 255, 0.03)", color: "rgba(255, 255, 255, 0.6)" }}
             aria-label="Cerrar"
+            onMouseEnter={(e) => (e.currentTarget as HTMLElement).style.borderColor = "rgba(0, 255, 255, 0.3)"}
+            onMouseLeave={(e) => (e.currentTarget as HTMLElement).style.borderColor = "rgba(255, 255, 255, 0.1)"}
           >
             <X size={14} aria-hidden />
           </button>
         </div>
       </header>
 
-      {/* ── Selector POC ── */}
+      {/* ── Selector POC demo ── */}
       <div
         className="relative shrink-0 flex items-center justify-between gap-2 px-3.5 py-1.5 text-[11px] z-10"
-        style={{ background: "rgba(7,14,28,0.4)", borderBottom: "1px solid rgba(255,255,255,0.04)" }}
+        style={{ background: "rgba(0, 0, 0, 0.4)", borderBottom: "1px solid rgba(0, 255, 255, 0.06)" }}
       >
-        <div className="flex items-center gap-1.5" style={{ color: "#4A6091" }}>
-          <UserRound size={11} style={{ color: "#F59E0B" }} aria-hidden />
+        <div className="flex items-center gap-1.5" style={{ color: "rgba(255, 255, 255, 0.5)" }}>
+          <UserRound size={11} style={{ color: "#00FFFF" }} aria-hidden />
           <span>Sesión demo:</span>
         </div>
         <select
@@ -482,9 +497,9 @@ export function SondaAssistant() {
           disabled={isLoading}
           className="rounded-md px-2 py-0.5 text-[11px] font-semibold outline-none cursor-pointer transition-all"
           style={{
-            background: "#0C1629",
-            border: "1px solid rgba(255,255,255,0.08)",
-            color: "#EEF2FF",
+            background: "#080808",
+            border: "1px solid rgba(0, 255, 255, 0.18)",
+            color: "#FFFFFF",
           }}
         >
           <option value="">Anónimo</option>
@@ -497,7 +512,7 @@ export function SondaAssistant() {
         <>
           {/* ── Área de mensajes ── */}
           <div ref={scrollRef} className="thin-scrollbar relative min-h-0 flex-1 overflow-y-auto px-3.5 py-3">
-            <div className="space-y-3">
+            <div className="space-y-3.5">
               {messages.map((message) => (
                 <Bubble key={message.id} message={message} />
               ))}
@@ -523,8 +538,8 @@ export function SondaAssistant() {
           <div
             className="relative shrink-0 flex flex-col gap-1.5 px-3.5 py-2.5"
             style={{
-              background: "rgba(7,14,28,0.72)",
-              borderTop: "1px solid rgba(255,255,255,0.06)",
+              background: "rgba(0, 0, 0, 0.8)",
+              borderTop: "1px solid rgba(0, 255, 255, 0.12)",
               backdropFilter: "blur(16px)",
             }}
           >
@@ -533,18 +548,18 @@ export function SondaAssistant() {
               <div
                 className="flex items-center justify-between gap-2 rounded-xl p-2 text-xs"
                 style={{
-                  border: "1px solid rgba(245,158,11,0.18)",
-                  background: "rgba(245,158,11,0.06)",
+                  border: "1px solid rgba(0, 255, 255, 0.25)",
+                  background: "rgba(0, 255, 255, 0.05)",
                 }}
               >
                 <div className="flex items-center gap-2 min-w-0">
                   <img src={attachedFile.url} alt={attachedFile.name} className="size-8 object-cover rounded-md shrink-0" style={{ border: "1px solid rgba(255,255,255,0.1)" }} />
                   <div className="min-w-0">
-                    <p className="font-semibold truncate" style={{ color: "#EEF2FF" }}>{attachedFile.name}</p>
-                    <p className="text-[10px]" style={{ color: "#F59E0B" }}>Evidencia lista para enviar</p>
+                    <p className="font-semibold truncate" style={{ color: "#FFFFFF" }}>{attachedFile.name}</p>
+                    <p className="text-[10px]" style={{ color: "#00FFFF" }}>Evidencia lista para enviar</p>
                   </div>
                 </div>
-                <button type="button" onClick={() => setAttachedFile(null)} className="grid size-6 place-items-center rounded-full" style={{ color: "#8DA0C4" }}>
+                <button type="button" onClick={() => setAttachedFile(null)} className="grid size-6 place-items-center rounded-full" style={{ color: "rgba(255, 255, 255, 0.6)" }}>
                   <X size={12} />
                 </button>
               </div>
@@ -555,15 +570,15 @@ export function SondaAssistant() {
               <div
                 className="rounded-xl p-2 shadow-2xl flex flex-col gap-1.5 animate-fade-up"
                 style={{
-                  border: "1px solid rgba(255,255,255,0.08)",
-                  background: "#0C1629",
+                  border: "1px solid rgba(0, 255, 255, 0.15)",
+                  background: "#080808",
                 }}
               >
                 <div className="flex items-center justify-between px-1 mb-0.5">
-                  <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "#4A6091" }}>
+                  <span className="text-[9.5px] font-bold uppercase tracking-wider" style={{ color: "rgba(255, 255, 255, 0.4)" }}>
                     Adjuntar evidencia técnica
                   </span>
-                  <button type="button" onClick={() => setShowAttachmentMenu(false)} style={{ color: "#8DA0C4" }}>
+                  <button type="button" onClick={() => setShowAttachmentMenu(false)} style={{ color: "rgba(255, 255, 255, 0.5)" }}>
                     <X size={11} />
                   </button>
                 </div>
@@ -578,22 +593,22 @@ export function SondaAssistant() {
                       }}
                       className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-xs font-medium transition-all duration-150"
                       style={{
-                        border: "1px solid rgba(255,255,255,0.06)",
-                        background: "rgba(255,255,255,0.02)",
-                        color: "#8DA0C4",
+                        border: "1px solid rgba(255, 255, 255, 0.05)",
+                        background: "rgba(255, 255, 255, 0.02)",
+                        color: "rgba(255, 255, 255, 0.7)",
                       }}
                       onMouseEnter={(e) => {
-                        (e.currentTarget as HTMLElement).style.borderColor = "rgba(245,158,11,0.25)";
-                        (e.currentTarget as HTMLElement).style.background = "rgba(245,158,11,0.05)";
-                        (e.currentTarget as HTMLElement).style.color = "#EEF2FF";
+                        (e.currentTarget as HTMLElement).style.borderColor = "rgba(0, 255, 255, 0.35)";
+                        (e.currentTarget as HTMLElement).style.background = "rgba(0, 255, 255, 0.06)";
+                        (e.currentTarget as HTMLElement).style.color = "#FFFFFF";
                       }}
                       onMouseLeave={(e) => {
-                        (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.06)";
-                        (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.02)";
-                        (e.currentTarget as HTMLElement).style.color = "#8DA0C4";
+                        (e.currentTarget as HTMLElement).style.borderColor = "rgba(255, 255, 255, 0.05)";
+                        (e.currentTarget as HTMLElement).style.background = "rgba(255, 255, 255, 0.02)";
+                        (e.currentTarget as HTMLElement).style.color = "rgba(255, 255, 255, 0.7)";
                       }}
                     >
-                      <span className="size-6 overflow-hidden rounded-md shrink-0" style={{ border: "1px solid rgba(255,255,255,0.08)", background: "#070E1C" }}>
+                      <span className="size-6 overflow-hidden rounded-md shrink-0" style={{ border: "1px solid rgba(255, 255, 255, 0.08)", background: "#000" }}>
                         <img src={shot.url} alt={shot.label} className="size-full object-cover" />
                       </span>
                       <span>{shot.label}</span>
@@ -603,9 +618,9 @@ export function SondaAssistant() {
                   <label
                     className="flex items-center justify-center gap-2 rounded-lg px-2.5 py-2 text-xs font-semibold transition-all duration-150 cursor-pointer"
                     style={{
-                      border: "1px dashed rgba(255,255,255,0.1)",
-                      background: "rgba(255,255,255,0.01)",
-                      color: "#4A6091",
+                      border: "1px dashed rgba(255, 255, 255, 0.15)",
+                      background: "rgba(255, 255, 255, 0.01)",
+                      color: "rgba(255, 255, 255, 0.5)",
                     }}
                   >
                     <Paperclip size={12} />
@@ -633,14 +648,14 @@ export function SondaAssistant() {
 
             {/* Estado */}
             <div className="flex items-center justify-between text-[10.5px] font-medium mb-0.5">
-              <div className="flex items-center gap-2" style={{ color: "#4A6091" }}>
+              <div className="flex items-center gap-2" style={{ color: "rgba(255, 255, 255, 0.5)" }}>
                 <span
                   className="size-1.5 rounded-full"
                   style={{
-                    background: isLoading ? "#F59E0B" : "#10B981",
+                    background: isLoading ? "#00FFFF" : "#00FF88",
                     boxShadow: isLoading
-                      ? "0 0 8px rgba(245,158,11,0.9)"
-                      : "0 0 8px rgba(16,185,129,0.7)",
+                      ? "0 0 8px rgba(0, 255, 255, 0.9)"
+                      : "0 0 8px rgba(0, 255, 136, 0.7)",
                     animation: isLoading ? "pulse 1s ease-in-out infinite" : "none",
                   }}
                 />
@@ -655,9 +670,9 @@ export function SondaAssistant() {
                 onClick={() => setShowAttachmentMenu((p) => !p)}
                 className="grid size-10 shrink-0 place-items-center rounded-xl transition-all duration-200"
                 style={{
-                  border: showAttachmentMenu ? "1px solid rgba(245,158,11,0.4)" : "1px solid rgba(255,255,255,0.08)",
-                  background: showAttachmentMenu ? "rgba(245,158,11,0.1)" : "rgba(255,255,255,0.04)",
-                  color: showAttachmentMenu ? "#F59E0B" : "#8DA0C4",
+                  border: showAttachmentMenu ? "1px solid rgba(0, 255, 255, 0.4)" : "1px solid rgba(255, 255, 255, 0.08)",
+                  background: showAttachmentMenu ? "rgba(0, 255, 255, 0.08)" : "rgba(255, 255, 255, 0.03)",
+                  color: showAttachmentMenu ? "#00FFFF" : "rgba(255, 255, 255, 0.6)",
                 }}
                 title="Adjuntar evidencia"
               >
@@ -678,17 +693,17 @@ export function SondaAssistant() {
                 placeholder={attachedFile ? "Agrega un comentario o envía..." : "Describe tu problema..."}
                 className="thin-scrollbar max-h-28 min-h-10 flex-1 resize-none rounded-xl px-3.5 py-2.5 text-[13px] leading-5 outline-none transition-all duration-200"
                 style={{
-                  border: "1px solid rgba(255,255,255,0.08)",
-                  background: "rgba(255,255,255,0.04)",
-                  color: "#EEF2FF",
+                  border: "1px solid rgba(255, 255, 255, 0.08)",
+                  background: "rgba(255, 255, 255, 0.03)",
+                  color: "#FFFFFF",
                 }}
                 onFocus={(e) => {
-                  (e.currentTarget as HTMLElement).style.borderColor = "rgba(245,158,11,0.35)";
-                  (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.06)";
+                  (e.currentTarget as HTMLElement).style.borderColor = "rgba(0, 255, 255, 0.4)";
+                  (e.currentTarget as HTMLElement).style.background = "rgba(255, 255, 255, 0.05)";
                 }}
                 onBlur={(e) => {
-                  (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.08)";
-                  (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.04)";
+                  (e.currentTarget as HTMLElement).style.borderColor = "rgba(255, 255, 255, 0.08)";
+                  (e.currentTarget as HTMLElement).style.background = "rgba(255, 255, 255, 0.03)";
                 }}
               />
 
@@ -698,13 +713,13 @@ export function SondaAssistant() {
                 className="grid size-10 shrink-0 place-items-center rounded-xl transition-all duration-200 disabled:cursor-not-allowed"
                 style={{
                   background: (!input.trim() && !attachedFile) || isLoading
-                    ? "rgba(255,255,255,0.06)"
-                    : "linear-gradient(135deg, #F59E0B 0%, #D97706 100%)",
-                  color: (!input.trim() && !attachedFile) || isLoading ? "#4A6091" : "#070E1C",
+                    ? "rgba(255, 255, 255, 0.04)"
+                    : "linear-gradient(135deg, #00FFFF 0%, #0088FF 100%)",
+                  color: (!input.trim() && !attachedFile) || isLoading ? "rgba(255, 255, 255, 0.3)" : "#000000",
                   boxShadow: (!input.trim() && !attachedFile) || isLoading
                     ? "none"
-                    : "0 4px 16px rgba(245,158,11,0.35)",
-                  border: "1px solid rgba(255,255,255,0.06)",
+                    : "0 4px 16px rgba(0, 255, 255, 0.3)",
+                  border: "1px solid rgba(255, 255, 255, 0.06)",
                 }}
                 aria-label="Enviar"
               >
@@ -740,19 +755,21 @@ function SmartActionCard({
         padding: "8px 10px",
       }}
       onMouseEnter={(e) => {
-        (e.currentTarget as HTMLElement).style.background = action.bg.replace("0.1", "0.18");
-        (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)";
+        (e.currentTarget as HTMLElement).style.background = action.bg.replace("0.06", "0.14");
+        (e.currentTarget as HTMLElement).style.transform = "translateY(-1.5px)";
+        (e.currentTarget as HTMLElement).style.borderColor = action.color;
       }}
       onMouseLeave={(e) => {
         (e.currentTarget as HTMLElement).style.background = action.bg;
         (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
+        (e.currentTarget as HTMLElement).style.borderColor = action.border;
       }}
     >
       <div className="flex flex-col gap-1.5">
-        <span className="grid size-6 shrink-0 place-items-center rounded-lg" style={{ background: "rgba(255,255,255,0.07)", color: action.color }}>
+        <span className="grid size-6 shrink-0 place-items-center rounded-lg" style={{ background: "rgba(255,255,255,0.06)", color: action.color }}>
           <Icon size={12} aria-hidden />
         </span>
-        <span className="block text-[11px] font-semibold leading-tight" style={{ color: "#EEF2FF" }}>
+        <span className="block text-[11px] font-semibold leading-tight" style={{ color: "#FFFFFF" }}>
           {action.title}
         </span>
       </div>
@@ -763,16 +780,15 @@ function SmartActionCard({
 function Bubble({ message }: { message: ChatMessage }) {
   const isUser = message.role === "user";
 
-  const id = "sonda-welcome";
-  const idPersonal = "sonda-welcome-personal";
-  if (message.id === id || message.id === idPersonal || message.id === "atlas-welcome" || message.id === "atlas-welcome-personal") {
+  const welcomeIds = ["sonda-welcome", "sonda-welcome-personal", "atlas-welcome", "atlas-welcome-personal"];
+  if (welcomeIds.includes(message.id)) {
     return (
       <div
         className="max-w-[86%] rounded-2xl px-3.5 py-2.5 text-[13px] leading-5"
         style={{
-          border: "1px solid rgba(27,61,140,0.35)",
-          background: "rgba(27,61,140,0.12)",
-          color: "#8DA0C4",
+          border: "1px solid rgba(0, 255, 255, 0.22)",
+          background: "rgba(0, 255, 255, 0.05)",
+          color: "#E5E5E5",
         }}
       >
         <p className="whitespace-pre-line">{message.content}</p>
@@ -781,13 +797,13 @@ function Bubble({ message }: { message: ChatMessage }) {
   }
 
   return (
-    <div className={`flex gap-2 ${isUser ? "justify-end" : "justify-start"}`}>
+    <div className={`flex gap-2.5 ${isUser ? "justify-end" : "justify-start"}`}>
       {!isUser ? (
         <span
-          className="mt-1 grid size-[22px] shrink-0 place-items-center rounded-lg"
+          className="mt-0.5 grid size-[24px] shrink-0 place-items-center rounded-lg"
           style={{
-            border: "1px solid rgba(245,158,11,0.22)",
-            background: "rgba(245,158,11,0.08)",
+            border: "1px solid rgba(0, 255, 255, 0.25)",
+            background: "rgba(0, 255, 255, 0.06)",
           }}
         >
           <SondaIcon size={14} />
@@ -798,25 +814,26 @@ function Bubble({ message }: { message: ChatMessage }) {
         className="max-w-[80%] flex flex-col gap-2"
         style={{
           borderRadius: isUser ? "16px 4px 16px 16px" : "4px 16px 16px 16px",
-          padding: "8px 12px",
+          padding: "9px 13px",
           ...(isUser
             ? {
-                background: "linear-gradient(135deg, #1B3D8C 0%, #142F6E 100%)",
-                border: "1px solid rgba(27,61,140,0.6)",
-                color: "#EEF2FF",
-                boxShadow: "0 4px 16px rgba(4,8,20,0.35)",
+                background: "linear-gradient(135deg, #00FFFF 0%, #0088FF 100%)",
+                border: "1px solid rgba(0, 255, 255, 0.35)",
+                color: "#000000",
+                boxShadow: "0 4px 16px rgba(0, 255, 255, 0.15)",
+                fontWeight: 500,
               }
             : {
-                border: "1px solid rgba(255,255,255,0.07)",
-                background: "rgba(255,255,255,0.04)",
-                color: "#C8D5F0",
+                border: "1px solid rgba(255, 255, 255, 0.08)",
+                background: "rgba(255, 255, 255, 0.03)",
+                color: "#EAEAEA",
               }),
         }}
       >
         {message.attachmentUrl ? (
-          <div className="relative overflow-hidden rounded-lg p-1 flex flex-col gap-1" style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(7,14,28,0.5)" }}>
+          <div className="relative overflow-hidden rounded-lg p-1 flex flex-col gap-1" style={{ border: "1px solid rgba(255,255,255,0.06)", background: "rgba(0,0,0,0.5)" }}>
             <img src={message.attachmentUrl} alt={message.attachmentName || "Evidencia"} className="max-h-40 object-cover rounded-md" />
-            <span className="text-[10px] font-mono px-1 truncate" style={{ color: "#4A6091" }}>
+            <span className="text-[10px] font-mono px-1 truncate" style={{ color: "rgba(255,255,255,0.4)" }}>
               📎 {message.attachmentName || "evidencia.png"}
             </span>
           </div>
@@ -828,11 +845,11 @@ function Bubble({ message }: { message: ChatMessage }) {
 
       {isUser ? (
         <span
-          className="mt-1 grid size-[22px] shrink-0 place-items-center rounded-lg"
+          className="mt-0.5 grid size-[24px] shrink-0 place-items-center rounded-lg"
           style={{
-            border: "1px solid rgba(255,255,255,0.08)",
-            background: "rgba(255,255,255,0.05)",
-            color: "#8DA0C4",
+            border: "1px solid rgba(255,255,255,0.1)",
+            background: "rgba(255,255,255,0.04)",
+            color: "rgba(255,255,255,0.6)",
           }}
         >
           <UserRound size={12} aria-hidden />
@@ -844,8 +861,8 @@ function Bubble({ message }: { message: ChatMessage }) {
 
 function TypingIndicator() {
   return (
-    <div className="flex items-center gap-2 pl-8 text-[13px]" style={{ color: "#4A6091" }}>
-      <Loader2 size={14} className="animate-spin" style={{ color: "#F59E0B" }} aria-hidden />
+    <div className="flex items-center gap-2 pl-8 text-[13px]" style={{ color: "rgba(255, 255, 255, 0.4)" }}>
+      <Loader2 size={13} className="animate-spin" style={{ color: "#00FFFF" }} aria-hidden />
       <span>revisando contexto...</span>
     </div>
   );
@@ -856,17 +873,17 @@ function RegisteredCase({ ticket }: { ticket: Ticket }) {
     <article
       className="ml-8 flex flex-col gap-3 rounded-2xl p-4"
       style={{
-        border: "1px solid rgba(16,185,129,0.22)",
-        background: "linear-gradient(135deg, rgba(16,185,129,0.07) 0%, rgba(16,185,129,0.03) 100%)",
-        boxShadow: "0 8px 32px rgba(4,8,20,0.35)",
+        border: "1px solid rgba(0, 255, 255, 0.3)",
+        background: "linear-gradient(135deg, rgba(0, 255, 255, 0.05) 0%, rgba(0, 255, 255, 0.01) 100%)",
+        boxShadow: "0 8px 32px rgba(0, 255, 255, 0.05)",
       }}
     >
-      <div className="flex items-center gap-2 text-sm font-bold" style={{ color: "#6EE7B7" }}>
-        <CheckCircle2 size={16} style={{ color: "#10B981" }} aria-hidden />
+      <div className="flex items-center gap-2 text-sm font-bold" style={{ color: "#00FFFF" }}>
+        <CheckCircle2 size={16} style={{ color: "#00FFFF" }} aria-hidden />
         Caso registrado exitosamente
       </div>
 
-      <p className="font-data text-xs font-semibold" style={{ color: "#8DA0C4" }}>
+      <p className="font-data text-xs font-semibold" style={{ color: "rgba(255,255,255,0.7)" }}>
         {ticket.id}
       </p>
 
@@ -882,21 +899,21 @@ function RegisteredCase({ ticket }: { ticket: Ticket }) {
 
       {ticket.attachmentName && (
         <div className="border-t pt-3 flex flex-col gap-1.5" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
-          <p className="text-[10px] font-bold uppercase tracking-[0.1em]" style={{ color: "#4A6091" }}>
+          <p className="text-[10px] font-bold uppercase tracking-[0.1em]" style={{ color: "rgba(255, 255, 255, 0.4)" }}>
             Evidencia técnica adjunta
           </p>
           <div
             className="flex items-center gap-3 rounded-xl p-2 text-xs"
-            style={{ border: "1px solid rgba(16,185,129,0.12)", background: "rgba(7,14,28,0.5)" }}
+            style={{ border: "1px solid rgba(0, 255, 255, 0.15)", background: "rgba(0, 0, 0, 0.5)" }}
           >
             {ticket.attachmentUrl ? (
               <img src={ticket.attachmentUrl} alt={ticket.attachmentName} className="size-10 object-cover rounded-lg shrink-0" style={{ border: "1px solid rgba(255,255,255,0.08)" }} />
             ) : (
-              <Paperclip size={15} style={{ color: "#10B981" }} className="shrink-0" />
+              <Paperclip size={15} style={{ color: "#00FFFF" }} className="shrink-0" />
             )}
             <div className="min-w-0 flex-1">
-              <p className="font-semibold truncate" style={{ color: "#EEF2FF" }}>{ticket.attachmentName}</p>
-              <p className="text-[10.5px] italic mt-0.5 leading-4" style={{ color: "#8DA0C4" }}>
+              <p className="font-semibold truncate" style={{ color: "#FFFFFF" }}>{ticket.attachmentName}</p>
+              <p className="text-[10.5px] italic mt-0.5 leading-4" style={{ color: "rgba(255,255,255,0.7)" }}>
                 {ticket.attachmentAnalysis || "Análisis técnico completado por soporte SONDA"}
               </p>
             </div>
@@ -910,10 +927,10 @@ function RegisteredCase({ ticket }: { ticket: Ticket }) {
 function CaseLine({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-[10.5px] font-bold uppercase tracking-[0.1em]" style={{ color: "#4A6091" }}>
+      <p className="text-[10.5px] font-bold uppercase tracking-[0.1em]" style={{ color: "rgba(255, 255, 255, 0.4)" }}>
         {label}
       </p>
-      <p className="mt-0.5 leading-5" style={{ color: "#C8D5F0" }}>
+      <p className="mt-0.5 leading-5" style={{ color: "#FFFFFF" }}>
         {value}
       </p>
     </div>

@@ -9,42 +9,52 @@ export function SupportPortal() {
 
   return (
     <>
-      {/* ── Keyframes ── */}
+      {/* ── Keyframes y Clases de Animación robustas para SSR ── */}
       <style>{`
         @keyframes sonda-float {
-          0%,100% { transform: translateY(0px) scale(1); }
-          50%      { transform: translateY(-18px) scale(1.015); }
+          0%, 100% { transform: translateY(0px) scale(1); }
+          50%      { transform: translateY(-16px) scale(1.01); }
         }
         @keyframes sonda-pulse-ring {
-          0%   { transform: scale(0.88); opacity: 0.55; }
-          100% { transform: scale(1.65); opacity: 0; }
+          0%   { transform: scale(0.9); opacity: 0.6; }
+          100% { transform: scale(1.55); opacity: 0; }
         }
         @keyframes sonda-glow-breathe {
-          0%,100% { opacity: 0.18; }
-          50%     { opacity: 0.42; }
+          0%, 100% { opacity: 0.25; transform: scale(1); }
+          50%      { opacity: 0.55; transform: scale(1.08); }
         }
         @keyframes sonda-fade-up {
-          from { opacity: 0; transform: translateY(22px); }
+          from { opacity: 0; transform: translateY(24px); }
           to   { opacity: 1; transform: translateY(0); }
         }
         @keyframes sonda-chat-in {
-          from { opacity: 0; transform: scale(0.93) translateY(30px); }
+          from { opacity: 0; transform: scale(0.95) translateY(40px); }
           to   { opacity: 1; transform: scale(1)    translateY(0); }
         }
         @keyframes sonda-dot-blink {
-          0%,80%,100% { transform: scale(0); }
-          40%         { transform: scale(1); }
+          0%, 80%, 100% { transform: scale(0.3); opacity: 0.4; }
+          40%           { transform: scale(1); opacity: 1; }
         }
+        
         .s-float   { animation: sonda-float 4.8s ease-in-out infinite; }
-        .s-ring-1  { animation: sonda-pulse-ring 3.2s cubic-bezier(0.2,0,0.8,1) infinite; }
-        .s-ring-2  { animation: sonda-pulse-ring 3.2s cubic-bezier(0.2,0,0.8,1) infinite 1.6s; }
-        .s-ring-3  { animation: sonda-pulse-ring 3.2s cubic-bezier(0.2,0,0.8,1) infinite 0.8s; }
-        .s-glow    { animation: sonda-glow-breathe 3.8s ease-in-out infinite; }
-        .s-fade-1  { animation: sonda-fade-up 0.9s ease-out 0.4s both; }
-        .s-fade-2  { animation: sonda-fade-up 0.9s ease-out 0.85s both; }
-        .s-fade-3  { animation: sonda-fade-up 0.9s ease-out 1.1s both; }
-        .s-chat    { animation: sonda-chat-in 0.45s cubic-bezier(0.34,1.42,0.64,1) both; }
-        .s-btn:hover { background: rgba(255,255,255,0.07) !important; border-color: rgba(255,255,255,0.45) !important; letter-spacing: 0.14em !important; }
+        .s-ring-1  { animation: sonda-pulse-ring 3.6s cubic-bezier(0.215, 0.61, 0.355, 1) infinite; }
+        .s-ring-2  { animation: sonda-pulse-ring 3.6s cubic-bezier(0.215, 0.61, 0.355, 1) infinite 1.8s; }
+        .s-ring-3  { animation: sonda-pulse-ring 3.6s cubic-bezier(0.215, 0.61, 0.355, 1) infinite 0.9s; }
+        .s-glow    { animation: sonda-glow-breathe 4.2s ease-in-out infinite; }
+        .s-fade-1  { animation: sonda-fade-up 0.8s cubic-bezier(0.25, 1, 0.5, 1) 0.2s both; }
+        .s-fade-2  { animation: sonda-fade-up 0.8s cubic-bezier(0.25, 1, 0.5, 1) 0.55s both; }
+        .s-fade-3  { animation: sonda-fade-up 0.8s cubic-bezier(0.25, 1, 0.5, 1) 0.8s both; }
+        .s-chat    { animation: sonda-chat-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+        
+        .s-btn:hover {
+          background: rgba(0, 255, 255, 0.1) !important;
+          border-color: #00FFFF !important;
+          box-shadow: 0 0 32px rgba(0, 255, 255, 0.3), inset 0 0 10px rgba(0, 255, 255, 0.1) !important;
+          transform: translateY(-2px) scale(1.02);
+        }
+        .s-btn:active {
+          transform: translateY(0px) scale(0.98);
+        }
       `}</style>
 
       <main style={{
@@ -59,68 +69,76 @@ export function SupportPortal() {
         fontFamily: "'Kumbh Sans','Segoe UI',sans-serif",
       }}>
 
-        {/* ── Glow ambiental de fondo ── */}
+        {/* ── Glow ambiental de fondo (Cyan) ── */}
         <div className="s-glow" style={{
           position: "absolute",
-          width: 700,
-          height: 420,
+          width: 650,
+          height: 380,
           borderRadius: "50%",
-          background: "radial-gradient(ellipse at center, rgba(255,255,255,0.055) 0%, transparent 68%)",
+          background: "radial-gradient(ellipse at center, rgba(0, 255, 255, 0.11) 0%, transparent 70%)",
           pointerEvents: "none",
           zIndex: 0,
         }} />
 
-        {/* ── Anillos de pulso ── */}
-        {["s-ring-1","s-ring-2","s-ring-3"].map((cls) => (
+        {/* ── Anillos de pulso HUD (Cyan) ── */}
+        {!chatOpen && ["s-ring-1", "s-ring-2", "s-ring-3"].map((cls) => (
           <div key={cls} className={cls} style={{
             position: "absolute",
-            width: 360,
-            height: 200,
+            width: 380,
+            height: 220,
             borderRadius: "50%",
-            border: "1px solid rgba(255,255,255,0.1)",
+            border: "1px solid rgba(0, 255, 255, 0.08)",
+            boxShadow: "0 0 12px rgba(0, 255, 255, 0.02)",
             pointerEvents: "none",
             zIndex: 0,
           }} />
         ))}
 
         {/* ── Contenido central ── */}
-        <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 0 }}>
+        <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
 
           {/* Logo flotando */}
-          <div className="s-float s-fade-1" style={{ position: "relative" }}>
-            {/* Halo suave debajo del logo */}
-            <div style={{
-              position: "absolute",
-              inset: "-24px -40px",
-              borderRadius: "50%",
-              background: "radial-gradient(ellipse at center, rgba(255,255,255,0.07) 0%, transparent 70%)",
-              pointerEvents: "none",
-            }} />
+          <div className="s-fade-1">
+            <div className="s-float" style={{ position: "relative" }}>
+              {/* Halo suave detrás del logo */}
+              <div style={{
+                position: "absolute",
+                inset: "-20px -30px",
+                borderRadius: "50%",
+                background: "radial-gradient(ellipse at center, rgba(0, 255, 255, 0.13) 0%, transparent 68%)",
+                pointerEvents: "none",
+              }} />
 
-            {/* Logo SONDA — SVG wordmark fiel al original */}
-            <SondaWordmark width={260} />
+              {/* Logo SONDA — SVG compuesto con isotipo cyan real y wordmark */}
+              <SondaLogoModern width={280} />
+            </div>
           </div>
 
           {/* Separador sutil */}
-          <div className="s-fade-2" style={{
-            marginTop: 36,
-            width: 1,
-            height: 52,
-            background: "linear-gradient(to bottom, rgba(255,255,255,0.25), transparent)",
-          }} />
+          {!chatOpen && (
+            <div className="s-fade-2" style={{
+              marginTop: 40,
+              width: 1,
+              height: 48,
+              background: "linear-gradient(to bottom, rgba(0, 255, 255, 0.35), transparent)",
+            }} />
+          )}
 
           {/* Tagline */}
-          <p className="s-fade-2" style={{
-            marginTop: 20,
-            fontSize: 12,
-            letterSpacing: "0.22em",
-            textTransform: "uppercase",
-            color: "rgba(255,255,255,0.3)",
-            fontWeight: 500,
-            margin: "0 0 0 0",
-          }}>
-            Mesa de Ayuda · ITSM
-          </p>
+          {!chatOpen && (
+            <p className="s-fade-2" style={{
+              marginTop: 24,
+              fontSize: 12,
+              letterSpacing: "0.24em",
+              textTransform: "uppercase",
+              color: "rgba(0, 255, 255, 0.6)",
+              fontWeight: 600,
+              margin: "0 0 0 0",
+              textShadow: "0 0 10px rgba(0, 255, 255, 0.15)",
+            }}>
+              Mesa de Ayuda · ITSM
+            </p>
+          )}
 
           {/* ── CTA o chat ── */}
           {!chatOpen ? (
@@ -128,56 +146,78 @@ export function SupportPortal() {
               className="s-btn s-fade-3"
               onClick={() => setChatOpen(true)}
               style={{
-                marginTop: 44,
-                padding: "15px 52px",
-                border: "1px solid rgba(255,255,255,0.18)",
-                borderRadius: 2,
-                background: "transparent",
-                color: "rgba(255,255,255,0.88)",
-                fontSize: 13,
-                fontWeight: 600,
-                letterSpacing: "0.1em",
-                textTransform: "uppercase",
+                marginTop: 48,
+                padding: "16px 56px",
+                border: "1px solid rgba(0, 255, 255, 0.28)",
+                borderRadius: 12,
+                background: "rgba(0, 255, 255, 0.02)",
+                color: "#FFFFFF",
                 cursor: "pointer",
                 fontFamily: "inherit",
-                transition: "all 0.25s ease",
+                boxShadow: "0 8px 32px rgba(0, 255, 255, 0.05), inset 0 0 12px rgba(0, 255, 255, 0.03)",
+                transition: "all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)",
+                textAlign: "center",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 4,
               }}
             >
-              Iniciar soporte
+              <span style={{
+                fontSize: 14,
+                fontWeight: 800,
+                letterSpacing: "0.2em",
+                textTransform: "uppercase",
+                color: "#00FFFF",
+                textShadow: "0 0 12px rgba(0, 255, 255, 0.3)",
+              }}>
+                PINCHA ACÁ
+              </span>
+              <span style={{
+                fontSize: 11,
+                fontWeight: 500,
+                letterSpacing: "0.08em",
+                color: "rgba(255, 255, 255, 0.6)",
+              }}>
+                Iniciar Soporte TI
+              </span>
             </button>
           ) : (
-            <div className="s-chat" style={{ marginTop: 36 }}>
+            <div className="s-chat" style={{ width: "100%", display: "flex", justifyContent: "center" }}>
               <SondaAssistant />
             </div>
           )}
 
           {/* Indicador de estado */}
-          <div className="s-fade-3" style={{
-            marginTop: chatOpen ? 14 : 32,
-            display: "flex",
-            alignItems: "center",
-            gap: 7,
-          }}>
-            <span style={{
-              display: "inline-flex",
-              gap: 4,
+          {!chatOpen && (
+            <div className="s-fade-3" style={{
+              marginTop: 40,
+              display: "flex",
               alignItems: "center",
+              gap: 8,
             }}>
-              {[0,1,2].map(i => (
-                <span key={i} style={{
-                  width: 6,
-                  height: 6,
-                  borderRadius: "50%",
-                  background: "rgba(255,255,255,0.35)",
-                  animation: `sonda-dot-blink 1.4s ease-in-out ${i * 0.16}s infinite`,
-                  display: "inline-block",
-                }} />
-              ))}
-            </span>
-            <span style={{ fontSize: 11, color: "rgba(255,255,255,0.22)", letterSpacing: "0.1em" }}>
-              sistema disponible
-            </span>
-          </div>
+              <span style={{
+                display: "inline-flex",
+                gap: 4,
+                alignItems: "center",
+              }}>
+                {[0, 1, 2].map(i => (
+                  <span key={i} style={{
+                    width: 6,
+                    height: 6,
+                    borderRadius: "50%",
+                    background: "#00FFFF",
+                    boxShadow: "0 0 8px rgba(0, 255, 255, 0.6)",
+                    animation: `sonda-dot-blink 1.5s ease-in-out ${i * 0.18}s infinite`,
+                    display: "inline-block",
+                  }} />
+                ))}
+              </span>
+              <span style={{ fontSize: 11, color: "rgba(255, 255, 255, 0.4)", letterSpacing: "0.12em", fontWeight: 500 }}>
+                sistema disponible
+              </span>
+            </div>
+          )}
         </div>
 
         {/* ── Link admin — casi invisible ── */}
@@ -185,16 +225,18 @@ export function SupportPortal() {
           href="/admin"
           style={{
             position: "absolute",
-            bottom: 20,
-            right: 24,
+            bottom: 24,
+            right: 28,
             fontSize: 11,
-            color: "rgba(255,255,255,0.18)",
+            color: "rgba(255, 255, 255, 0.2)",
             textDecoration: "none",
             letterSpacing: "0.08em",
+            fontWeight: 500,
             transition: "color 0.2s",
+            zIndex: 10,
           }}
-          onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.5)"}
-          onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.18)"}
+          onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = "rgba(0, 255, 255, 0.7)"}
+          onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = "rgba(255, 255, 255, 0.2)"}
         >
           Panel Admin →
         </Link>
@@ -203,56 +245,81 @@ export function SupportPortal() {
   );
 }
 
-/* ── Wordmark SONDA — fiel al logo oficial ─────────────────────────
-   Letras blancas bold sobre fondo negro, con ® en superíndice        */
-function SondaWordmark({ width = 260 }: { width?: number }) {
-  const h = Math.round(width * 0.32);
+/* ── Wordmark + Isotipo SONDA — Diseño de Alta Fidelidad en SVG ───────────────────────────
+   Fiel al restyling oficial: letras blancas y el isotipo de curvas dinámicas en gradiente cyan */
+function SondaLogoModern({ width = 280 }: { width?: number }) {
+  const h = Math.round(width * 0.35);
   return (
     <svg
       width={width}
       height={h}
-      viewBox="0 0 520 168"
+      viewBox="0 0 540 160"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       aria-label="SONDA"
       role="img"
     >
-      {/* Fondo negro del logo */}
-      <rect width="520" height="168" fill="#000000" rx="3" />
+      <defs>
+        {/* Gradiente cyan premium oficial */}
+        <linearGradient id="sondaCyanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#00FFFF" />
+          <stop offset="100%" stopColor="#0066FF" />
+        </linearGradient>
+        
+        {/* Glow de alta fidelidad para el isotipo */}
+        <filter id="sondaGlow" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="6" result="blur" />
+          <feComposite in="SourceGraphic" in2="blur" operator="over" />
+        </filter>
+      </defs>
 
-      {/* Wordmark SONDA — tipografía pesada */}
+      {/* ── ISOTIPO SONDA (Curvas entrelazadas en cyan y blanco) ── */}
+      <g transform="translate(15, 12)" filter="url(#sondaGlow)">
+        {/* Órbita principal cyan */}
+        <path
+          d="M 55,108 C 25,108 8,82 8,55 C 8,28 25,6 55,6 C 85,6 102,28 102,55 C 102,82 85,108 55,108 Z"
+          stroke="url(#sondaCyanGrad)"
+          strokeWidth="11"
+          fill="none"
+          strokeLinecap="round"
+          opacity="0.95"
+        />
+        
+        {/* Cinta interna blanca para efecto 3D tecnológico */}
+        <path
+          d="M 28,68 C 22,55 25,38 35,28 C 45,18 62,18 72,28 C 82,38 85,55 79,68 C 73,81 60,94 45,94"
+          stroke="#FFFFFF"
+          strokeWidth="5"
+          fill="none"
+          strokeLinecap="round"
+          opacity="0.75"
+        />
+
+        {/* Punto de brillo central (núcleo) */}
+        <circle cx="55" cy="55" r="7" fill="#00FFFF" />
+      </g>
+
+      {/* ── WORDMARK SONDA — Tipografía oficial en blanco ── */}
       <text
-        x="22"
-        y="132"
-        fontFamily="'Arial Black','Arial','Helvetica Neue','Impact',sans-serif"
+        x="135"
+        y="108"
+        fontFamily="'Kumbh Sans', 'Arial Black', sans-serif"
         fontWeight="900"
-        fontSize="126"
+        fontSize="106"
         letterSpacing="-3"
         fill="#FFFFFF"
       >
         SONDA
       </text>
 
-      {/* Punto que aparece en el logo original */}
+      {/* Registed trademark ® en superíndice */}
       <text
-        x="493"
-        y="132"
-        fontFamily="'Arial Black','Arial',sans-serif"
-        fontWeight="900"
-        fontSize="126"
-        fill="#FFFFFF"
-      >
-        .
-      </text>
-
-      {/* ® superscript */}
-      <text
-        x="487"
-        y="48"
-        fontFamily="'Arial','Helvetica Neue',sans-serif"
-        fontWeight="400"
-        fontSize="32"
-        fill="rgba(255,255,255,0.75)"
+        x="506"
+        y="42"
+        fontFamily="'Kumbh Sans', 'Arial', sans-serif"
+        fontWeight="600"
+        fontSize="28"
+        fill="rgba(0, 255, 255, 0.85)"
       >
         ®
       </text>
