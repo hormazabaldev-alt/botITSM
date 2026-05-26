@@ -21,7 +21,7 @@ import {
 import { BrandMark } from "@/components/shared/BrandMark";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import {
-  listOperationalCases,
+  listOperationalCasesSync as listOperationalCases,
 } from "@/services/operations.repository";
 import type { Ticket as ITSMDemoTicket } from "@/lib/itsm/types";
 import type { AdminKpi, ChartPoint, OperationalCase } from "@/types/operational";

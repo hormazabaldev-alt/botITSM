@@ -5,26 +5,36 @@ import type { Json } from "@/types/database";
 const inMemoryMessages = new Map<string, ChatMessage[]>();
 const inMemoryContexts = new Map<string, SessionContext>();
 
-export async function persistChatTurn(context: SessionContext, messages: ChatMessage[]) {
+type SessionOutcome = "active" | "resolved" | "escalated";
+
+export async function persistChatTurn(
+  context: SessionContext,
+  messages: ChatMessage[],
+  outcome: SessionOutcome = "active",
+) {
   const supabase = getSupabaseServerClient();
+  const isClosed = outcome === "resolved" || outcome === "escalated";
+  const now = new Date().toISOString();
 
   if (supabase) {
     const richSession = await supabase.from("chat_sessions").upsert({
       id: context.sessionId,
       channel: "portal-web",
-      status: context.awaitingResolutionConfirmation ? "active" : "open",
+      status: outcome,
       context: context as unknown as Json,
       active_article_id: context.activeArticleId ?? null,
       detected_intent: context.detectedIntent ?? null,
       priority: context.priority ?? null,
-      updated_at: new Date().toISOString(),
+      updated_at: now,
+      ...(isClosed ? { closed_at: now } : {}),
     });
 
     if (richSession.error) {
       const basicSession = await supabase.from("chat_sessions").upsert({
         id: context.sessionId,
         channel: "portal-web",
-        status: context.awaitingResolutionConfirmation ? "active" : "open",
+        status: outcome,
+        ...(isClosed ? { closed_at: now } : {}),
       });
 
       if (basicSession.error) {
