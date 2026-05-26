@@ -37,7 +37,7 @@ export async function generateMockITSMResponse(input: ITSMResponseInput): Promis
 
   if (isGreetingOnly(input.userMessage)) {
     return {
-      assistantMessage: "Hola. ¿Qué necesitas resolver?",
+      assistantMessage: "Hola. Escríbeme qué falla y te guío con el siguiente paso.",
       classification: detectedIntent,
       priority,
       requiredFields: [],
@@ -75,7 +75,7 @@ export async function generateMockITSMResponse(input: ITSMResponseInput): Promis
     classification: detectedIntent,
     priority,
     requiredFields,
-    suggestedActions: article?.resolutionSteps ?? serviceDeskTurn?.suggestedActions ?? ["Recopilar contexto", "Clasificar prioridad", "Escalar si persiste"],
+    suggestedActions: serviceDeskTurn?.suggestedActions ?? article?.resolutionSteps ?? ["Recopilar contexto", "Clasificar prioridad", "Escalar si persiste"],
     operationalStatuses: shouldCreateTicket
       ? ["Detectando intención", "Consultando base de conocimiento", "Preparando ticket"]
       : ["Detectando intención", "Consultando base de conocimiento", "Ejecutando guía de descarte"],
@@ -111,15 +111,15 @@ function buildOperationalMessage({
     return "Entendido: vamos con Excel/Office.\n\nPrimero confirma si falla solo Excel o también Word/Outlook; si es solo Excel, intenta abrirlo en modo seguro para descartar complementos.";
   }
 
+  if (intent === "HARDWARE_ISSUE" && serviceDeskTurn) {
+    return serviceDeskTurn.response;
+  }
+
   if (article?.resolutionSteps.length) {
     return [
       "Entendido. Probemos el primer descarte.",
       formatStepForUser(article.resolutionSteps[0]),
     ].join("\n\n");
-  }
-
-  if (intent === "HARDWARE_ISSUE" && serviceDeskTurn) {
-    return serviceDeskTurn.response;
   }
 
   const introByIntent: Record<ITSMIntent, string> = {

@@ -251,7 +251,7 @@ function resolveAsset(current: string, allUserText: string): ServiceDeskAsset | 
   if (current.includes("mouse") || allUserText.includes("mouse") || allUserText.includes("raton")) return "mouse";
   if (current.includes("teclado") || allUserText.includes("teclado")) return "keyboard";
   if (current.includes("impresora") || allUserText.includes("impresora")) return "printer";
-  if (current.includes("monitor") || allUserText.includes("monitor") || allUserText.includes("pantalla")) return "external_monitor";
+  if (current.includes("monitor") || allUserText.includes("monitor") || hasAnyText(current, ["pantalla externa", "segunda pantalla"])) return "external_monitor";
   if (current.includes("notebook") || current.includes("note") || current.includes("laptop")) return "notebook";
   return undefined;
 }

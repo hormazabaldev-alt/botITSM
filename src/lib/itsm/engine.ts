@@ -42,6 +42,10 @@ export function detectIntent(message: string): ITSMIntent {
     return "INCIDENT";
   }
 
+  if (hasAny(text, ["barra de abajo", "barra de tareas", "menu inicio", "menú inicio", "escritorio", "explorador de windows"])) {
+    return "INCIDENT";
+  }
+
   if (hasAny(text, ["excel", "office", "word", "powerpoint", "teams"]) && hasAny(text, ["problema", "falla", "error", "no abre", "no inicia", "se cierra", "queda pegado", "bloqueado"])) {
     return "INCIDENT";
   }
@@ -77,7 +81,7 @@ export function detectTurnIntent(message: string, context?: SessionContext): ITS
   }
 
   const text = normalize(message);
-  const explicitIncident = hasAny(text, ["se cayo", "caida", "indisponible", "produccion", "detenido", "sistema", "aplicacion", "servicio"]);
+  const explicitIncident = hasAny(text, ["se cayo", "caida", "indisponible", "produccion", "detenido", "sistema", "aplicacion", "servicio", "barra", "windows", "inicio", "escritorio"]);
 
   return explicitIncident ? detectedIntent : context.detectedIntent;
 }

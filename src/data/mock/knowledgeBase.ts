@@ -559,6 +559,25 @@ export const knowledgeBase: KnowledgeArticle[] = [
     tags: ["pantalla azul", "bsod", "error critico", "error crítico", "windows se reinicia", "crash"],
   },
   {
+    id: "kb-windows-taskbar-missing",
+    title: "Barra de tareas o menú Inicio no aparece",
+    category: "Endpoint Windows",
+    intent: "INCIDENT",
+    symptoms: ["Barra de tareas no aparece", "Menú Inicio no responde", "No se ve la barra inferior"],
+    resolutionSteps: [
+      "Confirmar si la barra inferior está oculta, congelada o si tampoco responde el menú Inicio.",
+      "Presionar la tecla Windows para validar si aparece el menú Inicio.",
+      "Reiniciar el Explorador de Windows o cerrar sesión si la barra quedó congelada.",
+      "Reiniciar el equipo si el escritorio no responde o el problema persiste.",
+    ],
+    escalationCriteria: [
+      "La barra no vuelve después de reiniciar sesión o equipo.",
+      "El escritorio queda completamente bloqueado.",
+      "El usuario no puede acceder a aplicaciones necesarias para trabajar.",
+    ],
+    tags: ["barra de abajo", "barra inferior", "barra de tareas", "taskbar", "menu inicio", "menú inicio", "explorador de windows", "escritorio"],
+  },
+  {
     id: "kb-browser-site-error",
     title: "Navegador o sitio corporativo con error",
     category: "Aplicaciones web",
