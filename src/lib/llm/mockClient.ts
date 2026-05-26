@@ -8,6 +8,7 @@ import {
   isResolvedMessage,
   shouldCreateTicketFromMessage,
 } from "@/lib/itsm/engine";
+import { resolveServiceDeskTurn, type ServiceDeskTurn } from "@/lib/itsm/serviceDeskLayer";
 import type { ITSMIntent, ITSMResponse, ITSMResponseInput, SessionContext } from "@/lib/itsm/types";
 
 export async function generateMockITSMResponse(input: ITSMResponseInput): Promise<ITSMResponse> {
@@ -32,6 +33,7 @@ export async function generateMockITSMResponse(input: ITSMResponseInput): Promis
   const shouldEscalate =
     priority === "P1" || detectedIntent === "SECURITY_INCIDENT" || shouldCreateTicketFromMessage(input.userMessage, priority, detectedIntent);
   const shouldCreateTicket = shouldEscalate && !isResolvedMessage(input.userMessage);
+  const serviceDeskTurn = detectedIntent === "HARDWARE_ISSUE" ? resolveServiceDeskTurn(input.userMessage, input.sessionContext.messages) : undefined;
 
   if (isGreetingOnly(input.userMessage)) {
     return {
@@ -65,15 +67,14 @@ export async function generateMockITSMResponse(input: ITSMResponseInput): Promis
   return {
     assistantMessage: buildOperationalMessage({
       intent: detectedIntent,
-      message: input.userMessage,
-      context: input.sessionContext,
       requiredFields,
       shouldCreateTicket,
+      serviceDeskTurn,
     }),
     classification: detectedIntent,
     priority,
     requiredFields,
-    suggestedActions: article?.resolutionSteps ?? ["Recopilar contexto", "Clasificar prioridad", "Escalar si persiste"],
+    suggestedActions: serviceDeskTurn?.suggestedActions ?? article?.resolutionSteps ?? ["Recopilar contexto", "Clasificar prioridad", "Escalar si persiste"],
     operationalStatuses: shouldCreateTicket
       ? ["Detectando intención", "Consultando base de conocimiento", "Preparando ticket"]
       : ["Detectando intención", "Consultando base de conocimiento", "Ejecutando guía de descarte"],
@@ -85,16 +86,14 @@ export async function generateMockITSMResponse(input: ITSMResponseInput): Promis
 
 function buildOperationalMessage({
   intent,
-  message,
-  context,
   requiredFields,
   shouldCreateTicket,
+  serviceDeskTurn,
 }: {
   intent: ITSMIntent;
-  message: string;
-  context: SessionContext;
   requiredFields: string[];
   shouldCreateTicket: boolean;
+  serviceDeskTurn?: ServiceDeskTurn;
 }) {
   if (shouldCreateTicket) {
     return [
@@ -103,9 +102,8 @@ function buildOperationalMessage({
     ].join("\n\n");
   }
 
-  const hardwareFlow = buildHardwareFlowMessage(message, context);
-  if (intent === "HARDWARE_ISSUE" && hardwareFlow) {
-    return hardwareFlow;
+  if (intent === "HARDWARE_ISSUE" && serviceDeskTurn) {
+    return serviceDeskTurn.response;
   }
 
   const introByIntent: Record<ITSMIntent, string> = {
@@ -136,109 +134,6 @@ function buildOperationalMessage({
   ]
     .filter(Boolean)
     .join("\n\n");
-}
-
-function buildHardwareFlowMessage(message: string, context: SessionContext) {
-  const current = normalizeText(message);
-  const history = context.messages
-    .filter((item) => item.role === "user")
-    .map((item) => normalizeText(item.content));
-  const allUserText = [...history, current].join(" ");
-  const asset = hardwareAsset(allUserText);
-  const connection = connectionType(allUserText);
-  const askedConnection = context.messages.some((item) => {
-    const content = normalizeText(item.content);
-    return item.role === "assistant" && content.includes("usb") && content.includes("inalambrico");
-  });
-  const askedPortTest = context.messages.some((item) => item.role === "assistant" && normalizeText(item.content).includes("otro puerto usb"));
-  const askedReplacementTest = context.messages.some((item) => item.role === "assistant" && normalizeText(item.content).includes("otro mouse"));
-
-  if (!asset) {
-    return undefined;
-  }
-
-  if (mentionsNoDetection(current) && askedPortTest) {
-    return [
-      "Con ese resultado, el descarte apunta al periférico o al puerto USB.",
-      "Prueba otro mouse en el mismo equipo. ¿Ese otro mouse funciona?",
-    ].join("\n\n");
-  }
-
-  if (mentionsReplacementWorks(current) && askedReplacementTest) {
-    return [
-      "Entonces el equipo y el puerto quedan operativos; el problema queda aislado al mouse original.",
-      "Corresponde preparar reemplazo. Confírmame tu nombre, correo y área para dejar el caso con el descarte completo.",
-    ].join("\n\n");
-  }
-
-  if (connection === "wired" && askedConnection) {
-    return [
-      `Perfecto, queda como ${hardwareAssetLabel(asset)} cableado.`,
-      "Siguiente descarte: conéctalo directo a otro puerto USB, sin hub ni adaptador. ¿Enciende o el equipo muestra algún aviso al conectarlo?",
-    ].join("\n\n");
-  }
-
-  if (connection === "wireless" && askedConnection) {
-    return [
-      `Perfecto, queda como ${hardwareAssetLabel(asset)} inalámbrico.`,
-      "Cambia la batería o carga, reconecta el receptor USB y prueba emparejarlo nuevamente. ¿El equipo lo detecta después de eso?",
-    ].join("\n\n");
-  }
-
-  if (asset === "mouse") {
-    return "Entendido: mouse con falla.\n\nPrimero validemos conexión. ¿Es USB/cableado o inalámbrico?";
-  }
-
-  if (asset === "keyboard") {
-    return "Entendido: teclado con falla.\n\nPrimero validemos conexión. ¿Es USB/cableado o inalámbrico?";
-  }
-
-  if (asset === "monitor") {
-    return "Entendido: pantalla o monitor con falla.\n\n¿El monitor enciende y el cable queda firme al equipo?";
-  }
-
-  if (asset === "printer") {
-    return "Entendido: impresora con falla.\n\n¿Aparece conectada y muestra algún mensaje de error?";
-  }
-
-  return undefined;
-}
-
-function hardwareAsset(text: string) {
-  if (text.includes("mouse") || text.includes("raton")) return "mouse";
-  if (text.includes("teclado")) return "keyboard";
-  if (text.includes("monitor") || text.includes("pantalla")) return "monitor";
-  if (text.includes("impresora")) return "printer";
-  return undefined;
-}
-
-function hardwareAssetLabel(asset: string) {
-  const labels: Record<string, string> = {
-    mouse: "mouse",
-    keyboard: "teclado",
-    monitor: "monitor",
-    printer: "impresora",
-  };
-
-  return labels[asset] ?? "periférico";
-}
-
-function connectionType(text: string) {
-  if (hasAnyText(text, ["cable", "cableado", "usb", "se ocupa con cable", "con cable"])) return "wired";
-  if (hasAnyText(text, ["inalambrico", "bluetooth", "wireless", "receptor", "pila", "bateria"])) return "wireless";
-  return undefined;
-}
-
-function mentionsNoDetection(text: string) {
-  return hasAnyText(text, ["no enciende", "no prende", "no detecta", "no aparece", "nada", "sigue igual", "no funciona"]);
-}
-
-function mentionsReplacementWorks(text: string) {
-  return hasAnyText(text, ["otro mouse funciona", "otro si funciona", "otro sí funciona", "con otro funciona", "el otro funciona"]);
-}
-
-function hasAnyText(value: string, terms: string[]) {
-  return terms.some((term) => value.includes(normalizeText(term)));
 }
 
 function normalizeText(message: string) {

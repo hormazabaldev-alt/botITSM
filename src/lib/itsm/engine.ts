@@ -124,7 +124,9 @@ export function extractFields(message: string, context: SessionContext): Session
   }
 
   const normalizedText = normalize(text);
-  if (!collected.activo && hasAny(normalizedText, ["mouse", "raton", "teclado", "monitor", "pantalla", "impresora"])) {
+  if (mentionsInternalDisplay(normalizedText)) {
+    collected.activo = "Pantalla integrada del notebook";
+  } else if (!collected.activo && hasAny(normalizedText, ["mouse", "raton", "teclado", "monitor", "pantalla", "impresora"])) {
     collected.activo = inferAssetFromText(normalizedText);
   }
 
@@ -255,6 +257,18 @@ function inferAssetFromText(text: string) {
   if (text.includes("monitor") || text.includes("pantalla")) return "Monitor";
   if (text.includes("impresora")) return "Impresora";
   return "Periférico";
+}
+
+function mentionsInternalDisplay(text: string) {
+  return (
+    text.includes("pantalla de mi note") ||
+    text.includes("pantalla del note") ||
+    text.includes("pantalla de mi notebook") ||
+    text.includes("pantalla del notebook") ||
+    text.includes("pantalla integrada") ||
+    text.includes("pantalla de laptop") ||
+    ((text.includes("pantalla") || text.includes("display")) && hasAny(text, ["note", "notebook", "laptop"]))
+  );
 }
 
 function categoryByIntent(intent: ITSMIntent) {
