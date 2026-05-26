@@ -150,6 +150,14 @@ function resolveActiveArticleId(
   knowledgeMatches: ReturnType<typeof findKnowledgeMatches>,
   sessionContext: SessionContext,
 ) {
+  // ── Interruptor de Contexto (Context Switching) ──────────────────────────
+  // Si el usuario reporta un nuevo problema que matchea un artículo KB diferente,
+  // liberamos el tema anterior para que no se quede bloqueado y transicione de inmediato.
+  const topMatch = knowledgeMatches[0];
+  if (topMatch && sessionContext.activeArticleId && topMatch.id !== sessionContext.activeArticleId) {
+    return topMatch.id;
+  }
+
   const referencedArticle = knowledgeBase.find((article) => ticketDescription.includes(`Referencia KB: ${article.title}`));
   if (referencedArticle && referencedArticle.id === sessionContext.activeArticleId) {
     return referencedArticle.id;

@@ -15,7 +15,27 @@ export function resolveContextualContinuation(input: ITSMResponseInput): ITSMRes
   const storedArticle = findKnowledgeArticleById(input.sessionContext.activeArticleId);
   const activeArticle = storedArticle ?? input.knowledgeMatches[0];
 
-  if (!activeArticle || !isFollowUp(input.userMessage, input.sessionContext)) {
+  if (!activeArticle) {
+    return undefined;
+  }
+
+  // ── Romper Continuidad por Cambio de Intención ────────────────────────────
+  // Si el usuario cambia drásticamente de tema (por ejemplo, de HARDWARE_ISSUE a SOFTWARE_REQUEST)
+  // y no es una negación corta, rompemos el flujo contextual para permitir el Context Switch.
+  const activeIntent = activeArticle.intent;
+  const currentIntent = input.detectedIntent;
+  if (
+    currentIntent &&
+    activeIntent &&
+    currentIntent !== activeIntent &&
+    currentIntent !== "INCIDENT" &&
+    currentIntent !== "SERVICE_REQUEST" &&
+    !isShortNegation(normalizeText(input.userMessage))
+  ) {
+    return undefined;
+  }
+
+  if (!isFollowUp(input.userMessage, input.sessionContext)) {
     return undefined;
   }
 

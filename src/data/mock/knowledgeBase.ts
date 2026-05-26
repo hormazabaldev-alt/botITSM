@@ -64,7 +64,7 @@ export const knowledgeBase: KnowledgeArticle[] = [
     title: "Diagnóstico básico de notebook lento",
     category: "Puesto de trabajo",
     intent: "HARDWARE_ISSUE",
-    symptoms: ["Equipo lento", "Arranque demorado", "Aplicaciones congeladas"],
+    symptoms: ["Equipo lento", "Arranque demorado", "Aplicaciones congeladas", "Se queda pegado", "Colapsa", "Se pega", "No responde"],
     resolutionSteps: [
       "Reiniciar el equipo si lleva más de 48 horas encendido.",
       "Cerrar aplicaciones de alto consumo no críticas.",
@@ -77,7 +77,7 @@ export const knowledgeBase: KnowledgeArticle[] = [
       "La lentitud impide operar sistemas críticos.",
       "El diagnóstico básico no mejora la experiencia.",
     ],
-    tags: ["notebook", "lento", "rendimiento", "hardware", "equipo"],
+    tags: ["notebook", "lento", "rendimiento", "hardware", "equipo", "pegado", "se pega", "congelado", "colapsa", "no responde"],
   },
   {
     id: "kb-excel-wont-open",
@@ -651,7 +651,7 @@ export const knowledgeBase: KnowledgeArticle[] = [
       "No existe aprobador claro.",
       "La solicitud requiere segregación de funciones o control de auditoría.",
     ],
-    tags: ["perfil", "rol", "permiso sistema", "acceso sistema", "aplicacion corporativa", "aplicación corporativa", "usuario"],
+    tags: ["perfil", "rol", "permiso sistema", "acceso sistema", "aplicacion corporativa", "aplicación corporativa"],
   },
   {
     id: "kb-phishing-report",
@@ -848,6 +848,12 @@ function resolvePreferredArticleId(normalizedMessage: string) {
     hasAnySearchText(normalizedMessage, ["no salen", "no envia", "no envía", "no llegan", "no recibe", "bandeja de salida", "sincroniza"])
   ) {
     return "kb-outlook-send-receive";
+  }
+
+  if (
+    hasAnySearchText(normalizedMessage, ["lento", "lentitud", "se pega", "pegado", "congelado", "colapsa", "no responde", "quedo pegado", "queda pegado"])
+  ) {
+    return "kb-slow-notebook";
   }
 
   return undefined;
