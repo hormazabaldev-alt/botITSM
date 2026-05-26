@@ -25,6 +25,8 @@ type ChatApiResponse = {
   sessionContext: SessionContext;
 };
 
+const sessionContextStorageKey = "atlas-active-session-context";
+
 const smartActions = [
   {
     topic: "No puedo entrar al correo",
@@ -81,9 +83,12 @@ const statusLabels: Partial<Record<OperationalStatus, string>> = {
 };
 
 export function AtlasAssistant() {
-  const [messages, setMessages] = useState<ChatMessage[]>([initialMessage]);
+  const [messages, setMessages] = useState<ChatMessage[]>(() => {
+    const storedContext = readStoredSessionContext();
+    return storedContext?.messages.length ? [initialMessage, ...storedContext.messages] : [initialMessage];
+  });
   const [input, setInput] = useState("");
-  const [context, setContext] = useState<SessionContext | undefined>();
+  const [context, setContext] = useState<SessionContext | undefined>(() => readStoredSessionContext());
   const [status, setStatus] = useState("listo");
   const [ticket, setTicket] = useState<Ticket | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -129,6 +134,7 @@ export function AtlasAssistant() {
       const payload = (await response.json()) as ChatApiResponse;
       const refinedContext = refineAssistantTurn(payload.sessionContext, cleanMessage);
       setContext(refinedContext);
+      storeSessionContext(refinedContext);
       setMessages([initialMessage, ...refinedContext.messages]);
       setStatus(resolveStatus(payload.response.operationalStatuses));
 
@@ -478,4 +484,23 @@ function removeAssumedName(message: string) {
     .replace(/\bHugo,\s*/g, "")
     .replace(/^Hugo,\s*/g, "")
     .trim();
+}
+
+function readStoredSessionContext() {
+  if (typeof window === "undefined") return undefined;
+
+  try {
+    const raw = window.localStorage.getItem(sessionContextStorageKey);
+    if (!raw) return undefined;
+
+    const parsed = JSON.parse(raw) as SessionContext;
+    return Array.isArray(parsed.messages) && Array.isArray(parsed.stepsExecuted) ? parsed : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function storeSessionContext(sessionContext: SessionContext) {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(sessionContextStorageKey, JSON.stringify(sessionContext));
 }

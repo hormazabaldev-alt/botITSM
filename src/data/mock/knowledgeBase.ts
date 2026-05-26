@@ -575,7 +575,7 @@ export const knowledgeBase: KnowledgeArticle[] = [
       "El escritorio queda completamente bloqueado.",
       "El usuario no puede acceder a aplicaciones necesarias para trabajar.",
     ],
-    tags: ["barra de abajo", "barra inferior", "barra de tareas", "taskbar", "menu inicio", "menú inicio", "explorador de windows", "escritorio"],
+    tags: ["barra de abajo", "barra inferior", "barra de tareas", "taskbar", "menu inicio", "menú inicio", "explorador", "explorador de windows", "reiniciar explorador", "escritorio"],
   },
   {
     id: "kb-browser-site-error",
@@ -805,6 +805,11 @@ export function findKnowledgeMatches(message: string, intent?: ITSMIntent) {
     .filter(({ contentScore }) => contentScore > 0)
     .sort((a, b) => b.score - a.score)
     .map(({ article }) => article);
+}
+
+export function findKnowledgeArticleById(id: string | undefined) {
+  if (!id) return undefined;
+  return knowledgeBase.find((article) => article.id === id);
 }
 
 function normalizeSearchText(value: string) {

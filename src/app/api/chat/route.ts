@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { findKnowledgeMatches } from "@/data/mock/knowledgeBase";
+import { findKnowledgeMatches, knowledgeBase } from "@/data/mock/knowledgeBase";
 import { createSessionContext, detectTurnIntent, extractFields } from "@/lib/itsm/engine";
 import type { ChatMessage, SessionContext } from "@/lib/itsm/types";
 import { generateITSMResponse } from "@/lib/llm";
@@ -53,7 +53,7 @@ export async function POST(request: Request) {
     messages: [...sessionContext.messages, userChatMessage, assistantChatMessage],
     detectedIntent: llmResponse.classification,
     priority: llmResponse.priority,
-    activeArticleId: knowledgeMatches[0]?.id ?? sessionContext.activeArticleId,
+    activeArticleId: resolveActiveArticleId(llmResponse.ticketDraft.description, knowledgeMatches, sessionContext),
     ticketDraft: llmResponse.ticketDraft,
     stepsExecuted: Array.from(new Set([...sessionContext.stepsExecuted, ...llmResponse.suggestedActions])),
     awaitingResolutionConfirmation: !llmResponse.shouldCreateTicket,
@@ -66,4 +66,13 @@ export async function POST(request: Request) {
     sessionContext: nextContext,
     knowledgeMatches,
   });
+}
+
+function resolveActiveArticleId(
+  ticketDescription: string,
+  knowledgeMatches: ReturnType<typeof findKnowledgeMatches>,
+  sessionContext: SessionContext,
+) {
+  const referencedArticle = knowledgeBase.find((article) => ticketDescription.includes(`Referencia KB: ${article.title}`));
+  return referencedArticle?.id ?? knowledgeMatches[0]?.id ?? sessionContext.activeArticleId;
 }
