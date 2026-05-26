@@ -5,7 +5,6 @@ import {
   AlertTriangle,
   CheckCircle2,
   ChevronUp,
-  Headset,
   KeyRound,
   Laptop,
   Loader2,
@@ -15,12 +14,12 @@ import {
   Paperclip,
   RotateCcw,
   Send,
-  ShieldCheck,
   UserRound,
   Wifi,
   X,
 } from "lucide-react";
 import type { ChatMessage, ITSMResponse, OperationalStatus, SessionContext, Ticket } from "@/lib/itsm/types";
+import { AtlasHexLogo } from "@/components/shared/BrandMark";
 
 type ChatApiResponse = {
   response: ITSMResponse;
@@ -33,47 +32,61 @@ const sessionContextStorageKey = "atlas-active-session-context";
 const smartActions = [
   {
     topic: "No puedo entrar al correo",
-    title: "Acceso",
+    title: "Correo / Acceso",
     icon: KeyRound,
-    accent: "from-amber-300 to-orange-400",
+    color: "#F59E0B",
+    bg: "rgba(245,158,11,0.1)",
+    border: "rgba(245,158,11,0.22)",
   },
   {
     topic: "VPN no funciona",
-    title: "Conectividad",
+    title: "VPN / Red",
     icon: Wifi,
-    accent: "from-cyan-300 to-blue-400",
+    color: "#3B82F6",
+    bg: "rgba(59,130,246,0.1)",
+    border: "rgba(59,130,246,0.22)",
   },
   {
     topic: "Necesito instalar software",
     title: "Software",
     icon: PackageCheck,
-    accent: "from-blue-300 to-indigo-400",
+    color: "#8B5CF6",
+    bg: "rgba(139,92,246,0.1)",
+    border: "rgba(139,92,246,0.22)",
   },
   {
     topic: "Mi notebook está lenta",
     title: "Hardware",
     icon: Laptop,
-    accent: "from-slate-300 to-slate-500",
+    color: "#10B981",
+    bg: "rgba(16,185,129,0.1)",
+    border: "rgba(16,185,129,0.22)",
   },
   {
     topic: "Necesito acceso",
-    title: "Incidente",
+    title: "Privilegios",
     icon: AlertTriangle,
-    accent: "from-rose-300 to-red-500",
+    color: "#EF4444",
+    bg: "rgba(239,68,68,0.1)",
+    border: "rgba(239,68,68,0.22)",
   },
   {
     topic: "Otro problema",
-    title: "Otro",
+    title: "Otro caso",
     icon: MessageSquareText,
-    accent: "from-violet-300 to-fuchsia-400",
+    color: "#8DA0C4",
+    bg: "rgba(141,160,196,0.1)",
+    border: "rgba(141,160,196,0.18)",
   },
 ];
 
 const demoScreenshots = [
   {
     name: "screenshot-administrador-tareas-cpu-99.png",
-    label: "📊 CPU al 99% (Chrome)",
-    url: "data:image/svg+xml;utf8," + encodeURIComponent(`
+    label: "CPU al 99% (Chrome)",
+    url:
+      "data:image/svg+xml;utf8," +
+      encodeURIComponent(`
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 250" width="100%" height="100%">
         <rect width="400" height="250" rx="8" fill="#1e1e2e"/>
         <text x="20" y="30" fill="#cdd6f4" font-family="monospace" font-size="14" font-weight="bold">Task Manager - Resource Monitor</text>
@@ -82,48 +95,37 @@ const demoScreenshots = [
         <text x="30" y="84" fill="#f38ba8" font-family="monospace" font-size="12" font-weight="bold">Google Chrome.exe</text>
         <text x="200" y="84" fill="#f38ba8" font-family="monospace" font-size="12">CPU: 98.4%</text>
         <text x="300" y="84" fill="#a6adc8" font-family="monospace" font-size="12">RAM: 7.2 GB</text>
-        <rect x="20" y="110" width="360" height="40" rx="4" fill="#181825"/>
-        <text x="30" y="134" fill="#cdd6f4" font-family="monospace" font-size="12">System Idle Process</text>
-        <text x="200" y="134" fill="#cdd6f4" font-family="monospace" font-size="12">CPU: 1.2%</text>
-        <text x="300" y="134" fill="#a6adc8" font-family="monospace" font-size="12">RAM: 16 KB</text>
         <path d="M 20,230 L 100,210 L 180,225 L 260,160 L 340,90 L 380,80" fill="none" stroke="#f38ba8" stroke-width="3"/>
-        <text x="20" y="195" fill="#f38ba8" font-family="monospace" font-size="12" font-weight="bold">CPU UPTIME SPIKE: 99.1%</text>
+        <text x="20" y="195" fill="#f38ba8" font-family="monospace" font-size="12" font-weight="bold">CPU SPIKE: 99.1%</text>
       </svg>
     `.trim()),
   },
   {
-    name: "screenshot-analizador-disco-lleno.png",
-    label: "⚠️ Disco C:\\ Lleno",
-    url: "data:image/svg+xml;utf8," + encodeURIComponent(`
+    name: "screenshot-disco-lleno.png",
+    label: "Disco C:\\ Lleno (crítico)",
+    url:
+      "data:image/svg+xml;utf8," +
+      encodeURIComponent(`
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 250" width="100%" height="100%">
         <rect width="400" height="250" rx="8" fill="#1e1e2e"/>
         <text x="20" y="30" fill="#cdd6f4" font-family="monospace" font-size="14" font-weight="bold">This PC - Drive Analyzer</text>
-        <line x1="20" y1="45" x2="380" y2="45" stroke="#313244" stroke-width="2"/>
-        <rect x="20" y="70" width="60" height="60" rx="6" fill="#313244"/>
-        <text x="40" y="108" fill="#bac2de" font-family="sans-serif" font-size="28" font-weight="bold">C:</text>
-        <text x="95" y="85" fill="#cdd6f4" font-family="sans-serif" font-size="13" font-weight="bold">OS (C:)</text>
         <rect x="95" y="98" width="280" height="15" rx="3" fill="#313244"/>
         <rect x="95" y="98" width="265" height="15" rx="3" fill="#f38ba8"/>
         <text x="95" y="132" fill="#f38ba8" font-family="sans-serif" font-size="11" font-weight="bold">1.82 GB free of 256 GB (CRITICAL)</text>
-        <rect x="20" y="160" width="360" height="70" rx="6" fill="#181825" stroke="#f38ba8" stroke-width="1"/>
-        <text x="35" y="185" fill="#f38ba8" font-family="sans-serif" font-size="12" font-weight="bold">⚠️ Alerta de Memoria Virtual:</text>
-        <text x="35" y="205" fill="#a6adc8" font-family="sans-serif" font-size="11">El espacio disponible es insuficiente para el archivo pagefile.sys.</text>
       </svg>
     `.trim()),
   },
   {
-    name: "screenshot-pantalla-azul-bsod.png",
-    label: "❌ Pantallazo Azul (BSOD)",
-    url: "data:image/svg+xml;utf8," + encodeURIComponent(`
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 250" width="100%" height="100%">
-        <rect width="400" height="250" rx="8" fill="#0078d7"/>
-        <text x="30" y="60" fill="#ffffff" font-family="sans-serif" font-size="48" font-weight="normal">:(</text>
+    name: "screenshot-pantallazo-azul-bsod.png",
+    label: "Pantallazo Azul (BSOD)",
+    url:
+      "data:image/svg+xml;utf8," +
+      encodeURIComponent(`
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 250" rx="8" width="100%" height="100%">
+        <rect width="400" height="250" fill="#0078d7"/>
+        <text x="30" y="60" fill="#ffffff" font-family="sans-serif" font-size="48">:(</text>
         <text x="30" y="110" fill="#ffffff" font-family="sans-serif" font-size="13" font-weight="bold">Su PC sufrió un problema y necesita reiniciarse.</text>
-        <text x="30" y="130" fill="#ffffff" font-family="sans-serif" font-size="11">Solo estamos recopilando información sobre el error y luego se reiniciará.</text>
-        <text x="30" y="150" fill="#ffffff" font-family="sans-serif" font-size="11">100% completo</text>
-        <text x="30" y="185" fill="#ffffff" font-family="monospace" font-size="9" font-weight="bold">Código de parada: DRIVER_IRQL_NOT_LESS_OR_EQUAL</text>
-        <text x="30" y="200" fill="#ffffff" font-family="monospace" font-size="9" font-weight="bold">Lo que falló: tcpip.sys</text>
-        <text x="30" y="215" fill="#ffffff" font-family="monospace" font-size="9" font-weight="bold">Código de error: STOP 0x000000D1</text>
+        <text x="30" y="185" fill="#ffffff" font-family="monospace" font-size="9" font-weight="bold">Código: DRIVER_IRQL_NOT_LESS_OR_EQUAL</text>
       </svg>
     `.trim()),
   },
@@ -138,12 +140,14 @@ const initialMessage: ChatMessage = {
 
 const statusLabels: Partial<Record<OperationalStatus, string>> = {
   "Detectando intención": "analizando...",
-  "Clasificando según ITIL": "analizando...",
+  "Clasificando según ITIL": "clasificando...",
   "Consultando base de conocimiento": "consultando guía...",
-  "Ejecutando guía de descarte": "validando guía...",
+  "Ejecutando guía de descarte": "validando pasos...",
   "Preparando ticket": "preparando escalamiento...",
-  "Cerrando caso": "cerrando...",
+  "Cerrando caso": "cerrando caso...",
 };
+
+/* ─────────────────────────────────── COMPONENTE PRINCIPAL ─────────────────────────────────── */
 
 export function AtlasAssistant() {
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
@@ -156,13 +160,13 @@ export function AtlasAssistant() {
     const storedContext = readStoredSessionContext();
     return storedContext?.collectedFields?.correo || "";
   });
-  const [status, setStatus] = useState("listo");
+  const [status, setStatus] = useState("en línea");
   const [ticket, setTicket] = useState<Ticket | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [expanded, setExpanded] = useState(true);
   const [closed, setClosed] = useState(false);
-  
-  // Estados para Adjuntos de Evidencia Visual
+
+  // Adjuntos
   const [attachedFile, setAttachedFile] = useState<{ name: string; url: string } | null>(null);
   const [showAttachmentMenu, setShowAttachmentMenu] = useState(false);
 
@@ -177,7 +181,6 @@ export function AtlasAssistant() {
   useEffect(() => {
     const textarea = inputRef.current;
     if (!textarea) return;
-
     textarea.style.height = "0px";
     const nextHeight = Math.min(textarea.scrollHeight, 112);
     textarea.style.height = `${nextHeight}px`;
@@ -189,7 +192,7 @@ export function AtlasAssistant() {
   async function sendMessage(
     message: string,
     fileToAttach?: { name: string; url: string } | null,
-    overrideContext?: SessionContext
+    overrideContext?: SessionContext,
   ) {
     const cleanMessage = message.trim();
     const activeFile = fileToAttach !== undefined ? fileToAttach : attachedFile;
@@ -207,7 +210,7 @@ export function AtlasAssistant() {
     const optimisticMessage: ChatMessage = {
       id: crypto.randomUUID(),
       role: "user",
-      content: cleanMessage || `[Evidencia Adjunta: ${activeFile?.name}]`,
+      content: cleanMessage || `[Evidencia: ${activeFile?.name}]`,
       createdAt: new Date().toISOString(),
       attachmentName: activeFile?.name,
       attachmentUrl: activeFile?.url,
@@ -221,15 +224,15 @@ export function AtlasAssistant() {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          userMessage: cleanMessage || `[Evidencia Adjunta: ${activeFile?.name}]`, 
+        body: JSON.stringify({
+          userMessage: cleanMessage || `[Evidencia Adjunta: ${activeFile?.name}]`,
           sessionContext: activeContext,
           attachmentName: activeFile?.name,
           attachmentUrl: activeFile?.url,
         }),
       });
 
-      if (!response.ok) throw new Error("No se pudo procesar el mensaje");
+      if (!response.ok) throw new Error("Error de red");
 
       const payload = (await response.json()) as ChatApiResponse;
       const refinedContext = refineAssistantTurn(payload.sessionContext, cleanMessage || `[Evidencia: ${activeFile?.name}]`);
@@ -248,7 +251,7 @@ export function AtlasAssistant() {
         {
           id: crypto.randomUUID(),
           role: "assistant",
-          content: "Tuve un problema procesando esto. Escríbeme nuevamente qué ocurre y lo retornamos.",
+          content: "Tuve un problema procesando esto. Escríbeme nuevamente qué ocurre y lo retomamos.",
           createdAt: new Date().toISOString(),
         },
       ]);
@@ -265,7 +268,6 @@ export function AtlasAssistant() {
 
   function startNewChat() {
     if (isLoading) return;
-
     clearStoredSessionContext();
     setContext(undefined);
     setMessages([initialMessage]);
@@ -273,7 +275,7 @@ export function AtlasAssistant() {
     setTicket(null);
     setAttachedFile(null);
     setShowAttachmentMenu(false);
-    setStatus("listo");
+    setStatus("en línea");
     setExpanded(true);
   }
 
@@ -289,13 +291,14 @@ export function AtlasAssistant() {
       setTicket(null);
       setAttachedFile(null);
       setShowAttachmentMenu(false);
-      setStatus("listo");
+      setStatus("en línea");
       return;
     }
 
-    const userData = email === "lilian.leon@sonda.cl"
-      ? { nombre: "Lilian Leon", correo: "lilian.leon@sonda.cl", area: "Operaciones" }
-      : { nombre: "Francisco Martinez", correo: "francisco.martinez@sonda.cl", area: "Soporte TI" };
+    const userData =
+      email === "lilian.leon@sonda.cl"
+        ? { nombre: "Lilian Leon", correo: "lilian.leon@sonda.cl", area: "Operaciones" }
+        : { nombre: "Francisco Martinez", correo: "francisco.martinez@sonda.cl", area: "Soporte TI" };
 
     const newContext: SessionContext = {
       sessionId: `session-${crypto.randomUUID()}`,
@@ -317,14 +320,13 @@ export function AtlasAssistant() {
     setTicket(null);
     setAttachedFile(null);
     setShowAttachmentMenu(false);
-    setStatus("listo");
+    setStatus("en línea");
     storeSessionContext(newContext);
   }
 
   function handleSuggestion(topic: string) {
     if (isLoading) return;
 
-    // Crear un contexto fresco pero preservando el usuario POC activo
     const freshContext: SessionContext = {
       sessionId: `session-${crypto.randomUUID()}`,
       collectedFields: context?.collectedFields ?? {},
@@ -337,12 +339,12 @@ export function AtlasAssistant() {
     setTicket(null);
     setAttachedFile(null);
     setShowAttachmentMenu(false);
-    setStatus("listo");
+    setStatus("en línea");
 
-    // Enviar el mensaje con el contexto limpio para iniciar el flujo de forma pura
     void sendMessage(topic, null, freshContext);
   }
 
+  /* ── Vista cerrada (botón flotante) ── */
   if (closed) {
     return (
       <button
@@ -351,70 +353,141 @@ export function AtlasAssistant() {
           setClosed(false);
           setExpanded(true);
         }}
-        className="inline-flex h-10 items-center gap-2 rounded-full border border-cyan-300/20 bg-slate-950/92 px-4 text-sm font-semibold text-cyan-50 shadow-[0_18px_60px_rgba(8,47,73,0.26)] backdrop-blur-2xl transition hover:border-cyan-300/50"
+        className="inline-flex h-11 items-center gap-2.5 rounded-full px-4 text-sm font-semibold transition-all duration-200"
+        style={{
+          background: "linear-gradient(135deg, #111F3A 0%, #0C1629 100%)",
+          border: "1px solid rgba(245,158,11,0.28)",
+          color: "#FCD34D",
+          boxShadow: "0 8px 32px rgba(4,8,20,0.55), 0 0 0 1px rgba(245,158,11,0.1)",
+        }}
       >
-        <ShieldCheck size={17} aria-hidden />
+        <AtlasHexLogo size={22} />
         Atlas
       </button>
     );
   }
 
+  /* ── Vista principal ── */
   return (
-    <section className="relative flex h-[min(520px,calc(100dvh-84px))] w-full max-w-[410px] flex-col overflow-hidden rounded-[20px] border border-cyan-200/12 bg-[#07111f]/96 text-slate-100 shadow-[0_24px_80px_rgba(2,8,23,0.34)] ring-1 ring-white/8 backdrop-blur-2xl">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_24%_0%,rgba(34,211,238,0.09),transparent_38%)]" />
-      <header className="relative flex h-14 shrink-0 items-center justify-between border-b border-white/10 bg-slate-950/42 px-4">
+    <section
+      className="relative flex flex-col overflow-hidden"
+      style={{
+        width: "min(420px, calc(100vw - 32px))",
+        height: "min(540px, calc(100dvh - 100px))",
+        borderRadius: "20px",
+        background: "linear-gradient(160deg, #111F3A 0%, #0C1629 50%, #070E1C 100%)",
+        border: "1px solid rgba(255,255,255,0.07)",
+        boxShadow: "0 32px 80px rgba(4,8,20,0.7), 0 0 0 1px rgba(245,158,11,0.06) inset",
+      }}
+    >
+      {/* Borde ámbar superior */}
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 h-[1.5px] rounded-t-[20px]"
+        style={{ background: "linear-gradient(90deg, transparent 5%, #F59E0B 35%, #FCD34D 65%, transparent 95%)" }}
+      />
+
+      {/* Brillo radial sutil */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background: "radial-gradient(ellipse 60% 40% at 30% 0%, rgba(27,61,140,0.18), transparent 55%)",
+        }}
+      />
+
+      {/* ── Header ── */}
+      <header
+        className="relative flex h-[52px] shrink-0 items-center justify-between px-4"
+        style={{
+          background: "rgba(7,14,28,0.6)",
+          borderBottom: "1px solid rgba(255,255,255,0.06)",
+          backdropFilter: "blur(12px)",
+        }}
+      >
         <div className="flex items-center gap-2.5">
-          <div className="grid size-8 place-items-center rounded-xl border border-cyan-300/20 bg-cyan-300/8 text-cyan-100">
-            <Headset size={16} aria-hidden />
-          </div>
-          <div className="min-w-0">
-            <h1 className="text-[14px] font-semibold text-white">Atlas</h1>
+          <AtlasHexLogo size={26} />
+          <div>
+            <h1
+              className="text-[13px] font-bold leading-tight tracking-[-0.02em]"
+              style={{ color: "#EEF2FF" }}
+            >
+              Atlas
+              <span className="mx-1.5 font-normal opacity-30">·</span>
+              <span className="font-semibold opacity-60 text-[12px]">SONDA</span>
+            </h1>
+            <p className="text-[10px] font-medium" style={{ color: "#4A6091" }}>
+              Soporte ITSM inteligente
+            </p>
           </div>
         </div>
+
         <div className="flex items-center gap-1.5">
           <button
             type="button"
             onClick={startNewChat}
             disabled={isLoading}
-            title="Iniciar nuevo chat"
-            className="inline-flex h-7 items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.05] px-2.5 text-[11px] font-semibold text-slate-300 transition duration-200 hover:border-cyan-300/40 hover:bg-cyan-300/10 hover:text-cyan-50 focus:outline-none focus:ring-2 focus:ring-cyan-300/30 disabled:cursor-not-allowed disabled:opacity-45"
-            aria-label="Iniciar nuevo chat"
+            title="Nuevo caso"
+            className="inline-flex h-7 items-center gap-1.5 rounded-full px-2.5 text-[11px] font-semibold transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-40"
+            style={{
+              border: "1px solid rgba(255,255,255,0.08)",
+              background: "rgba(255,255,255,0.04)",
+              color: "#8DA0C4",
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.borderColor = "rgba(245,158,11,0.35)";
+              (e.currentTarget as HTMLElement).style.color = "#FCD34D";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.08)";
+              (e.currentTarget as HTMLElement).style.color = "#8DA0C4";
+            }}
           >
-            <RotateCcw size={12} aria-hidden />
+            <RotateCcw size={11} aria-hidden />
             Nuevo
           </button>
+
           <button
             type="button"
-            onClick={() => setExpanded((current) => !current)}
-            className="grid size-7 place-items-center rounded-full border border-white/10 bg-white/[0.05] text-slate-300 transition duration-200 hover:border-cyan-300/40 hover:bg-cyan-300/10 hover:text-cyan-50 focus:outline-none focus:ring-2 focus:ring-cyan-300/30"
-            aria-label={expanded ? "Minimizar asistente" : "Expandir asistente"}
+            onClick={() => setExpanded((c) => !c)}
+            className="grid size-7 place-items-center rounded-full transition-all duration-200"
+            style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.04)", color: "#8DA0C4" }}
+            aria-label={expanded ? "Minimizar" : "Expandir"}
           >
-            {expanded ? <Minus size={15} aria-hidden /> : <ChevronUp size={15} aria-hidden />}
+            {expanded ? <Minus size={14} aria-hidden /> : <ChevronUp size={14} aria-hidden />}
           </button>
+
           <button
             type="button"
             onClick={() => setClosed(true)}
-            className="grid size-7 place-items-center rounded-full border border-white/10 bg-white/[0.05] text-slate-300 transition duration-200 hover:border-cyan-300/40 hover:bg-cyan-300/10 hover:text-cyan-50 focus:outline-none focus:ring-2 focus:ring-cyan-300/30"
-            aria-label="Cerrar asistente"
+            className="grid size-7 place-items-center rounded-full transition-all duration-200"
+            style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.04)", color: "#8DA0C4" }}
+            aria-label="Cerrar"
           >
-            <X size={15} aria-hidden />
+            <X size={14} aria-hidden />
           </button>
         </div>
       </header>
 
-      {/* Selector de Usuario POC */}
-      <div className="relative shrink-0 border-b border-white/5 bg-slate-950/20 px-3 py-1.5 flex items-center justify-between gap-2 text-[11px] z-10">
-        <div className="flex items-center gap-1.5 text-slate-400">
-          <UserRound size={12} className="text-cyan-400" aria-hidden />
-          <span>POC Sesión:</span>
+      {/* ── Selector POC ── */}
+      <div
+        className="relative shrink-0 flex items-center justify-between gap-2 px-3.5 py-1.5 text-[11px] z-10"
+        style={{ background: "rgba(7,14,28,0.4)", borderBottom: "1px solid rgba(255,255,255,0.04)" }}
+      >
+        <div className="flex items-center gap-1.5" style={{ color: "#4A6091" }}>
+          <UserRound size={11} style={{ color: "#F59E0B" }} aria-hidden />
+          <span>Sesión demo:</span>
         </div>
         <select
           value={selectedUserEmail}
           onChange={(e) => handleUserChange(e.target.value)}
           disabled={isLoading}
-          className="bg-slate-950 border border-white/10 rounded-md px-1.5 py-0.5 text-slate-200 font-semibold focus:outline-none focus:border-cyan-300/50 cursor-pointer"
+          className="rounded-md px-2 py-0.5 text-[11px] font-semibold outline-none cursor-pointer transition-all"
+          style={{
+            background: "#0C1629",
+            border: "1px solid rgba(255,255,255,0.08)",
+            color: "#EEF2FF",
+          }}
         >
-          <option value="">Anónimo / Sin Identificar</option>
+          <option value="">Anónimo</option>
           <option value="lilian.leon@sonda.cl">Lilian Leon (Operaciones)</option>
           <option value="francisco.martinez@sonda.cl">Francisco Martinez (Soporte TI)</option>
         </select>
@@ -422,16 +495,21 @@ export function AtlasAssistant() {
 
       {expanded ? (
         <>
-          <div ref={scrollRef} className="thin-scrollbar relative min-h-0 flex-1 overflow-y-auto px-3 py-2.5">
-            <div className="space-y-2.5">
+          {/* ── Área de mensajes ── */}
+          <div ref={scrollRef} className="thin-scrollbar relative min-h-0 flex-1 overflow-y-auto px-3.5 py-3">
+            <div className="space-y-3">
               {messages.map((message) => (
                 <Bubble key={message.id} message={message} />
               ))}
 
               {!hasConversation ? (
-                <div className="grid grid-cols-3 gap-1.5">
+                <div className="grid grid-cols-3 gap-1.5 pt-1">
                   {smartActions.map((action) => (
-                    <SmartActionCard key={action.topic} action={action} onClick={() => handleSuggestion(action.topic)} />
+                    <SmartActionCard
+                      key={action.topic}
+                      action={action}
+                      onClick={() => handleSuggestion(action.topic)}
+                    />
                   ))}
                 </div>
               ) : null}
@@ -441,46 +519,55 @@ export function AtlasAssistant() {
             </div>
           </div>
 
-          <div className="relative shrink-0 border-t border-white/10 bg-slate-950/72 px-3 py-2 backdrop-blur-xl flex flex-col gap-1.5">
-            {/* Vista Previa de Archivo Adjunto */}
+          {/* ── Input área ── */}
+          <div
+            className="relative shrink-0 flex flex-col gap-1.5 px-3.5 py-2.5"
+            style={{
+              background: "rgba(7,14,28,0.72)",
+              borderTop: "1px solid rgba(255,255,255,0.06)",
+              backdropFilter: "blur(16px)",
+            }}
+          >
+            {/* Preview adjunto */}
             {attachedFile && (
-              <div className="flex items-center justify-between gap-2 rounded-xl border border-cyan-300/15 bg-cyan-300/5 p-2 text-xs">
+              <div
+                className="flex items-center justify-between gap-2 rounded-xl p-2 text-xs"
+                style={{
+                  border: "1px solid rgba(245,158,11,0.18)",
+                  background: "rgba(245,158,11,0.06)",
+                }}
+              >
                 <div className="flex items-center gap-2 min-w-0">
-                  <img
-                    src={attachedFile.url}
-                    alt={attachedFile.name}
-                    className="size-8 object-cover rounded-md border border-white/10 shrink-0"
-                  />
+                  <img src={attachedFile.url} alt={attachedFile.name} className="size-8 object-cover rounded-md shrink-0" style={{ border: "1px solid rgba(255,255,255,0.1)" }} />
                   <div className="min-w-0">
-                    <p className="font-semibold text-slate-200 truncate">{attachedFile.name}</p>
-                    <p className="text-[10px] text-cyan-400">Evidencia cargada listo para enviar</p>
+                    <p className="font-semibold truncate" style={{ color: "#EEF2FF" }}>{attachedFile.name}</p>
+                    <p className="text-[10px]" style={{ color: "#F59E0B" }}>Evidencia lista para enviar</p>
                   </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setAttachedFile(null)}
-                  className="grid size-6 place-items-center rounded-full hover:bg-white/5 text-slate-400 hover:text-white"
-                  title="Eliminar adjunto"
-                >
-                  <X size={13} />
+                <button type="button" onClick={() => setAttachedFile(null)} className="grid size-6 place-items-center rounded-full" style={{ color: "#8DA0C4" }}>
+                  <X size={12} />
                 </button>
               </div>
             )}
 
-            {/* Menú de Capturas de Demo */}
+            {/* Menú adjuntos demo */}
             {showAttachmentMenu && (
-              <div className="rounded-xl border border-white/10 bg-slate-950 p-2 shadow-2xl flex flex-col gap-1.5 animate-in fade-in slide-in-from-bottom-2 duration-200">
-                <div className="flex items-center justify-between px-1">
-                  <span className="text-[10.5px] font-semibold uppercase tracking-wider text-slate-400">Adjuntar Evidencia (Demo L2)</span>
-                  <button
-                    type="button"
-                    onClick={() => setShowAttachmentMenu(false)}
-                    className="text-slate-400 hover:text-white"
-                  >
-                    <X size={12} />
+              <div
+                className="rounded-xl p-2 shadow-2xl flex flex-col gap-1.5 animate-fade-up"
+                style={{
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  background: "#0C1629",
+                }}
+              >
+                <div className="flex items-center justify-between px-1 mb-0.5">
+                  <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "#4A6091" }}>
+                    Adjuntar evidencia técnica
+                  </span>
+                  <button type="button" onClick={() => setShowAttachmentMenu(false)} style={{ color: "#8DA0C4" }}>
+                    <X size={11} />
                   </button>
                 </div>
-                <div className="grid grid-cols-1 gap-1.5">
+                <div className="grid grid-cols-1 gap-1">
                   {demoScreenshots.map((shot) => (
                     <button
                       key={shot.name}
@@ -489,19 +576,40 @@ export function AtlasAssistant() {
                         setAttachedFile({ name: shot.name, url: shot.url });
                         setShowAttachmentMenu(false);
                       }}
-                      className="flex items-center gap-2.5 rounded-lg border border-white/5 bg-white/[0.03] px-2.5 py-2 text-left text-xs font-medium text-slate-200 hover:border-cyan-300/30 hover:bg-cyan-300/5 transition duration-150"
+                      className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-xs font-medium transition-all duration-150"
+                      style={{
+                        border: "1px solid rgba(255,255,255,0.06)",
+                        background: "rgba(255,255,255,0.02)",
+                        color: "#8DA0C4",
+                      }}
+                      onMouseEnter={(e) => {
+                        (e.currentTarget as HTMLElement).style.borderColor = "rgba(245,158,11,0.25)";
+                        (e.currentTarget as HTMLElement).style.background = "rgba(245,158,11,0.05)";
+                        (e.currentTarget as HTMLElement).style.color = "#EEF2FF";
+                      }}
+                      onMouseLeave={(e) => {
+                        (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.06)";
+                        (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.02)";
+                        (e.currentTarget as HTMLElement).style.color = "#8DA0C4";
+                      }}
                     >
-                      <span className="size-6 overflow-hidden rounded-md border border-white/10 bg-slate-900 shrink-0">
+                      <span className="size-6 overflow-hidden rounded-md shrink-0" style={{ border: "1px solid rgba(255,255,255,0.08)", background: "#070E1C" }}>
                         <img src={shot.url} alt={shot.label} className="size-full object-cover" />
                       </span>
                       <span>{shot.label}</span>
                     </button>
                   ))}
-                  
-                  {/* Carga real simulada */}
-                  <label className="flex items-center justify-center gap-2 rounded-lg border border-dashed border-white/15 bg-white/[0.01] px-2.5 py-2 text-center text-xs font-semibold text-slate-400 hover:border-cyan-300/35 hover:text-slate-200 transition duration-150 cursor-pointer">
-                    <Paperclip size={13} />
-                    <span>Subir archivo desde el equipo...</span>
+
+                  <label
+                    className="flex items-center justify-center gap-2 rounded-lg px-2.5 py-2 text-xs font-semibold transition-all duration-150 cursor-pointer"
+                    style={{
+                      border: "1px dashed rgba(255,255,255,0.1)",
+                      background: "rgba(255,255,255,0.01)",
+                      color: "#4A6091",
+                    }}
+                  >
+                    <Paperclip size={12} />
+                    <span>Subir desde tu equipo...</span>
                     <input
                       type="file"
                       accept="image/*"
@@ -511,10 +619,7 @@ export function AtlasAssistant() {
                         if (file) {
                           const reader = new FileReader();
                           reader.onload = () => {
-                            setAttachedFile({
-                              name: file.name,
-                              url: reader.result as string,
-                            });
+                            setAttachedFile({ name: file.name, url: reader.result as string });
                             setShowAttachmentMenu(false);
                           };
                           reader.readAsDataURL(file);
@@ -526,45 +631,84 @@ export function AtlasAssistant() {
               </div>
             )}
 
+            {/* Estado */}
             <div className="flex items-center justify-between text-[10.5px] font-medium mb-0.5">
-              <div className="flex items-center gap-2 text-slate-400">
-                <span className={`size-1.5 rounded-full ${isLoading ? "animate-pulse bg-cyan-300 shadow-[0_0_14px_rgba(34,211,238,0.95)]" : "bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.7)]"}`} />
+              <div className="flex items-center gap-2" style={{ color: "#4A6091" }}>
+                <span
+                  className="size-1.5 rounded-full"
+                  style={{
+                    background: isLoading ? "#F59E0B" : "#10B981",
+                    boxShadow: isLoading
+                      ? "0 0 8px rgba(245,158,11,0.9)"
+                      : "0 0 8px rgba(16,185,129,0.7)",
+                    animation: isLoading ? "pulse 1s ease-in-out infinite" : "none",
+                  }}
+                />
                 {status}
               </div>
             </div>
 
+            {/* Formulario envío */}
             <form onSubmit={handleSubmit} className="flex items-end gap-2">
               <button
                 type="button"
-                onClick={() => setShowAttachmentMenu((prev) => !prev)}
-                className={`grid size-11 shrink-0 place-items-center rounded-2xl border border-white/10 transition duration-200 ${showAttachmentMenu ? "bg-cyan-300/10 border-cyan-300/40 text-cyan-400" : "bg-white/[0.055] text-slate-300 hover:bg-white/[0.08] hover:text-white"}`}
-                title="Adjuntar captura de pantalla"
+                onClick={() => setShowAttachmentMenu((p) => !p)}
+                className="grid size-10 shrink-0 place-items-center rounded-xl transition-all duration-200"
+                style={{
+                  border: showAttachmentMenu ? "1px solid rgba(245,158,11,0.4)" : "1px solid rgba(255,255,255,0.08)",
+                  background: showAttachmentMenu ? "rgba(245,158,11,0.1)" : "rgba(255,255,255,0.04)",
+                  color: showAttachmentMenu ? "#F59E0B" : "#8DA0C4",
+                }}
+                title="Adjuntar evidencia"
               >
-                <Paperclip size={16} />
+                <Paperclip size={15} />
               </button>
 
               <textarea
                 ref={inputRef}
                 value={input}
-                onChange={(event) => setInput(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter" && !event.shiftKey) {
-                    event.preventDefault();
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
                     void sendMessage(input);
                   }
                 }}
                 rows={1}
-                placeholder={attachedFile ? "Agrega un comentario o envía..." : "Escribe tu mensaje..."}
-                className="max-h-28 min-h-11 flex-1 resize-none rounded-2xl border border-white/10 bg-white/[0.055] px-3.5 py-2.5 text-[13px] leading-5 text-slate-100 outline-none transition duration-200 placeholder:text-slate-500 focus:border-cyan-300/45 focus:bg-white/[0.075] focus:ring-4 focus:ring-cyan-300/10"
+                placeholder={attachedFile ? "Agrega un comentario o envía..." : "Describe tu problema..."}
+                className="thin-scrollbar max-h-28 min-h-10 flex-1 resize-none rounded-xl px-3.5 py-2.5 text-[13px] leading-5 outline-none transition-all duration-200"
+                style={{
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  background: "rgba(255,255,255,0.04)",
+                  color: "#EEF2FF",
+                }}
+                onFocus={(e) => {
+                  (e.currentTarget as HTMLElement).style.borderColor = "rgba(245,158,11,0.35)";
+                  (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.06)";
+                }}
+                onBlur={(e) => {
+                  (e.currentTarget as HTMLElement).style.borderColor = "rgba(255,255,255,0.08)";
+                  (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.04)";
+                }}
               />
 
               <button
                 type="submit"
                 disabled={(!input.trim() && !attachedFile) || isLoading}
-                className="grid size-11 shrink-0 place-items-center rounded-2xl bg-cyan-300 text-slate-950 shadow-[0_10px_28px_rgba(34,211,238,0.18)] transition duration-200 hover:bg-cyan-200 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-500 disabled:shadow-none"
+                className="grid size-10 shrink-0 place-items-center rounded-xl transition-all duration-200 disabled:cursor-not-allowed"
+                style={{
+                  background: (!input.trim() && !attachedFile) || isLoading
+                    ? "rgba(255,255,255,0.06)"
+                    : "linear-gradient(135deg, #F59E0B 0%, #D97706 100%)",
+                  color: (!input.trim() && !attachedFile) || isLoading ? "#4A6091" : "#070E1C",
+                  boxShadow: (!input.trim() && !attachedFile) || isLoading
+                    ? "none"
+                    : "0 4px 16px rgba(245,158,11,0.35)",
+                  border: "1px solid rgba(255,255,255,0.06)",
+                }}
                 aria-label="Enviar"
               >
-                <Send size={16} aria-hidden />
+                <Send size={15} aria-hidden />
               </button>
             </form>
           </div>
@@ -574,13 +718,7 @@ export function AtlasAssistant() {
   );
 }
 
-function WelcomeCard({ message }: { message: string }) {
-  return (
-    <div className="max-w-[82%] rounded-xl border border-white/10 bg-white/[0.065] px-3 py-2 text-[13px] leading-5 text-slate-200">
-      <p>{message}</p>
-    </div>
-  );
-}
+/* ─────────────────────────────────── SUB-COMPONENTES ─────────────────────────────────── */
 
 function SmartActionCard({
   action,
@@ -595,17 +733,29 @@ function SmartActionCard({
     <button
       type="button"
       onClick={onClick}
-      className="group relative min-h-10 overflow-hidden rounded-xl border border-white/10 bg-white/[0.045] px-2 py-1.5 text-left transition duration-200 hover:border-cyan-300/30 hover:bg-white/[0.075] focus:outline-none focus:ring-2 focus:ring-cyan-300/25"
+      className="group relative min-h-[52px] overflow-hidden rounded-xl text-left transition-all duration-200 focus:outline-none"
+      style={{
+        border: `1px solid ${action.border}`,
+        background: action.bg,
+        padding: "8px 10px",
+      }}
+      onMouseEnter={(e) => {
+        (e.currentTarget as HTMLElement).style.background = action.bg.replace("0.1", "0.18");
+        (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)";
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLElement).style.background = action.bg;
+        (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
+      }}
     >
-      <span className={`absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r ${action.accent}`} />
-      <span className="relative flex items-center gap-2">
-        <span className="grid size-6 shrink-0 place-items-center rounded-lg border border-white/10 bg-slate-950/36 text-cyan-100 transition group-hover:border-cyan-300/30 group-hover:text-cyan-50">
+      <div className="flex flex-col gap-1.5">
+        <span className="grid size-6 shrink-0 place-items-center rounded-lg" style={{ background: "rgba(255,255,255,0.07)", color: action.color }}>
           <Icon size={12} aria-hidden />
         </span>
-        <span className="min-w-0">
-          <span className="block truncate text-[11px] font-semibold leading-4 text-slate-50">{action.title}</span>
+        <span className="block text-[11px] font-semibold leading-tight" style={{ color: "#EEF2FF" }}>
+          {action.title}
         </span>
-      </span>
+      </div>
     </button>
   );
 }
@@ -613,41 +763,76 @@ function SmartActionCard({
 function Bubble({ message }: { message: ChatMessage }) {
   const isUser = message.role === "user";
 
-  if (message.id === "atlas-welcome") {
-    return <WelcomeCard message={message.content} />;
+  if (message.id === "atlas-welcome" || message.id === "atlas-welcome-personal") {
+    return (
+      <div
+        className="max-w-[86%] rounded-2xl px-3.5 py-2.5 text-[13px] leading-5"
+        style={{
+          border: "1px solid rgba(27,61,140,0.35)",
+          background: "rgba(27,61,140,0.12)",
+          color: "#8DA0C4",
+        }}
+      >
+        <p className="whitespace-pre-line">{message.content}</p>
+      </div>
+    );
   }
 
   return (
     <div className={`flex gap-2 ${isUser ? "justify-end" : "justify-start"}`}>
       {!isUser ? (
-        <span className="mt-1 grid size-6 shrink-0 place-items-center rounded-lg border border-cyan-300/15 bg-cyan-300/10 text-cyan-100">
-          <Headset size={12} aria-hidden />
+        <span
+          className="mt-1 grid size-[22px] shrink-0 place-items-center rounded-lg"
+          style={{
+            border: "1px solid rgba(245,158,11,0.22)",
+            background: "rgba(245,158,11,0.08)",
+          }}
+        >
+          <AtlasHexLogo size={14} />
         </span>
       ) : null}
+
       <div
-        className={
-          isUser
-            ? "max-w-[82%] rounded-xl bg-cyan-300 px-3 py-2 text-sm leading-5 text-slate-950 shadow-[0_10px_24px_rgba(34,211,238,0.14)] flex flex-col gap-2"
-            : "max-w-[calc(100%-32px)] rounded-xl border border-white/10 bg-white/[0.065] px-3 py-2 text-[13px] leading-5 text-slate-200 flex flex-col gap-2"
-        }
+        className="max-w-[80%] flex flex-col gap-2"
+        style={{
+          borderRadius: isUser ? "16px 4px 16px 16px" : "4px 16px 16px 16px",
+          padding: "8px 12px",
+          ...(isUser
+            ? {
+                background: "linear-gradient(135deg, #1B3D8C 0%, #142F6E 100%)",
+                border: "1px solid rgba(27,61,140,0.6)",
+                color: "#EEF2FF",
+                boxShadow: "0 4px 16px rgba(4,8,20,0.35)",
+              }
+            : {
+                border: "1px solid rgba(255,255,255,0.07)",
+                background: "rgba(255,255,255,0.04)",
+                color: "#C8D5F0",
+              }),
+        }}
       >
         {message.attachmentUrl ? (
-          <div className="relative overflow-hidden rounded-lg border border-white/10 bg-slate-950/40 p-1 flex flex-col gap-1">
-            <img
-              src={message.attachmentUrl}
-              alt={message.attachmentName || "Evidencia adjunta"}
-              className="max-h-40 object-cover rounded-md"
-            />
-            <span className="text-[10px] font-mono text-slate-400 block px-1 truncate">
+          <div className="relative overflow-hidden rounded-lg p-1 flex flex-col gap-1" style={{ border: "1px solid rgba(255,255,255,0.08)", background: "rgba(7,14,28,0.5)" }}>
+            <img src={message.attachmentUrl} alt={message.attachmentName || "Evidencia"} className="max-h-40 object-cover rounded-md" />
+            <span className="text-[10px] font-mono px-1 truncate" style={{ color: "#4A6091" }}>
               📎 {message.attachmentName || "evidencia.png"}
             </span>
           </div>
         ) : null}
-        
-        {message.content ? <p className="whitespace-pre-line">{message.content}</p> : null}
+        {message.content ? (
+          <p className="text-[13px] leading-[1.55] whitespace-pre-line">{message.content}</p>
+        ) : null}
       </div>
+
       {isUser ? (
-        <span className="mt-1 grid size-6 shrink-0 place-items-center rounded-lg border border-white/10 bg-white/[0.075] text-slate-300">
+        <span
+          className="mt-1 grid size-[22px] shrink-0 place-items-center rounded-lg"
+          style={{
+            border: "1px solid rgba(255,255,255,0.08)",
+            background: "rgba(255,255,255,0.05)",
+            color: "#8DA0C4",
+          }}
+        >
           <UserRound size={12} aria-hidden />
         </span>
       ) : null}
@@ -657,44 +842,61 @@ function Bubble({ message }: { message: ChatMessage }) {
 
 function TypingIndicator() {
   return (
-    <div className="flex items-center gap-2 pl-9 text-sm text-slate-400">
-      <Loader2 size={15} className="animate-spin text-cyan-600" aria-hidden />
-      revisando contexto...
+    <div className="flex items-center gap-2 pl-8 text-[13px]" style={{ color: "#4A6091" }}>
+      <Loader2 size={14} className="animate-spin" style={{ color: "#F59E0B" }} aria-hidden />
+      <span>revisando contexto...</span>
     </div>
   );
 }
 
 function RegisteredCase({ ticket }: { ticket: Ticket }) {
   return (
-    <article className="ml-9 rounded-2xl border border-cyan-300/20 bg-cyan-300/[0.08] p-4 shadow-[0_16px_40px_rgba(2,8,23,0.18)] flex flex-col gap-3">
-      <div className="flex items-center gap-2 text-sm font-semibold text-cyan-50">
-        <CheckCircle2 size={17} className="text-emerald-300" aria-hidden />
-        Caso registrado
+    <article
+      className="ml-8 flex flex-col gap-3 rounded-2xl p-4"
+      style={{
+        border: "1px solid rgba(16,185,129,0.22)",
+        background: "linear-gradient(135deg, rgba(16,185,129,0.07) 0%, rgba(16,185,129,0.03) 100%)",
+        boxShadow: "0 8px 32px rgba(4,8,20,0.35)",
+      }}
+    >
+      <div className="flex items-center gap-2 text-sm font-bold" style={{ color: "#6EE7B7" }}>
+        <CheckCircle2 size={16} style={{ color: "#10B981" }} aria-hidden />
+        Caso registrado exitosamente
       </div>
-      <p className="font-mono text-xs font-semibold text-cyan-200">{ticket.id}</p>
-      <div className="space-y-3 text-sm">
+
+      <p className="font-data text-xs font-semibold" style={{ color: "#8DA0C4" }}>
+        {ticket.id}
+      </p>
+
+      <div className="space-y-2.5 text-sm">
         <CaseLine label="Resumen" value={summarize(ticket.description)} />
         <CaseLine label="Prioridad" value={priorityText(ticket.priority)} />
-        <CaseLine label="Próximo paso" value={ticket.assignedTeam.includes("Redes") ? "derivación a soporte de redes" : ticket.nextAction} />
+        <CaseLine
+          label="Siguiente acción"
+          value={ticket.assignedTeam.includes("Redes") ? "Derivación a soporte de redes" : ticket.nextAction}
+        />
         <CaseLine label="SLA estimado" value={ticket.estimatedSla.replace("respuesta inicial", "")} />
       </div>
 
       {ticket.attachmentName && (
-        <div className="mt-1 border-t border-white/5 pt-3 flex flex-col gap-1.5">
-          <p className="text-[11px] font-medium uppercase tracking-[0.1em] text-slate-500">Evidencia Técnica L2</p>
-          <div className="flex items-center gap-3 rounded-xl border border-cyan-300/10 bg-slate-950/45 p-2 text-xs">
+        <div className="border-t pt-3 flex flex-col gap-1.5" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
+          <p className="text-[10px] font-bold uppercase tracking-[0.1em]" style={{ color: "#4A6091" }}>
+            Evidencia técnica adjunta
+          </p>
+          <div
+            className="flex items-center gap-3 rounded-xl p-2 text-xs"
+            style={{ border: "1px solid rgba(16,185,129,0.12)", background: "rgba(7,14,28,0.5)" }}
+          >
             {ticket.attachmentUrl ? (
-              <img
-                src={ticket.attachmentUrl}
-                alt={ticket.attachmentName}
-                className="size-11 object-cover rounded-lg border border-white/10 shrink-0"
-              />
+              <img src={ticket.attachmentUrl} alt={ticket.attachmentName} className="size-10 object-cover rounded-lg shrink-0" style={{ border: "1px solid rgba(255,255,255,0.08)" }} />
             ) : (
-              <Paperclip size={16} className="text-cyan-400 shrink-0" />
+              <Paperclip size={15} style={{ color: "#10B981" }} className="shrink-0" />
             )}
             <div className="min-w-0 flex-1">
-              <p className="font-semibold text-slate-200 truncate">{ticket.attachmentName}</p>
-              <p className="text-[10.5px] text-slate-400 italic mt-0.5 leading-4">{ticket.attachmentAnalysis || "Análisis técnico completado por Atlas L2"}</p>
+              <p className="font-semibold truncate" style={{ color: "#EEF2FF" }}>{ticket.attachmentName}</p>
+              <p className="text-[10.5px] italic mt-0.5 leading-4" style={{ color: "#8DA0C4" }}>
+                {ticket.attachmentAnalysis || "Análisis técnico completado por Atlas L2"}
+              </p>
             </div>
           </div>
         </div>
@@ -706,11 +908,17 @@ function RegisteredCase({ ticket }: { ticket: Ticket }) {
 function CaseLine({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-[11px] font-medium uppercase tracking-[0.1em] text-slate-500">{label}</p>
-      <p className="mt-1 leading-5 text-slate-200">{value}</p>
+      <p className="text-[10.5px] font-bold uppercase tracking-[0.1em]" style={{ color: "#4A6091" }}>
+        {label}
+      </p>
+      <p className="mt-0.5 leading-5" style={{ color: "#C8D5F0" }}>
+        {value}
+      </p>
     </div>
   );
 }
+
+/* ─────────────────────────────────── HELPERS ─────────────────────────────────── */
 
 function resolveStatus(states: OperationalStatus[]) {
   const state = states.at(-1);
@@ -719,12 +927,11 @@ function resolveStatus(states: OperationalStatus[]) {
 
 function priorityText(priority: Ticket["priority"]) {
   const labels: Record<Ticket["priority"], string> = {
-    P1: "Crítica",
-    P2: "Alta",
-    P3: "Media",
-    P4: "Baja",
+    P1: "Crítica — Atención inmediata",
+    P2: "Alta — 4 horas hábiles",
+    P3: "Media — 8 horas hábiles",
+    P4: "Baja — 48 horas hábiles",
   };
-
   return labels[priority];
 }
 
@@ -755,23 +962,18 @@ function responseForSuggestion(message: string) {
   if (normalized === "vpn no funciona") {
     return "Entendido.\n\n¿El problema ocurre al conectarte desde fuera de la red corporativa o también dentro de oficina?";
   }
-
   if (normalized === "no puedo entrar al correo") {
     return "Entendido.\n\n¿El acceso falla por contraseña, MFA o aparece algún mensaje específico en Outlook?";
   }
-
   if (normalized === "necesito instalar software") {
     return "Entendido.\n\n¿Qué software necesitas instalar y en qué equipo corporativo debe quedar habilitado?";
   }
-
   if (normalized === "mi notebook está lenta") {
     return "Entendido.\n\n¿La lentitud ocurre desde el inicio del equipo o principalmente al usar una aplicación específica?";
   }
-
   if (normalized === "necesito acceso") {
     return "Entendido.\n\n¿A qué sistema, carpeta o recurso necesitas acceder y ya cuentas con aprobación del responsable?";
   }
-
   if (normalized === "otro problema") {
     return "Entendido.\n\nDescríbeme brevemente qué está ocurriendo, desde cuándo pasa y si afecta solo a tu usuario o a más personas.";
   }
@@ -788,11 +990,9 @@ function removeAssumedName(message: string) {
 
 function readStoredSessionContext() {
   if (typeof window === "undefined") return undefined;
-
   try {
     const raw = window.localStorage.getItem(sessionContextStorageKey);
     if (!raw) return undefined;
-
     const parsed = JSON.parse(raw) as SessionContext;
     return Array.isArray(parsed.messages) && Array.isArray(parsed.stepsExecuted) ? parsed : undefined;
   } catch {

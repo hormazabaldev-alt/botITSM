@@ -9,6 +9,7 @@ import {
   CheckCircle2,
   ChevronRight,
   Clock3,
+  Database,
   Gauge,
   KeyRound,
   LockKeyhole,
@@ -17,25 +18,15 @@ import {
   ShieldAlert,
   Ticket,
   UsersRound,
+  Zap,
 } from "lucide-react";
-import { BrandMark } from "@/components/shared/BrandMark";
+import { BrandMark, AtlasHexLogo } from "@/components/shared/BrandMark";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import {
   listOperationalCasesSync as listOperationalCases,
 } from "@/services/operations.repository";
 import type { Ticket as ITSMDemoTicket } from "@/lib/itsm/types";
 import type { AdminKpi, ChartPoint, OperationalCase } from "@/types/operational";
-
-const navItems = [
-  { id: "overview", label: "Overview", icon: Gauge },
-  { id: "incidents", label: "Incidents", icon: ShieldAlert },
-  { id: "requests", label: "Requests", icon: Ticket },
-  { id: "access", label: "Access", icon: KeyRound },
-  { id: "knowledge", label: "Knowledge", icon: BookOpen },
-  { id: "analytics", label: "Analytics", icon: BarChart3 },
-  { id: "cases", label: "Conversaciones", icon: MessageSquareText },
-  { id: "configuration", label: "Configuration", icon: Settings },
-];
 
 export function AdminDashboard() {
   const [authenticated, setAuthenticated] = useState(false);
@@ -72,26 +63,51 @@ function AdminLogin({ onSuccess }: { onSuccess: () => void }) {
   }
 
   return (
-    <main className="grid min-h-screen place-items-center bg-[radial-gradient(circle_at_20%_0%,rgba(14,165,233,0.22),transparent_34%),linear-gradient(135deg,#07111f_0%,#0f172a_48%,#111827_100%)] px-4 py-8 text-white">
-      <section className="w-full max-w-md rounded-3xl border border-white/10 bg-white/[0.07] p-6 shadow-2xl shadow-black/30 backdrop-blur-2xl">
+    <main
+      className="grid min-h-screen place-items-center px-4 py-8"
+      style={{
+        background: "radial-gradient(ellipse 70% 50% at 20% 0%, rgba(27,61,140,0.3), transparent 50%), linear-gradient(150deg, #070E1C 0%, #0C1629 50%, #070E1C 100%)",
+        color: "#EEF2FF",
+      }}
+    >
+      {/* Borde ámbar superior */}
+      <div className="pointer-events-none fixed inset-x-0 top-0 h-[2px]" style={{ background: "linear-gradient(90deg, transparent, #F59E0B 40%, #FCD34D 60%, transparent)" }} />
+
+      <section
+        className="w-full max-w-md rounded-3xl p-6 backdrop-blur-2xl"
+        style={{
+          background: "rgba(17,31,58,0.92)",
+          border: "1px solid rgba(255,255,255,0.07)",
+          boxShadow: "0 32px 80px rgba(4,8,20,0.7), 0 0 0 1px rgba(245,158,11,0.06) inset",
+        }}
+      >
         <BrandMark variant="dark" />
         <div className="mt-8">
-          <div className="mb-5 grid size-12 place-items-center rounded-2xl bg-cyan-400/12 text-cyan-200">
-            <LockKeyhole size={22} aria-hidden />
+          <div
+            className="mb-5 grid size-12 place-items-center rounded-2xl"
+            style={{ background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.2)" }}
+          >
+            <LockKeyhole size={22} style={{ color: "#FCD34D" }} aria-hidden />
           </div>
-          <h1 className="text-2xl font-semibold tracking-[-0.025em]">Consola operacional</h1>
-          <p className="mt-2 text-sm leading-6 text-slate-300">
-            Acceso restringido para monitoreo, gobierno y seguimiento de casos ITSM.
+          <h1 className="text-2xl font-bold tracking-[-0.025em]" style={{ color: "#EEF2FF" }}>Consola operacional</h1>
+          <p className="mt-2 text-sm leading-6" style={{ color: "#8DA0C4" }}>
+            Acceso restringido · Monitoreo, gobierno y seguimiento de casos ITSM.
           </p>
         </div>
 
-        <div className="mt-6 rounded-2xl border border-cyan-200/20 bg-cyan-200/[0.08] p-4">
+        <div
+          className="mt-6 rounded-2xl p-4"
+          style={{ border: "1px solid rgba(245,158,11,0.18)", background: "rgba(245,158,11,0.06)" }}
+        >
           <div className="flex items-start gap-3">
-            <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-cyan-200/12 text-cyan-100">
+            <div
+              className="grid size-9 shrink-0 place-items-center rounded-xl"
+              style={{ background: "rgba(245,158,11,0.1)", color: "#FCD34D" }}
+            >
               <KeyRound size={17} aria-hidden />
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-white">Credenciales demo</p>
+              <p className="text-sm font-bold" style={{ color: "#EEF2FF" }}>Credenciales de demostración</p>
               <div className="mt-3 grid gap-2 text-sm">
                 <CredentialLine label="Usuario" value={demoUser} />
                 <CredentialLine label="Clave" value={demoPassword} />
@@ -101,7 +117,12 @@ function AdminLogin({ onSuccess }: { onSuccess: () => void }) {
           <button
             type="button"
             onClick={enterDemo}
-            className="mt-4 flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-cyan-100/20 bg-white/10 text-sm font-semibold text-cyan-50 transition hover:bg-white/15"
+            className="mt-4 flex h-10 w-full items-center justify-center gap-2 rounded-xl text-sm font-bold transition-all duration-200"
+            style={{
+              background: "linear-gradient(135deg, #F59E0B 0%, #D97706 100%)",
+              color: "#070E1C",
+              boxShadow: "0 4px 16px rgba(245,158,11,0.3)",
+            }}
           >
             Ingresar como demo
             <ChevronRight size={16} aria-hidden />
@@ -110,19 +131,32 @@ function AdminLogin({ onSuccess }: { onSuccess: () => void }) {
 
         <form onSubmit={submit} className="mt-6 space-y-4">
           <div>
-            <label className="text-xs font-medium uppercase tracking-[0.12em] text-slate-400" htmlFor="admin-user">
+            <label
+              className="text-xs font-bold uppercase tracking-[0.12em]"
+              htmlFor="admin-user"
+              style={{ color: "#4A6091" }}
+            >
               Usuario
             </label>
             <input
               id="admin-user"
               value={user}
               onChange={(event) => setUser(event.target.value)}
-              className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-white/10 px-3 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-300/70"
+              className="mt-2 h-11 w-full rounded-xl px-3 text-sm outline-none transition-all duration-200"
+              style={{
+                border: "1px solid rgba(255,255,255,0.08)",
+                background: "rgba(255,255,255,0.04)",
+                color: "#EEF2FF",
+              }}
               autoComplete="username"
             />
           </div>
           <div>
-            <label className="text-xs font-medium uppercase tracking-[0.12em] text-slate-400" htmlFor="admin-password">
+            <label
+              className="text-xs font-bold uppercase tracking-[0.12em]"
+              htmlFor="admin-password"
+              style={{ color: "#4A6091" }}
+            >
               Clave
             </label>
             <input
@@ -130,16 +164,26 @@ function AdminLogin({ onSuccess }: { onSuccess: () => void }) {
               type="password"
               value={password}
               onChange={(event) => setPassword(event.target.value)}
-              className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-white/10 px-3 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-300/70"
+              className="mt-2 h-11 w-full rounded-xl px-3 text-sm outline-none transition-all duration-200"
+              style={{
+                border: "1px solid rgba(255,255,255,0.08)",
+                background: "rgba(255,255,255,0.04)",
+                color: "#EEF2FF",
+              }}
               autoComplete="current-password"
             />
           </div>
-          {error ? <p className="text-sm text-rose-200">{error}</p> : null}
+          {error ? <p className="text-sm" style={{ color: "#FCA5A5" }}>{error}</p> : null}
           <button
             type="submit"
-            className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-cyan-300 text-sm font-semibold text-slate-950 transition hover:bg-cyan-200"
+            className="flex h-11 w-full items-center justify-center gap-2 rounded-xl text-sm font-bold transition-all duration-200"
+            style={{
+              background: "linear-gradient(135deg, #1B3D8C 0%, #142F6E 100%)",
+              border: "1px solid rgba(27,61,140,0.6)",
+              color: "#EEF2FF",
+            }}
           >
-            Entrar
+            Ingresar
             <ChevronRight size={16} aria-hidden />
           </button>
         </form>
@@ -150,9 +194,12 @@ function AdminLogin({ onSuccess }: { onSuccess: () => void }) {
 
 function CredentialLine({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-slate-950/24 px-3 py-2">
-      <span className="text-xs font-medium uppercase tracking-[0.12em] text-slate-400">{label}</span>
-      <span className="font-mono text-xs font-semibold text-cyan-100">{value}</span>
+    <div
+      className="flex items-center justify-between gap-3 rounded-xl px-3 py-2"
+      style={{ border: "1px solid rgba(255,255,255,0.06)", background: "rgba(7,14,28,0.4)" }}
+    >
+      <span className="text-xs font-medium uppercase tracking-[0.12em]" style={{ color: "#4A6091" }}>{label}</span>
+      <span className="font-data text-xs font-semibold" style={{ color: "#FCD34D" }}>{value}</span>
     </div>
   );
 }
@@ -403,85 +450,149 @@ function AdminWorkspace() {
     setActiveSection(id);
   }
 
+  const navSections = [
+    { id: "overview",       label: "Vista General",              icon: Activity },
+    { id: "incidents",      label: "Gestión de Incidentes",      icon: ShieldAlert },
+    { id: "requests",       label: "Gestión de Requerimientos",  icon: BarChart3 },
+    { id: "access",         label: "Gestión de Accesos",         icon: UsersRound },
+    { id: "knowledge",      label: "Base de Conocimiento",       icon: BookOpen },
+    { id: "analytics",      label: "Analítica Avanzada",         icon: Gauge },
+    { id: "cases",          label: "Bitácora de Casos",          icon: Ticket },
+    { id: "configuration",  label: "Gobernanza",                 icon: Settings },
+  ];
+
   return (
-    <main className="min-h-screen bg-[#07111f] text-[12px] text-slate-100">
-      <div className="grid min-h-screen lg:grid-cols-[230px_1fr]">
-        <aside className="border-b border-white/10 bg-[#0a1525] p-3 lg:sticky lg:top-0 lg:h-screen lg:border-b-0 lg:border-r">
-          <div className="flex items-center gap-2.5">
-            <BrandMark compact variant="dark" />
+    <main className="min-h-screen text-[12px]" style={{ background: "#070E1C", color: "#EEF2FF" }}>
+      {/* Borde ámbar superior */}
+      <div className="pointer-events-none fixed inset-x-0 top-0 z-50 h-[2px]" style={{ background: "linear-gradient(90deg, transparent, #F59E0B 40%, #FCD34D 60%, transparent)" }} />
+
+      <div className="grid min-h-screen lg:grid-cols-[240px_1fr]">
+        {/* ── Sidebar ── */}
+        <aside
+          className="border-b lg:sticky lg:top-0 lg:h-screen lg:border-b-0 lg:border-r lg:overflow-y-auto lg:flex lg:flex-col"
+          style={{
+            background: "linear-gradient(180deg, #0C1629 0%, #0A1220 100%)",
+            borderColor: "rgba(255,255,255,0.06)",
+          }}
+        >
+          {/* Logo */}
+          <div className="flex items-center gap-3 p-4 pb-3">
+            <AtlasHexLogo size={36} />
             <div className="min-w-0">
-              <p className="text-[13px] font-semibold leading-4 text-white">Soporte ITSM</p>
-              <p className="truncate text-[11px] text-slate-500">SONDA · Geimser</p>
+              <p className="text-[14px] font-bold leading-tight tracking-[-0.02em]" style={{ color: "#EEF2FF" }}>Atlas</p>
+              <p className="text-[11px] font-medium tracking-[0.03em]" style={{ color: "#4A6091" }}>SONDA · Panel ITSM</p>
             </div>
           </div>
-          <nav className="mt-6 grid gap-1">
-            {[
-              { id: "overview", label: "Vista General", icon: Activity },
-              { id: "incidents", label: "Gestión de Incidentes", icon: ShieldAlert },
-              { id: "requests", label: "Gestión de Requerimientos", icon: BarChart3 },
-              { id: "access", label: "Gestión de Accesos", icon: UsersRound },
-              { id: "knowledge", label: "Base de Conocimiento", icon: BookOpen },
-              { id: "analytics", label: "Analítica Avanzada", icon: Gauge },
-              { id: "cases", label: "Bitácora de Casos", icon: Ticket },
-              { id: "configuration", label: "Gobernanza", icon: Gauge },
-            ].map((item) => (
-              <button
-                key={item.label}
-                type="button"
-                onClick={() => goToSection(item.id)}
-                className={`flex w-full items-center text-left gap-2.5 rounded-lg px-2.5 py-1.5 text-[12px] font-medium transition ${
-                  activeSection === item.id ? "bg-cyan-300/10 text-cyan-100 ring-1 ring-cyan-300/15" : "text-slate-400 hover:bg-white/[0.045] hover:text-white"
-                }`}
-              >
-                <item.icon size={14} className="shrink-0" aria-hidden />
-                <span className="truncate">{item.label}</span>
-              </button>
-            ))}
+
+          {/* Línea separadora ámbar */}
+          <div className="mx-4 mb-3 h-px" style={{ background: "linear-gradient(90deg, #F59E0B, transparent)" }} />
+
+          {/* Fuente de datos */}
+          <div className="mx-3 mb-3 rounded-xl px-3 py-2" style={{ background: "rgba(245,158,11,0.07)", border: "1px solid rgba(245,158,11,0.15)" }}>
+            <div className="flex items-center gap-2">
+              <Database size={11} style={{ color: "#F59E0B" }} />
+              <span className="text-[11px] font-bold" style={{ color: ticketSource === "supabase" ? "#6EE7B7" : "#FCD34D" }}>
+                {ticketSource === "cargando" ? "Conectando..." : ticketSource === "supabase" ? `${realTickets.length} tickets en BD` : "Modo demo"}
+              </span>
+            </div>
+          </div>
+
+          <nav className="flex-1 px-2 grid gap-0.5">
+            {navSections.map((item) => {
+              const active = activeSection === item.id;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => goToSection(item.id)}
+                  className="flex w-full items-center text-left gap-3 rounded-xl px-3 py-2.5 text-[12px] font-semibold transition-all duration-150"
+                  style={{
+                    background: active ? "rgba(245,158,11,0.1)" : "transparent",
+                    border: active ? "1px solid rgba(245,158,11,0.2)" : "1px solid transparent",
+                    color: active ? "#FCD34D" : "#8DA0C4",
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!active) {
+                      (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.04)";
+                      (e.currentTarget as HTMLElement).style.color = "#EEF2FF";
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!active) {
+                      (e.currentTarget as HTMLElement).style.background = "transparent";
+                      (e.currentTarget as HTMLElement).style.color = "#8DA0C4";
+                    }
+                  }}
+                >
+                  <item.icon size={14} className="shrink-0" aria-hidden />
+                  <span className="truncate">{item.label}</span>
+                  {active && <span className="ml-auto size-1.5 rounded-full" style={{ background: "#F59E0B" }} />}
+                </button>
+              );
+            })}
           </nav>
+
+          {/* Footer sidebar */}
+          <div className="p-4 pt-3">
+            <div className="h-px mb-3" style={{ background: "rgba(255,255,255,0.05)" }} />
+            <label
+              className="flex items-center gap-2 cursor-pointer select-none rounded-xl px-3 py-2 text-[11px] font-semibold transition-all"
+              style={{ border: "1px solid rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.03)", color: "#8DA0C4" }}
+            >
+              <input
+                type="checkbox"
+                checked={showOnlyReal}
+                onChange={(e) => setShowOnlyReal(e.target.checked)}
+                className="sr-only peer"
+              />
+              <div className="relative w-7 h-4 rounded-full transition-all" style={{ background: showOnlyReal ? "#F59E0B" : "rgba(255,255,255,0.1)" }}>
+                <span className="absolute top-0.5 left-0.5 size-3 rounded-full bg-white transition-all" style={{ transform: showOnlyReal ? "translateX(12px)" : "translateX(0)" }} />
+              </div>
+              <span>Solo datos reales</span>
+            </label>
+            <p className="mt-3 text-[10px] font-medium uppercase tracking-[0.08em]" style={{ color: "#4A6091" }}>ITIL v4 · Atlas v2.0</p>
+          </div>
         </aside>
 
         <section className="min-w-0">
-          <header className="border-b border-white/10 bg-[#07111f]/92 px-4 py-2.5 backdrop-blur-xl lg:px-5">
-            <div className="flex flex-col gap-2 xl:flex-row xl:items-end xl:justify-between">
+          {/* ── Header del workspace ── */}
+          <header
+            className="sticky top-0 z-20 px-5 py-3 backdrop-blur-xl"
+            style={{
+              background: "rgba(7,14,28,0.88)",
+              borderBottom: "1px solid rgba(255,255,255,0.06)",
+            }}
+          >
+            <div className="flex flex-col gap-2 xl:flex-row xl:items-center xl:justify-between">
               <div>
-                <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-cyan-200/75">Centro de Operaciones ITSM</p>
-                <h1 className="mt-0.5 text-[22px] font-semibold leading-7 tracking-[-0.025em] text-white">Panel ejecutivo ITSM</h1>
-                <p className="mt-1 max-w-2xl text-[12px] leading-4 text-slate-400">
-                  Vista ejecutiva de incidentes, solicitudes, accesos, SLA, escalamiento y efectividad de conocimiento.
-                </p>
+                <p className="text-[10px] font-bold uppercase tracking-[0.16em]" style={{ color: "#4A6091" }}>Centro de Operaciones ITSM</p>
+                <h1 className="mt-0.5 text-[20px] font-bold leading-7 tracking-[-0.025em]" style={{ color: "#EEF2FF" }}>Panel ejecutivo ITSM</h1>
               </div>
-              <div className="flex flex-wrap items-center gap-3">
-                <label className="flex items-center gap-2 cursor-pointer select-none rounded-lg border border-cyan-300/20 bg-cyan-300/[0.07] px-2.5 py-1 text-cyan-200 transition hover:bg-cyan-300/12">
-                  <input
-                    type="checkbox"
-                    checked={showOnlyReal}
-                    onChange={(e) => setShowOnlyReal(e.target.checked)}
-                    className="sr-only peer"
-                  />
-                  <div className="relative w-7 h-4 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-cyan-400"></div>
-                  <span className="text-[11px] font-medium tracking-tight">Solo reales (Supabase)</span>
-                </label>
-                <div className="flex flex-wrap gap-1.5">
-                  <StatusBadge tone="cyan">Mercury-ready</StatusBadge>
-                  <StatusBadge tone="cyan">Supabase-ready</StatusBadge>
-                  <StatusBadge tone={ticketSource === "supabase" ? "green" : "amber"}>
-                    {ticketSource === "supabase" ? `${realTickets.length} tickets reales` : "tickets demo"}
-                  </StatusBadge>
-                  <StatusBadge tone="slate">ITIL aligned</StatusBadge>
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold" style={{ border: "1px solid rgba(16,185,129,0.2)", background: "rgba(16,185,129,0.07)", color: "#6EE7B7" }}>
+                  <Zap size={10} />
+                  ITIL v4
                 </div>
+                <StatusBadge tone={ticketSource === "supabase" ? "green" : "amber"}>
+                  {ticketSource === "supabase" ? `${realTickets.length} tickets reales` : "modo demo"}
+                </StatusBadge>
+                <StatusBadge tone="slate">Supabase</StatusBadge>
               </div>
             </div>
           </header>
 
-          <div className="space-y-2.5 p-3">
+          <div className="space-y-3 p-4">
             {showOnlyReal && cases.length === 0 ? (
-              <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 bg-white/[0.02] p-12 text-center my-10">
-                <div className="grid size-14 place-items-center rounded-2xl bg-cyan-400/10 text-cyan-200">
-                  <Ticket size={28} />
+              <div
+                className="flex flex-col items-center justify-center rounded-2xl p-12 text-center my-10"
+                style={{ border: "1px dashed rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.02)" }}
+              >
+                <div className="grid size-14 place-items-center rounded-2xl" style={{ background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.2)" }}>
+                  <Ticket size={28} style={{ color: "#FCD34D" }} />
                 </div>
-                <h3 className="mt-4 text-base font-semibold text-white">No hay tickets reales en Supabase</h3>
-                <p className="mt-2 max-w-sm text-slate-400">
-                  Aún no se han registrado casos reales en la base de datos de Supabase. Abre la interfaz del chatbot, inicia un caso y completa o resuelve el diagnóstico para poblar la base de datos en tiempo real.
+                <h3 className="mt-4 text-base font-bold" style={{ color: "#EEF2FF" }}>Sin tickets reales en Supabase</h3>
+                <p className="mt-2 max-w-sm" style={{ color: "#8DA0C4" }}>
+                  Aún no hay casos reales registrados. Inicia una conversación en el chatbot y completa el diagnóstico para poblar la base de datos.
                 </p>
               </div>
             ) : (
@@ -516,9 +627,9 @@ function AdminWorkspace() {
                 )}
                 {activeSection === "incidents" && (
                   <div className="space-y-3">
-                    <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4">
-                      <h2 className="text-base font-semibold text-white">Gestión de Incidentes (Incident Management)</h2>
-                      <p className="text-slate-400 mt-1">Monitoreo técnico de fallas activas de hardware, sistemas operativos, VPN y conectividad.</p>
+                    <div className="rounded-xl p-4" style={{ border: "1px solid rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.02)" }}>
+                      <h2 className="text-base font-bold" style={{ color: "#EEF2FF" }}>Gestión de Incidentes</h2>
+                      <p className="mt-1" style={{ color: "#8DA0C4" }}>Monitoreo técnico de fallas activas de hardware, sistemas operativos, VPN y conectividad.</p>
                     </div>
                     <div className="grid gap-2.5 xl:grid-cols-[1fr_3fr]">
                       <DomainCard id="incidents-detail" title="Métricas de Incidentes" metrics={operationalModel.incident} />
@@ -533,9 +644,9 @@ function AdminWorkspace() {
                 )}
                 {activeSection === "requests" && (
                   <div className="space-y-3">
-                    <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4">
-                      <h2 className="text-base font-semibold text-white">Gestión de Requerimientos (Request Management)</h2>
-                      <p className="text-slate-400 mt-1">Seguimiento de solicitudes de instalación de software autorizado, compras de licencias y aprovisionamiento base.</p>
+                    <div className="rounded-xl p-4" style={{ border: "1px solid rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.02)" }}>
+                      <h2 className="text-base font-bold" style={{ color: "#EEF2FF" }}>Gestión de Requerimientos</h2>
+                      <p className="mt-1" style={{ color: "#8DA0C4" }}>Seguimiento de solicitudes de instalación de software autorizado, compras de licencias y aprovisionamiento base.</p>
                     </div>
                     <div className="grid gap-2.5 xl:grid-cols-[1fr_3fr]">
                       <DomainCard id="requests-detail" title="Métricas de Requerimientos" metrics={operationalModel.request} />
@@ -550,9 +661,9 @@ function AdminWorkspace() {
                 )}
                 {activeSection === "access" && (
                   <div className="space-y-3">
-                    <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4">
-                      <h2 className="text-base font-semibold text-white">Gestión de Accesos e Identidades (Access Management)</h2>
-                      <p className="text-slate-400 mt-1">Aprobación y provisión de accesos de red, reseteo de contraseñas, onboarding y carpetas compartidas.</p>
+                    <div className="rounded-xl p-4" style={{ border: "1px solid rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.02)" }}>
+                      <h2 className="text-base font-bold" style={{ color: "#EEF2FF" }}>Gestión de Accesos e Identidades</h2>
+                      <p className="mt-1" style={{ color: "#8DA0C4" }}>Aprobación y provisión de accesos de red, reseteo de contraseñas, onboarding y carpetas compartidas.</p>
                     </div>
                     <div className="grid gap-2.5 xl:grid-cols-[1fr_3fr]">
                       <DomainCard id="access-detail" title="Métricas de Accesos" metrics={operationalModel.access} />
@@ -567,9 +678,9 @@ function AdminWorkspace() {
                 )}
                 {activeSection === "knowledge" && (
                   <div className="space-y-3">
-                    <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4">
-                      <h2 className="text-base font-semibold text-white">Efectividad de Base de Conocimiento (Knowledge Base)</h2>
-                      <p className="text-slate-400 mt-1">Efectividad en el uso de artículos L2 y desvío autónomo de casos por el bot.</p>
+                    <div className="rounded-xl p-4" style={{ border: "1px solid rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.02)" }}>
+                      <h2 className="text-base font-bold" style={{ color: "#EEF2FF" }}>Base de Conocimiento</h2>
+                      <p className="mt-1" style={{ color: "#8DA0C4" }}>Efectividad en el uso de artículos L2 y desvío autónomo de casos por el bot.</p>
                     </div>
                     <div className="grid gap-2.5 xl:grid-cols-[1fr_3fr]">
                       <DomainCard id="knowledge-detail" title="Resumen de Base de Conocimiento" metrics={operationalModel.knowledge} />
@@ -624,24 +735,22 @@ function AdminWorkspace() {
                   </div>
                 )}
                 {activeSection === "configuration" && (
-                  <section id="configuration" className="rounded-xl border border-white/10 bg-white/[0.035] px-4 py-3.5 space-y-4">
+                  <section id="configuration" className="rounded-2xl px-5 py-4 space-y-4" style={{ border: "1px solid rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.025)" }}>
                     <div>
-                      <h2 className="text-base font-semibold text-white">Gobernanza y Configuración (Governance)</h2>
-                      <p className="mt-1 text-[11px] text-slate-500">Detalles de configuración de la mesa de soporte inteligente en base al modelo ITIL v4 de SONDA.</p>
+                      <h2 className="text-base font-bold" style={{ color: "#EEF2FF" }}>Gobernanza y Configuración</h2>
+                      <p className="mt-1 text-[11px]" style={{ color: "#4A6091" }}>Configuración de la mesa de soporte inteligente bajo el modelo ITIL v4 de SONDA.</p>
                     </div>
                     <div className="grid gap-3 sm:grid-cols-3">
-                      <div className="rounded-lg bg-slate-900/60 p-3 border border-white/5">
-                        <p className="text-cyan-200 font-semibold text-xs">Taxonomía</p>
-                        <p className="text-slate-400 mt-1 leading-4">Categorización inteligente automatizada con 8 intents estándar y más de 30 categorías de servicio.</p>
-                      </div>
-                      <div className="rounded-lg bg-slate-900/60 p-3 border border-white/5">
-                        <p className="text-cyan-200 font-semibold text-xs">SLA y Prioridades</p>
-                        <p className="text-slate-400 mt-1 leading-4">Cálculo de severidad autónomo (P1 a P4) correlacionando impacto operacional y urgencia reportada por el usuario.</p>
-                      </div>
-                      <div className="rounded-lg bg-slate-900/60 p-3 border border-white/5">
-                        <p className="text-cyan-200 font-semibold text-xs">Base de Datos</p>
-                        <p className="text-slate-400 mt-1 leading-4">Conectado en tiempo real a Supabase para auditorías operativas rápidas y analítica sin latencia.</p>
-                      </div>
+                      {[
+                        { title: "Taxonomía ITIL", body: "Categorización inteligente automatizada con 8 intents estándar y más de 30 categorías de servicio." },
+                        { title: "SLA y Prioridades", body: "Cálculo de severidad autónomo (P1-P4) correlacionando impacto operacional y urgencia reportada." },
+                        { title: "Base de Datos", body: "Conectado en tiempo real a Supabase para auditorías operativas rápidas y analítica sin latencia." },
+                      ].map((card) => (
+                        <div key={card.title} className="rounded-xl p-3.5" style={{ background: "rgba(7,14,28,0.5)", border: "1px solid rgba(245,158,11,0.12)" }}>
+                          <p className="text-xs font-bold" style={{ color: "#FCD34D" }}>{card.title}</p>
+                          <p className="mt-2 leading-5" style={{ color: "#8DA0C4" }}>{card.body}</p>
+                        </div>
+                      ))}
                     </div>
                   </section>
                 )}
@@ -654,50 +763,102 @@ function AdminWorkspace() {
   );
 }
 
+const PRIORITY_DOT: Record<string, string> = {
+  P1: "#EF4444",
+  P2: "#F97316",
+  P3: "#F59E0B",
+  P4: "#10B981",
+};
+
+function PriorityDot({ priority }: { priority: string }) {
+  const color = PRIORITY_DOT[priority] ?? "#8DA0C4";
+  return (
+    <span className="inline-flex items-center gap-1.5">
+      <span className="size-2 rounded-full shrink-0" style={{ background: color, boxShadow: `0 0 5px ${color}` }} />
+      <span className="font-data font-semibold" style={{ color }}>{priority}</span>
+    </span>
+  );
+}
+
 function OperationalTable({ cases }: { cases: OperationalCase[] }) {
   return (
-    <article className="overflow-hidden rounded-xl border border-white/10 bg-white/[0.04] shadow-sm shadow-black/10">
-      <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
-        <h2 className="flex items-center gap-2 text-[14px] font-semibold text-white">
-          <CheckCircle2 size={15} className="text-cyan-200/80" aria-hidden />
-          Lista de casos analizados
+    <article
+      className="overflow-hidden rounded-2xl shadow-sm"
+      style={{ border: "1px solid rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.025)" }}
+    >
+      <div
+        className="flex items-center justify-between px-4 py-3"
+        style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}
+      >
+        <h2 className="flex items-center gap-2 text-[13px] font-bold" style={{ color: "#EEF2FF" }}>
+          <CheckCircle2 size={14} style={{ color: "#10B981" }} aria-hidden />
+          Bitácora de casos
         </h2>
-        <span className="text-[11px] text-slate-500">actualización operacional en vivo</span>
+        <span className="text-[11px] font-medium" style={{ color: "#4A6091" }}>actualización en vivo</span>
       </div>
       <div className="thin-scrollbar max-h-[480px] overflow-auto">
         <table className="w-full min-w-[1040px] border-collapse text-left text-xs">
-          <thead className="sticky top-0 bg-[#0b1727] text-slate-500">
+          <thead className="sticky top-0" style={{ background: "#0A1220" }}>
             <tr>
-              {["Ticket ID", "Usuario", "Tipo", "Categoría", "Prioridad", "Estado", "Soporte (Asignado)", "Creado", "Duración", "Escalado", "SLA"].map(
+              {["Ticket ID", "Usuario", "Tipo", "Categoría", "Prioridad", "Estado", "Asignado a", "Creado", "Duración", "Escalado", "SLA"].map(
                 (header) => (
-                  <th key={header} className="px-3 py-2.5 font-medium">
+                  <th
+                    key={header}
+                    className="px-3 py-2.5 font-bold text-[11px] uppercase tracking-[0.07em]"
+                    style={{ color: "#4A6091" }}
+                  >
                     {header}
                   </th>
                 ),
               )}
             </tr>
           </thead>
-          <tbody className="divide-y divide-white/8">
-            {cases.map((item) => (
-              <tr key={item.id} className="transition hover:bg-white/[0.035]">
-                <td className="px-3 py-2.5 font-mono font-semibold text-cyan-100">{item.id}</td>
-                <td className="px-3 py-2.5 font-medium text-white">{item.user_name}</td>
-                <td className="px-3 py-2.5 text-slate-300">{item.issue_type.replaceAll("_", " ")}</td>
-                <td className="px-3 py-2.5 text-slate-300">{item.category}</td>
+          <tbody>
+            {cases.map((item, i) => (
+              <tr
+                key={item.id}
+                className="transition-colors duration-100"
+                style={{
+                  background: i % 2 === 0 ? "transparent" : "rgba(255,255,255,0.015)",
+                  borderTop: "1px solid rgba(255,255,255,0.04)",
+                }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(245,158,11,0.05)"; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = i % 2 === 0 ? "transparent" : "rgba(255,255,255,0.015)"; }}
+              >
+                <td className="px-3 py-2.5 font-data font-semibold" style={{ color: "#FCD34D" }}>{item.id}</td>
+                <td className="px-3 py-2.5 font-semibold" style={{ color: "#EEF2FF" }}>{item.user_name || "—"}</td>
+                <td className="px-3 py-2.5" style={{ color: "#8DA0C4" }}>{item.issue_type.replaceAll("_", " ")}</td>
+                <td className="px-3 py-2.5" style={{ color: "#8DA0C4" }}>{item.category}</td>
+                <td className="px-3 py-2.5"><PriorityDot priority={item.priority} /></td>
                 <td className="px-3 py-2.5">
-                  <StatusBadge tone={item.priority === "P1" ? "red" : item.priority === "P2" ? "amber" : "cyan"}>
-                    {item.priority}
-                  </StatusBadge>
+                  <span
+                    className="inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold"
+                    style={{
+                      background: item.status === "Resuelto" ? "rgba(16,185,129,0.12)" : item.status === "Escalado" ? "rgba(139,92,246,0.12)" : "rgba(59,130,246,0.12)",
+                      color: item.status === "Resuelto" ? "#6EE7B7" : item.status === "Escalado" ? "#C4B5FD" : "#93C5FD",
+                      border: `1px solid ${item.status === "Resuelto" ? "rgba(16,185,129,0.25)" : item.status === "Escalado" ? "rgba(139,92,246,0.25)" : "rgba(59,130,246,0.25)"}`,
+                    }}
+                  >
+                    {item.status}
+                  </span>
                 </td>
-                <td className="px-3 py-2.5 text-slate-300">{item.status}</td>
-                <td className="px-3 py-2.5 text-slate-300">{item.assigned_technician}</td>
-                <td className="px-3 py-2.5 text-slate-400">{formatDate(item.created_at)}</td>
-                <td className="px-3 py-2.5 text-slate-300">{item.duration_minutes} min</td>
-                <td className="px-3 py-2.5 text-slate-300">{item.escalated ? "Sí" : "No"}</td>
+                <td className="px-3 py-2.5" style={{ color: "#8DA0C4" }}>{item.assigned_technician}</td>
+                <td className="px-3 py-2.5 font-data" style={{ color: "#4A6091" }}>{formatDate(item.created_at)}</td>
+                <td className="px-3 py-2.5" style={{ color: "#8DA0C4" }}>{item.duration_minutes} min</td>
                 <td className="px-3 py-2.5">
-                  <StatusBadge tone={item.duration_minutes > item.sla_minutes ? "red" : "green"}>
-                    {item.duration_minutes > item.sla_minutes ? "Breach" : "OK"}
-                  </StatusBadge>
+                  <span style={{ color: item.escalated ? "#C4B5FD" : "#4A6091" }}>{item.escalated ? "Sí" : "No"}</span>
+                </td>
+                <td className="px-3 py-2.5">
+                  <span
+                    className="inline-flex rounded-full px-2 py-0.5 text-[11px] font-bold"
+                    style={{
+                      background: item.duration_minutes > item.sla_minutes ? "rgba(239,68,68,0.12)" : "rgba(16,185,129,0.12)",
+                      color: item.duration_minutes > item.sla_minutes ? "#FCA5A5" : "#6EE7B7",
+                      border: `1px solid ${item.duration_minutes > item.sla_minutes ? "rgba(239,68,68,0.25)" : "rgba(16,185,129,0.25)"}`,
+                    }}
+                  >
+                    {item.duration_minutes > item.sla_minutes ? "Incumplido" : "OK"}
+                  </span>
                 </td>
               </tr>
             ))}
@@ -766,31 +927,51 @@ function averageDuration(items: OperationalCase[]) {
 }
 
 function ExecutiveKpiCard({ kpi }: { kpi: { label: string; value: string; meta: string; tone: string } }) {
-  const tone =
-    kpi.tone === "warning"
-      ? "border-amber-300/16 bg-amber-300/[0.045]"
-      : kpi.tone === "positive"
-        ? "border-cyan-300/16 bg-cyan-300/[0.045]"
-        : "border-white/10 bg-white/[0.04]";
+  const borderColor = kpi.tone === "warning"
+    ? "rgba(245,158,11,0.22)"
+    : kpi.tone === "positive"
+      ? "rgba(16,185,129,0.2)"
+      : "rgba(255,255,255,0.07)";
+  const bgColor = kpi.tone === "warning"
+    ? "rgba(245,158,11,0.06)"
+    : kpi.tone === "positive"
+      ? "rgba(16,185,129,0.05)"
+      : "rgba(255,255,255,0.03)";
+  const valueColor = kpi.tone === "warning"
+    ? "#FCD34D"
+    : kpi.tone === "positive"
+      ? "#6EE7B7"
+      : "#EEF2FF";
 
   return (
-    <article className={`rounded-lg border px-2.5 py-2 shadow-sm shadow-black/10 ${tone}`}>
-      <p className="text-[11px] font-medium text-slate-400">{kpi.label}</p>
-      <p className="mt-1 text-[20px] font-semibold leading-6 tracking-[-0.03em] text-white">{kpi.value}</p>
-      <p className="mt-1 text-[11px] text-slate-500">{kpi.meta}</p>
+    <article
+      className="rounded-xl px-3 py-2.5 transition-all duration-200 hover:scale-[1.02]"
+      style={{ border: `1px solid ${borderColor}`, background: bgColor, boxShadow: "0 4px 16px rgba(4,8,20,0.3)" }}
+    >
+      <p className="text-[10.5px] font-medium uppercase tracking-[0.07em]" style={{ color: "#4A6091" }}>{kpi.label}</p>
+      <p className="mt-1.5 text-[22px] font-bold leading-6 tracking-[-0.03em]" style={{ color: valueColor }}>{kpi.value}</p>
+      <p className="mt-1 text-[11px]" style={{ color: "#4A6091" }}>{kpi.meta}</p>
     </article>
   );
 }
 
 function DomainCard({ id, title, metrics }: { id: string; title: string; metrics: Array<{ label: string; value: string }> }) {
   return (
-    <article id={id} className="scroll-mt-4 rounded-lg border border-white/10 bg-white/[0.035] p-2.5">
-      <h2 className="text-[13px] font-semibold text-white">{title}</h2>
-      <div className="mt-2 grid grid-cols-2 gap-1.5">
+    <article
+      id={id}
+      className="scroll-mt-4 rounded-xl p-3"
+      style={{ border: "1px solid rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.025)" }}
+    >
+      <h2 className="text-[13px] font-bold" style={{ color: "#EEF2FF" }}>{title}</h2>
+      <div className="mt-2.5 grid grid-cols-2 gap-2">
         {metrics.map((metric) => (
-          <div key={metric.label} className="rounded-md border border-white/8 bg-slate-950/18 px-2 py-1.5">
-            <p className="text-[10px] uppercase tracking-[0.08em] text-slate-500">{metric.label}</p>
-            <p className="mt-0.5 text-[15px] font-semibold leading-5 text-slate-100">{metric.value}</p>
+          <div
+            key={metric.label}
+            className="rounded-xl px-2.5 py-2"
+            style={{ border: "1px solid rgba(255,255,255,0.06)", background: "rgba(7,14,28,0.4)" }}
+          >
+            <p className="text-[10px] uppercase tracking-[0.08em] font-bold" style={{ color: "#4A6091" }}>{metric.label}</p>
+            <p className="mt-1 text-[16px] font-bold leading-5" style={{ color: "#EEF2FF" }}>{metric.value}</p>
           </div>
         ))}
       </div>
@@ -800,12 +981,18 @@ function DomainCard({ id, title, metrics }: { id: string; title: string; metrics
 
 function Panel({ title, icon: Icon, children }: { title: string; icon: typeof Activity; children: ReactNode }) {
   return (
-    <article className="rounded-lg border border-white/10 bg-white/[0.04] p-3 shadow-sm shadow-black/10">
-      <div className="mb-2.5 flex items-center justify-between gap-3">
-        <h2 className="flex items-center gap-2 text-[13px] font-semibold text-white">
-          <Icon size={15} className="text-cyan-200/80" aria-hidden />
-          {title}
-        </h2>
+    <article
+      className="rounded-xl p-3.5"
+      style={{ border: "1px solid rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.025)" }}
+    >
+      <div className="mb-3 flex items-center gap-2">
+        <span
+          className="grid size-6 place-items-center rounded-lg"
+          style={{ background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.18)" }}
+        >
+          <Icon size={13} style={{ color: "#F59E0B" }} aria-hidden />
+        </span>
+        <h2 className="text-[13px] font-bold" style={{ color: "#EEF2FF" }}>{title}</h2>
       </div>
       {children}
     </article>
@@ -813,18 +1000,21 @@ function Panel({ title, icon: Icon, children }: { title: string; icon: typeof Ac
 }
 
 function LineBars({ items }: { items: ChartPoint[] }) {
-  const max = Math.max(...items.map((item) => item.value));
+  const max = Math.max(...items.map((item) => item.value), 1);
   return (
-    <div className="flex h-32 items-end gap-1.5">
+    <div className="flex h-32 items-end gap-1">
       {items.map((item) => (
-        <div key={item.label} className="flex flex-1 flex-col items-center gap-1.5">
-          <div className="flex h-24 w-full items-end rounded-md bg-white/[0.04] p-1">
+        <div key={item.label} className="flex flex-1 flex-col items-center gap-1">
+          <div className="flex h-24 w-full items-end rounded-lg p-0.5" style={{ background: "rgba(255,255,255,0.04)" }}>
             <div
-              className="w-full rounded-md bg-gradient-to-t from-cyan-400/90 to-sky-200/90"
-              style={{ height: `${Math.max((item.value / max) * 100, 10)}%` }}
+              className="w-full rounded-md transition-all duration-500"
+              style={{
+                height: `${Math.max((item.value / max) * 100, 8)}%`,
+                background: "linear-gradient(to top, #F59E0B, rgba(245,158,11,0.3))",
+              }}
             />
           </div>
-          <span className="text-[10px] text-slate-500">{item.label}</span>
+          <span className="text-[9px] font-medium" style={{ color: "#4A6091" }}>{item.label}</span>
         </div>
       ))}
     </div>
@@ -832,17 +1022,20 @@ function LineBars({ items }: { items: ChartPoint[] }) {
 }
 
 function HorizontalBars({ items, compact = false }: { items: ChartPoint[]; compact?: boolean }) {
-  const max = Math.max(...items.map((item) => item.value));
+  const max = Math.max(...items.map((item) => item.value), 1);
   return (
-    <div className="space-y-2.5">
+    <div className="space-y-2">
       {items.map((item) => (
         <div key={item.label}>
           <div className="mb-1 flex justify-between gap-3 text-xs">
-            <span className="truncate text-slate-300">{item.label.replaceAll("_", " ")}</span>
-            <span className="font-medium text-white">{item.value}</span>
+            <span className="truncate" style={{ color: "#8DA0C4" }}>{item.label.replaceAll("_", " ")}</span>
+            <span className="font-bold" style={{ color: "#EEF2FF" }}>{item.value}</span>
           </div>
-          <div className={`overflow-hidden rounded-full bg-white/[0.075] ${compact ? "h-1" : "h-1.5"}`}>
-            <div className="h-full rounded-full bg-cyan-300/90" style={{ width: `${Math.max((item.value / max) * 100, 8)}%` }} />
+          <div className={`overflow-hidden rounded-full ${compact ? "h-1" : "h-1.5"}`} style={{ background: "rgba(255,255,255,0.07)" }}>
+            <div
+              className="h-full rounded-full transition-all duration-500"
+              style={{ width: `${Math.max((item.value / max) * 100, 6)}%`, background: "linear-gradient(90deg, #1B3D8C, #F59E0B)" }}
+            />
           </div>
         </div>
       ))}
@@ -872,26 +1065,32 @@ function FunnelBars({ items }: { items: ChartPoint[] }) {
 }
 
 function PriorityStack({ items }: { items: ChartPoint[] }) {
-  const total = items.reduce((sum, item) => sum + item.value, 0);
+  const total = Math.max(items.reduce((sum, item) => sum + item.value, 0), 1);
   const colors: Record<string, string> = {
-    P1: "bg-rose-400",
-    P2: "bg-amber-300",
-    P3: "bg-cyan-300",
-    P4: "bg-emerald-300",
+    P1: "#EF4444",
+    P2: "#F97316",
+    P3: "#F59E0B",
+    P4: "#10B981",
   };
 
   return (
     <div>
-      <div className="flex h-3 overflow-hidden rounded-full bg-white/[0.075]">
+      <div className="flex h-2.5 overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.06)" }}>
         {items.map((item) => (
-          <div key={item.label} className={`${colors[item.label] ?? "bg-slate-400"} opacity-90`} style={{ width: `${(item.value / total) * 100}%` }} />
+          <div
+            key={item.label}
+            style={{ width: `${(item.value / total) * 100}%`, background: colors[item.label] ?? "#8DA0C4", opacity: 0.88 }}
+          />
         ))}
       </div>
       <div className="mt-3 grid grid-cols-2 gap-2">
         {items.map((item) => (
-          <div key={item.label} className="rounded-md bg-white/[0.04] p-2">
-            <p className="text-xs text-slate-400">{item.label}</p>
-            <p className="mt-1 text-base font-semibold text-white">{item.value}</p>
+          <div key={item.label} className="rounded-xl p-2.5" style={{ background: "rgba(255,255,255,0.03)", border: `1px solid ${colors[item.label]}22` }}>
+            <div className="flex items-center gap-1.5">
+              <span className="size-2 rounded-full" style={{ background: colors[item.label] ?? "#8DA0C4", boxShadow: `0 0 5px ${colors[item.label]}` }} />
+              <p className="text-xs font-bold" style={{ color: colors[item.label] ?? "#8DA0C4" }}>{item.label}</p>
+            </div>
+            <p className="mt-1 text-[18px] font-bold" style={{ color: "#EEF2FF" }}>{item.value}</p>
           </div>
         ))}
       </div>
@@ -900,17 +1099,20 @@ function PriorityStack({ items }: { items: ChartPoint[] }) {
 }
 
 function Heatmap({ items }: { items: ChartPoint[] }) {
-  const max = Math.max(...items.map((item) => item.value));
+  const max = Math.max(...items.map((item) => item.value), 1);
   return (
-    <div className="grid grid-cols-4 gap-1.5">
+    <div className="grid grid-cols-4 gap-1">
       {items.map((item) => (
         <div
           key={item.label}
-          className="rounded-md border border-white/8 px-2 py-2 text-center"
-          style={{ backgroundColor: `rgba(34, 211, 238, ${0.045 + (item.value / max) * 0.22})` }}
+          className="rounded-xl px-2 py-2 text-center"
+          style={{
+            background: `rgba(245,158,11,${0.04 + (item.value / max) * 0.2})`,
+            border: `1px solid rgba(245,158,11,${0.08 + (item.value / max) * 0.18})`,
+          }}
         >
-          <p className="text-[11px] font-medium text-white">{item.label}</p>
-          <p className="mt-0.5 text-[10px] text-slate-400">{item.value}</p>
+          <p className="text-[10.5px] font-semibold" style={{ color: "#EEF2FF" }}>{item.label}</p>
+          <p className="mt-0.5 text-[11px] font-bold" style={{ color: item.value > max * 0.6 ? "#F59E0B" : "#4A6091" }}>{item.value}</p>
         </div>
       ))}
     </div>
@@ -919,11 +1121,20 @@ function Heatmap({ items }: { items: ChartPoint[] }) {
 
 function KnowledgeList({ items }: { items: ChartPoint[] }) {
   return (
-    <div className="space-y-2.5">
+    <div className="space-y-2">
       {items.map((item) => (
-        <div key={item.label} className="flex items-start justify-between gap-3 rounded-lg bg-white/[0.04] p-2.5">
-          <p className="text-xs leading-5 text-slate-300">{item.label}</p>
-          <span className="rounded-full bg-cyan-300/10 px-2 py-0.5 text-[11px] font-semibold text-cyan-100">{item.value}</span>
+        <div
+          key={item.label}
+          className="flex items-start justify-between gap-3 rounded-xl p-2.5"
+          style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
+        >
+          <p className="text-xs leading-5" style={{ color: "#8DA0C4" }}>{item.label}</p>
+          <span
+            className="rounded-full px-2 py-0.5 text-[11px] font-bold shrink-0"
+            style={{ background: "rgba(245,158,11,0.12)", color: "#FCD34D", border: "1px solid rgba(245,158,11,0.22)" }}
+          >
+            {item.value}
+          </span>
         </div>
       ))}
     </div>
@@ -932,15 +1143,19 @@ function KnowledgeList({ items }: { items: ChartPoint[] }) {
 
 function EscalatedList({ cases }: { cases: OperationalCase[] }) {
   return (
-    <div className="space-y-2.5">
+    <div className="space-y-2">
       {cases.map((item) => (
-        <div key={item.id} className="rounded-lg border border-white/10 bg-white/[0.035] p-2.5">
+        <div
+          key={item.id}
+          className="rounded-xl p-2.5"
+          style={{ border: "1px solid rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.025)" }}
+        >
           <div className="flex items-center justify-between gap-3">
-            <p className="font-mono text-xs font-semibold text-cyan-100">{item.id}</p>
-            <StatusBadge tone={item.priority === "P1" ? "red" : "amber"}>{item.priority}</StatusBadge>
+            <p className="font-data text-xs font-semibold" style={{ color: "#FCD34D" }}>{item.id}</p>
+            <PriorityDot priority={item.priority} />
           </div>
-          <p className="mt-1.5 text-[13px] font-medium text-white">{item.category}</p>
-          <p className="mt-1 text-xs text-slate-400">{item.assigned_technician}</p>
+          <p className="mt-1.5 text-[13px] font-semibold" style={{ color: "#EEF2FF" }}>{item.category}</p>
+          <p className="mt-1 text-xs" style={{ color: "#4A6091" }}>{item.assigned_technician}</p>
         </div>
       ))}
     </div>
