@@ -172,56 +172,62 @@ function AdminWorkspace() {
 
   return (
     <main className="min-h-screen bg-[#07111f] text-slate-100">
-      <div className="grid min-h-screen lg:grid-cols-[260px_1fr]">
-        <aside className="border-b border-white/10 bg-[#0a1525] p-5 lg:border-b-0 lg:border-r">
-          <BrandMark variant="dark" />
-          <nav className="mt-10 grid gap-1">
+      <div className="grid min-h-screen lg:grid-cols-[228px_1fr]">
+        <aside className="border-b border-white/10 bg-[#0a1525] p-4 lg:border-b-0 lg:border-r">
+          <div className="flex items-center gap-2.5">
+            <BrandMark compact variant="dark" />
+            <div className="min-w-0">
+              <p className="text-sm font-semibold leading-5 text-white">Soporte ITSM</p>
+              <p className="truncate text-[11px] text-slate-500">SONDA · Geimser</p>
+            </div>
+          </div>
+          <nav className="mt-8 grid gap-1">
             {navItems.map((item, index) => (
               <button
                 key={item.label}
-                className={`flex h-10 items-center gap-3 rounded-xl px-3 text-sm font-medium transition ${
-                  index === 2 ? "bg-cyan-300/12 text-cyan-100" : "text-slate-400 hover:bg-white/5 hover:text-white"
+                className={`flex h-9 items-center gap-2.5 rounded-lg px-2.5 text-[13px] font-medium transition ${
+                  index === 2 ? "bg-cyan-300/10 text-cyan-100 ring-1 ring-cyan-300/15" : "text-slate-400 hover:bg-white/[0.045] hover:text-white"
                 }`}
               >
-                <item.icon size={17} aria-hidden />
+                <item.icon size={15} aria-hidden />
                 {item.label}
               </button>
             ))}
           </nav>
-          <div className="mt-10 rounded-2xl border border-cyan-300/20 bg-cyan-300/8 p-4">
-            <p className="text-xs font-medium uppercase tracking-[0.14em] text-cyan-200">Gobierno</p>
-            <p className="mt-3 text-sm leading-6 text-slate-300">
+          <div className="mt-8 rounded-xl border border-white/10 bg-white/[0.035] p-3">
+            <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-cyan-200/80">Gobierno</p>
+            <p className="mt-2 text-xs leading-5 text-slate-400">
               Trazabilidad activa por conversación, decisión, clasificación y grupo resolutor.
             </p>
           </div>
         </aside>
 
         <section className="min-w-0">
-          <header className="border-b border-white/10 bg-[#07111f]/92 px-5 py-5 backdrop-blur-xl lg:px-8">
-            <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+          <header className="border-b border-white/10 bg-[#07111f]/92 px-5 py-4 backdrop-blur-xl lg:px-6">
+            <div className="flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between">
               <div>
-                <p className="text-xs font-medium uppercase tracking-[0.16em] text-cyan-200">Operations Command Center</p>
-                <h1 className="mt-2 text-2xl font-semibold tracking-[-0.025em] text-white">Panel ejecutivo ITSM</h1>
-                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">
+                <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-cyan-200/80">Operations Command Center</p>
+                <h1 className="mt-1.5 text-[28px] font-semibold leading-8 tracking-[-0.025em] text-white">Panel ejecutivo ITSM</h1>
+                <p className="mt-1.5 max-w-2xl text-[13px] leading-5 text-slate-400">
                   Monitoreo de conversaciones, tickets, resolución autónoma, escalamiento humano y uso de conocimiento.
                 </p>
               </div>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-1.5">
                 <StatusBadge tone="cyan">Mercury-ready</StatusBadge>
-                <StatusBadge tone="green">Supabase-ready</StatusBadge>
+                <StatusBadge tone="cyan">Supabase-ready</StatusBadge>
                 <StatusBadge tone="slate">ITIL aligned</StatusBadge>
               </div>
             </div>
           </header>
 
-          <div className="space-y-5 p-5 lg:p-8">
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="space-y-3.5 p-4 lg:p-5">
+            <div className="grid gap-2.5 sm:grid-cols-2 xl:grid-cols-4">
               {kpis.map((kpi) => (
                 <AdminKpiCard key={kpi.label} kpi={kpi} />
               ))}
             </div>
 
-            <div className="grid gap-5 xl:grid-cols-[1.2fr_0.8fr_0.8fr]">
+            <div className="grid gap-3.5 xl:grid-cols-[1.18fr_0.82fr_0.82fr]">
               <Panel title="Volumen por día" icon={Activity}>
                 <LineBars items={byDay} />
               </Panel>
@@ -233,7 +239,7 @@ function AdminWorkspace() {
               </Panel>
             </div>
 
-            <div className="grid gap-5 xl:grid-cols-4">
+            <div className="grid gap-3.5 xl:grid-cols-4">
               <Panel title="Incidentes por tipo" icon={Gauge}>
                 <HorizontalBars items={byType} />
               </Panel>
@@ -248,7 +254,7 @@ function AdminWorkspace() {
               </Panel>
             </div>
 
-            <div className="grid gap-5 xl:grid-cols-[0.78fr_1.22fr]">
+            <div className="grid gap-3.5 xl:grid-cols-[0.72fr_1.28fr]">
               <Panel title="Casos escalados" icon={Ticket}>
                 <EscalatedList cases={escalated} />
               </Panel>
@@ -264,26 +270,26 @@ function AdminWorkspace() {
 function AdminKpiCard({ kpi }: { kpi: AdminKpi }) {
   const tone =
     kpi.emphasis === "critical"
-      ? "border-rose-300/25 bg-rose-400/8 text-rose-100"
+      ? "border-rose-300/16 bg-rose-300/[0.045] text-rose-100"
       : kpi.emphasis === "positive"
-        ? "border-emerald-300/25 bg-emerald-400/8 text-emerald-100"
-        : "border-white/10 bg-white/[0.055] text-white";
+        ? "border-cyan-300/16 bg-cyan-300/[0.045] text-cyan-50"
+        : "border-white/10 bg-white/[0.04] text-white";
 
   return (
-    <article className={`rounded-2xl border p-4 shadow-xl shadow-black/10 ${tone}`}>
-      <p className="text-xs font-medium text-slate-400">{kpi.label}</p>
-      <p className="mt-3 text-2xl font-semibold tracking-[-0.03em]">{kpi.value}</p>
-      <p className="mt-3 text-xs text-slate-400">{kpi.delta}</p>
+    <article className={`rounded-xl border p-2.5 shadow-sm shadow-black/10 ${tone}`}>
+      <p className="text-[12px] font-medium text-slate-400">{kpi.label}</p>
+      <p className="mt-1.5 text-[26px] font-semibold leading-7 tracking-[-0.03em]">{kpi.value}</p>
+      <p className="mt-1.5 text-[12px] text-slate-500">{kpi.delta}</p>
     </article>
   );
 }
 
 function Panel({ title, icon: Icon, children }: { title: string; icon: typeof Activity; children: ReactNode }) {
   return (
-    <article className="rounded-2xl border border-white/10 bg-white/[0.055] p-5 shadow-xl shadow-black/10">
-      <div className="mb-5 flex items-center justify-between gap-3">
-        <h2 className="flex items-center gap-2 text-sm font-semibold text-white">
-          <Icon size={17} className="text-cyan-200" aria-hidden />
+    <article className="rounded-xl border border-white/10 bg-white/[0.04] p-3.5 shadow-sm shadow-black/10">
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <h2 className="flex items-center gap-2 text-[14px] font-semibold text-white">
+          <Icon size={15} className="text-cyan-200/80" aria-hidden />
           {title}
         </h2>
       </div>
@@ -295,16 +301,16 @@ function Panel({ title, icon: Icon, children }: { title: string; icon: typeof Ac
 function LineBars({ items }: { items: ChartPoint[] }) {
   const max = Math.max(...items.map((item) => item.value));
   return (
-    <div className="flex h-52 items-end gap-2">
+    <div className="flex h-40 items-end gap-1.5">
       {items.map((item) => (
-        <div key={item.label} className="flex flex-1 flex-col items-center gap-2">
-          <div className="flex h-40 w-full items-end rounded-xl bg-white/[0.045] p-1">
+        <div key={item.label} className="flex flex-1 flex-col items-center gap-1.5">
+          <div className="flex h-32 w-full items-end rounded-lg bg-white/[0.04] p-1">
             <div
-              className="w-full rounded-lg bg-gradient-to-t from-cyan-400 to-sky-200"
+              className="w-full rounded-md bg-gradient-to-t from-cyan-400/90 to-sky-200/90"
               style={{ height: `${Math.max((item.value / max) * 100, 10)}%` }}
             />
           </div>
-          <span className="text-[11px] text-slate-500">{item.label}</span>
+          <span className="text-[10px] text-slate-500">{item.label}</span>
         </div>
       ))}
     </div>
@@ -314,15 +320,15 @@ function LineBars({ items }: { items: ChartPoint[] }) {
 function HorizontalBars({ items, compact = false }: { items: ChartPoint[]; compact?: boolean }) {
   const max = Math.max(...items.map((item) => item.value));
   return (
-    <div className="space-y-3">
+    <div className="space-y-2.5">
       {items.map((item) => (
         <div key={item.label}>
           <div className="mb-1 flex justify-between gap-3 text-xs">
             <span className="truncate text-slate-300">{item.label.replaceAll("_", " ")}</span>
             <span className="font-medium text-white">{item.value}</span>
           </div>
-          <div className={`overflow-hidden rounded-full bg-white/10 ${compact ? "h-1.5" : "h-2"}`}>
-            <div className="h-full rounded-full bg-cyan-300" style={{ width: `${Math.max((item.value / max) * 100, 8)}%` }} />
+          <div className={`overflow-hidden rounded-full bg-white/[0.075] ${compact ? "h-1" : "h-1.5"}`}>
+            <div className="h-full rounded-full bg-cyan-300/90" style={{ width: `${Math.max((item.value / max) * 100, 8)}%` }} />
           </div>
         </div>
       ))}
@@ -341,16 +347,16 @@ function PriorityStack({ items }: { items: ChartPoint[] }) {
 
   return (
     <div>
-      <div className="flex h-4 overflow-hidden rounded-full bg-white/10">
+      <div className="flex h-3 overflow-hidden rounded-full bg-white/[0.075]">
         {items.map((item) => (
-          <div key={item.label} className={colors[item.label] ?? "bg-slate-400"} style={{ width: `${(item.value / total) * 100}%` }} />
+          <div key={item.label} className={`${colors[item.label] ?? "bg-slate-400"} opacity-90`} style={{ width: `${(item.value / total) * 100}%` }} />
         ))}
       </div>
-      <div className="mt-5 grid grid-cols-2 gap-3">
+      <div className="mt-4 grid grid-cols-2 gap-2.5">
         {items.map((item) => (
-          <div key={item.label} className="rounded-xl bg-white/[0.045] p-3">
+          <div key={item.label} className="rounded-lg bg-white/[0.04] p-2.5">
             <p className="text-xs text-slate-400">{item.label}</p>
-            <p className="mt-1 text-xl font-semibold text-white">{item.value}</p>
+            <p className="mt-1 text-lg font-semibold text-white">{item.value}</p>
           </div>
         ))}
       </div>
@@ -361,15 +367,15 @@ function PriorityStack({ items }: { items: ChartPoint[] }) {
 function Heatmap({ items }: { items: ChartPoint[] }) {
   const max = Math.max(...items.map((item) => item.value));
   return (
-    <div className="grid grid-cols-4 gap-2">
+    <div className="grid grid-cols-4 gap-1.5">
       {items.map((item) => (
         <div
           key={item.label}
-          className="rounded-xl border border-white/8 px-2 py-3 text-center"
-          style={{ backgroundColor: `rgba(34, 211, 238, ${0.08 + (item.value / max) * 0.34})` }}
+          className="rounded-md border border-white/8 px-2 py-2 text-center"
+          style={{ backgroundColor: `rgba(34, 211, 238, ${0.045 + (item.value / max) * 0.22})` }}
         >
-          <p className="text-xs font-medium text-white">{item.label}</p>
-          <p className="mt-1 text-xs text-slate-400">{item.value} casos</p>
+          <p className="text-[11px] font-medium text-white">{item.label}</p>
+          <p className="mt-0.5 text-[10px] text-slate-400">{item.value}</p>
         </div>
       ))}
     </div>
@@ -378,11 +384,11 @@ function Heatmap({ items }: { items: ChartPoint[] }) {
 
 function KnowledgeList({ items }: { items: ChartPoint[] }) {
   return (
-    <div className="space-y-3">
+    <div className="space-y-2.5">
       {items.map((item) => (
-        <div key={item.label} className="flex items-start justify-between gap-3 rounded-xl bg-white/[0.045] p-3">
+        <div key={item.label} className="flex items-start justify-between gap-3 rounded-lg bg-white/[0.04] p-2.5">
           <p className="text-xs leading-5 text-slate-300">{item.label}</p>
-          <span className="rounded-full bg-cyan-300/12 px-2 py-1 text-xs font-semibold text-cyan-100">{item.value}</span>
+          <span className="rounded-full bg-cyan-300/10 px-2 py-0.5 text-[11px] font-semibold text-cyan-100">{item.value}</span>
         </div>
       ))}
     </div>
@@ -391,14 +397,14 @@ function KnowledgeList({ items }: { items: ChartPoint[] }) {
 
 function EscalatedList({ cases }: { cases: OperationalCase[] }) {
   return (
-    <div className="space-y-3">
+    <div className="space-y-2.5">
       {cases.map((item) => (
-        <div key={item.id} className="rounded-xl border border-white/10 bg-white/[0.04] p-3">
+        <div key={item.id} className="rounded-lg border border-white/10 bg-white/[0.035] p-2.5">
           <div className="flex items-center justify-between gap-3">
             <p className="font-mono text-xs font-semibold text-cyan-100">{item.id}</p>
             <StatusBadge tone={item.priority === "P1" ? "red" : "amber"}>{item.priority}</StatusBadge>
           </div>
-          <p className="mt-2 text-sm font-medium text-white">{item.category}</p>
+          <p className="mt-1.5 text-[13px] font-medium text-white">{item.category}</p>
           <p className="mt-1 text-xs text-slate-400">{item.assigned_technician}</p>
         </div>
       ))}
@@ -408,21 +414,21 @@ function EscalatedList({ cases }: { cases: OperationalCase[] }) {
 
 function OperationalTable({ cases }: { cases: OperationalCase[] }) {
   return (
-    <article className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.055] shadow-xl shadow-black/10">
-      <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
-        <h2 className="flex items-center gap-2 text-sm font-semibold text-white">
-          <CheckCircle2 size={17} className="text-cyan-200" aria-hidden />
+    <article className="overflow-hidden rounded-xl border border-white/10 bg-white/[0.04] shadow-sm shadow-black/10">
+      <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
+        <h2 className="flex items-center gap-2 text-[14px] font-semibold text-white">
+          <CheckCircle2 size={15} className="text-cyan-200/80" aria-hidden />
           Últimos 100 casos
         </h2>
-        <span className="text-xs text-slate-500">actualización operacional</span>
+        <span className="text-[11px] text-slate-500">actualización operacional</span>
       </div>
-      <div className="thin-scrollbar max-h-[560px] overflow-auto">
+      <div className="thin-scrollbar max-h-[520px] overflow-auto">
         <table className="w-full min-w-[1080px] border-collapse text-left text-xs">
-          <thead className="sticky top-0 bg-[#0d1a2b] text-slate-400">
+          <thead className="sticky top-0 bg-[#0b1727] text-slate-500">
             <tr>
               {["Ticket", "Usuario", "Tipo", "Prioridad", "Estado", "Resolución", "Escalado", "Técnico", "Fecha", "Duración"].map(
                 (header) => (
-                  <th key={header} className="px-4 py-3 font-medium">
+                  <th key={header} className="px-3 py-2.5 font-medium">
                     {header}
                   </th>
                 ),
@@ -432,20 +438,20 @@ function OperationalTable({ cases }: { cases: OperationalCase[] }) {
           <tbody className="divide-y divide-white/8">
             {cases.map((item) => (
               <tr key={item.id} className="transition hover:bg-white/[0.035]">
-                <td className="px-4 py-3 font-mono font-semibold text-cyan-100">{item.id}</td>
-                <td className="px-4 py-3 text-slate-300">{item.user_name}</td>
-                <td className="px-4 py-3 text-slate-300">{item.category}</td>
-                <td className="px-4 py-3">
+                <td className="px-3 py-2.5 font-mono font-semibold text-cyan-100">{item.id}</td>
+                <td className="px-3 py-2.5 text-slate-300">{item.user_name}</td>
+                <td className="px-3 py-2.5 text-slate-300">{item.category}</td>
+                <td className="px-3 py-2.5">
                   <StatusBadge tone={item.priority === "P1" ? "red" : item.priority === "P2" ? "amber" : "cyan"}>
                     {item.priority}
                   </StatusBadge>
                 </td>
-                <td className="px-4 py-3 text-slate-300">{item.status}</td>
-                <td className="px-4 py-3 text-slate-300">{item.resolution_type}</td>
-                <td className="px-4 py-3 text-slate-300">{item.escalated ? "Sí" : "No"}</td>
-                <td className="px-4 py-3 text-slate-300">{item.assigned_technician}</td>
-                <td className="px-4 py-3 text-slate-400">{formatDate(item.created_at)}</td>
-                <td className="px-4 py-3 text-slate-300">{item.duration_minutes} min</td>
+                <td className="px-3 py-2.5 text-slate-300">{item.status}</td>
+                <td className="px-3 py-2.5 text-slate-300">{item.resolution_type}</td>
+                <td className="px-3 py-2.5 text-slate-300">{item.escalated ? "Sí" : "No"}</td>
+                <td className="px-3 py-2.5 text-slate-300">{item.assigned_technician}</td>
+                <td className="px-3 py-2.5 text-slate-400">{formatDate(item.created_at)}</td>
+                <td className="px-3 py-2.5 text-slate-300">{item.duration_minutes} min</td>
               </tr>
             ))}
           </tbody>
