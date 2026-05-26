@@ -66,3 +66,22 @@ values
   ('P3', 480, 1440),
   ('P4', 1440, 4320)
 on conflict (priority) do nothing;
+
+alter table demo_users enable row level security;
+alter table chat_sessions enable row level security;
+alter table chat_messages enable row level security;
+alter table tickets enable row level security;
+alter table ticket_events enable row level security;
+alter table knowledge_articles enable row level security;
+alter table sla_rules enable row level security;
+
+grant usage on schema public to service_role;
+grant select, insert, update, delete on
+  demo_users,
+  chat_sessions,
+  chat_messages,
+  tickets,
+  ticket_events,
+  knowledge_articles,
+  sla_rules
+to service_role;
