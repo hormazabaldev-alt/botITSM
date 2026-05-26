@@ -13,6 +13,7 @@ import {
   KeyRound,
   LockKeyhole,
   MessageSquareText,
+  Settings,
   ShieldAlert,
   Ticket,
   UsersRound,
@@ -30,11 +31,14 @@ import {
 import type { AdminKpi, ChartPoint, OperationalCase } from "@/types/operational";
 
 const navItems = [
-  { id: "kpis", label: "Analytics", icon: BarChart3 },
-  { id: "itil-report", label: "Reporte ITIL", icon: CheckCircle2 },
-  { id: "tickets", label: "Tickets", icon: Ticket },
+  { id: "overview", label: "Overview", icon: Gauge },
+  { id: "incidents", label: "Incidents", icon: ShieldAlert },
+  { id: "requests", label: "Requests", icon: Ticket },
+  { id: "access", label: "Access", icon: KeyRound },
   { id: "knowledge", label: "Knowledge", icon: BookOpen },
+  { id: "analytics", label: "Analytics", icon: BarChart3 },
   { id: "cases", label: "Conversaciones", icon: MessageSquareText },
+  { id: "configuration", label: "Configuration", icon: Settings },
 ];
 
 export function AdminDashboard() {
@@ -162,7 +166,7 @@ function kpiValue(kpis: AdminKpi[], label: string) {
 }
 
 function AdminWorkspace() {
-  const [activeSection, setActiveSection] = useState("kpis");
+  const [activeSection, setActiveSection] = useState("overview");
   const kpis = useMemo(() => getAdminKpis(), []);
   const cases = useMemo(() => listOperationalCases(100), []);
   const byDay = useMemo(() => getVolumeByDay(), []);
@@ -173,6 +177,7 @@ function AdminWorkspace() {
   const escalated = useMemo(() => cases.filter((item) => item.escalated).slice(0, 7), [cases]);
   const technicians = useMemo(() => groupByField("assigned_technician", 8), []);
   const knowledge = useMemo(() => getKnowledgeUsage(), []);
+  const operationalModel = useMemo(() => buildOperationalModel(cases, kpis, knowledge), [cases, kpis, knowledge]);
 
   function goToSection(id: string) {
     setActiveSection(id);
@@ -181,8 +186,8 @@ function AdminWorkspace() {
 
   return (
     <main className="min-h-screen bg-[#07111f] text-slate-100">
-      <div className="grid min-h-screen lg:grid-cols-[188px_1fr]">
-        <aside className="border-b border-white/10 bg-[#0a1525] p-3 lg:border-b-0 lg:border-r">
+      <div className="grid min-h-screen lg:grid-cols-[196px_1fr]">
+        <aside className="border-b border-white/10 bg-[#0a1525] p-3 lg:sticky lg:top-0 lg:h-screen lg:border-b-0 lg:border-r">
           <div className="flex items-center gap-2.5">
             <BrandMark compact variant="dark" />
             <div className="min-w-0">
@@ -206,21 +211,19 @@ function AdminWorkspace() {
             ))}
           </nav>
           <div className="mt-6 rounded-lg border border-white/10 bg-white/[0.035] p-2.5">
-            <p className="text-[9px] font-medium uppercase tracking-[0.16em] text-cyan-200/80">ITIL control</p>
-            <p className="mt-1.5 text-[11px] leading-4 text-slate-400">
-              Incidentes, solicitudes, SLA y escalamiento trazables.
-            </p>
+            <p className="text-[9px] font-medium uppercase tracking-[0.16em] text-cyan-200/80">Operating model</p>
+            <p className="mt-1.5 text-[11px] leading-4 text-slate-400">Incidents, requests, access, SLA and knowledge outcomes.</p>
           </div>
         </aside>
 
         <section className="min-w-0">
-          <header className="border-b border-white/10 bg-[#07111f]/92 px-5 py-4 backdrop-blur-xl lg:px-6">
-            <div className="flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between">
+          <header className="border-b border-white/10 bg-[#07111f]/92 px-4 py-3 backdrop-blur-xl lg:px-5">
+            <div className="flex flex-col gap-2 xl:flex-row xl:items-end xl:justify-between">
               <div>
-                <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-cyan-200/80">Operations Command Center</p>
-                <h1 className="mt-1.5 text-[28px] font-semibold leading-8 tracking-[-0.025em] text-white">Panel ejecutivo ITSM</h1>
-                <p className="mt-1.5 max-w-2xl text-[13px] leading-5 text-slate-400">
-                  Monitoreo de conversaciones, tickets, resolución autónoma, escalamiento humano y uso de conocimiento.
+                <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-cyan-200/75">Operations Command Center</p>
+                <h1 className="mt-1 text-[24px] font-semibold leading-7 tracking-[-0.025em] text-white">Panel ejecutivo ITSM</h1>
+                <p className="mt-1 max-w-2xl text-[12px] leading-4 text-slate-400">
+                  Vista ejecutiva de incidentes, solicitudes, accesos, SLA, escalamiento y efectividad de conocimiento.
                 </p>
               </div>
               <div className="flex flex-wrap gap-1.5">
@@ -232,49 +235,68 @@ function AdminWorkspace() {
           </header>
 
           <div className="space-y-3 p-3 lg:p-4">
-            <div id="kpis" className="scroll-mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-8">
-              {kpis.map((kpi) => (
-                <AdminKpiCard key={kpi.label} kpi={kpi} />
-              ))}
-            </div>
-
-            <section id="itil-report" className="scroll-mt-4">
-              <ITILReportLine kpis={kpis} />
+            <section id="overview" className="scroll-mt-4">
+              <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
+                {operationalModel.executive.map((kpi) => (
+                  <ExecutiveKpiCard key={kpi.label} kpi={kpi} />
+                ))}
+              </div>
             </section>
 
-            <div id="tickets" className="scroll-mt-4 grid gap-3 xl:grid-cols-[1.18fr_0.82fr_0.82fr]">
+            <section className="grid gap-2.5 xl:grid-cols-4">
+              <DomainCard id="incidents" title="Incident Management" metrics={operationalModel.incident} />
+              <DomainCard id="requests" title="Request Management" metrics={operationalModel.request} />
+              <DomainCard id="access" title="Access Management" metrics={operationalModel.access} />
+              <DomainCard id="knowledge" title="Knowledge Effectiveness" metrics={operationalModel.knowledge} />
+            </section>
+
+            <div id="analytics" className="scroll-mt-4 grid gap-3 xl:grid-cols-[1.15fr_0.85fr_0.85fr]">
               <Panel title="Volumen por día" icon={Activity}>
                 <LineBars items={byDay} />
               </Panel>
               <Panel title="Prioridades" icon={ShieldAlert}>
                 <PriorityStack items={byPriority} />
               </Panel>
-              <Panel title="Heatmap horario" icon={Clock3}>
+              <Panel title="Hourly demand heatmap" icon={Clock3}>
                 <Heatmap items={heatmap} />
               </Panel>
             </div>
 
-            <div id="knowledge" className="scroll-mt-4 grid gap-3 xl:grid-cols-4">
-              <Panel title="Incidentes por tipo" icon={Gauge}>
+            <div className="grid gap-3 xl:grid-cols-4">
+              <Panel title="Distribution by category" icon={Gauge}>
                 <HorizontalBars items={byType} />
               </Panel>
-              <Panel title="Top intents" icon={BarChart3}>
+              <Panel title="Incident trend" icon={BarChart3}>
                 <HorizontalBars items={topIntents} compact />
               </Panel>
-              <Panel title="Agentes y técnicos" icon={UsersRound}>
+              <Panel title="Escalation funnel" icon={UsersRound}>
                 <HorizontalBars items={technicians} compact />
               </Panel>
-              <Panel title="Knowledge usado" icon={BookOpen}>
+              <Panel title="Knowledge articles used" icon={BookOpen}>
                 <KnowledgeList items={knowledge} />
               </Panel>
             </div>
 
-            <div id="cases" className="scroll-mt-4 grid gap-3 xl:grid-cols-[0.72fr_1.28fr]">
+            <div id="cases" className="scroll-mt-4 grid gap-3 xl:grid-cols-[0.68fr_1.32fr]">
               <Panel title="Casos escalados" icon={Ticket}>
                 <EscalatedList cases={escalated} />
               </Panel>
               <OperationalTable cases={cases} />
             </div>
+
+            <section id="configuration" className="scroll-mt-4 rounded-xl border border-white/10 bg-white/[0.035] px-3 py-2.5">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <h2 className="text-[13px] font-semibold text-white">Configuration & Governance</h2>
+                  <p className="mt-1 text-[11px] text-slate-500">Modelo actual: incidentes, solicitudes, accesos, conocimiento, SLA y escalamiento.</p>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  <StatusBadge tone="cyan">ITSM taxonomy</StatusBadge>
+                  <StatusBadge tone="slate">Audit-ready</StatusBadge>
+                  <StatusBadge tone="slate">Mock data</StatusBadge>
+                </div>
+              </div>
+            </section>
           </div>
         </section>
       </div>
@@ -282,47 +304,89 @@ function AdminWorkspace() {
   );
 }
 
-function AdminKpiCard({ kpi }: { kpi: AdminKpi }) {
+function buildOperationalModel(cases: OperationalCase[], kpis: AdminKpi[], knowledge: ChartPoint[]) {
+  const incidentCases = cases.filter((item) =>
+    ["INCIDENT", "NETWORK_ISSUE", "HARDWARE_ISSUE", "SECURITY_INCIDENT"].includes(item.issue_type),
+  );
+  const requestCases = cases.filter((item) => ["SERVICE_REQUEST", "SOFTWARE_REQUEST"].includes(item.issue_type));
+  const accessCases = cases.filter((item) => item.issue_type === "ACCESS_REQUEST");
+  const autonomous = cases.filter((item) => item.resolution_type === "Autónoma").length;
+  const escalated = cases.filter((item) => item.escalated).length;
+  const slaBreaches = cases.filter((item) => item.duration_minutes > item.sla_minutes).length;
+
+  return {
+    executive: [
+      { label: "Conversaciones totales", value: kpiValue(kpis, "Conversaciones"), meta: "+18% últimos 7 días", tone: "neutral" },
+      { label: "Casos gestionados", value: cases.length.toString(), meta: "pipeline operativo", tone: "neutral" },
+      { label: "Resolución autónoma", value: kpiValue(kpis, "Resolución autónoma"), meta: `${autonomous} casos`, tone: "positive" },
+      { label: "Escalados humanos", value: kpiValue(kpis, "Escalados humanos"), meta: "con contexto", tone: "neutral" },
+      { label: "SLA cumplimiento", value: kpiValue(kpis, "Cumplimiento SLA"), meta: `${slaBreaches} breaches`, tone: slaBreaches ? "warning" : "positive" },
+      { label: "Tiempo promedio", value: kpiValue(kpis, "Tiempo promedio"), meta: "resolución", tone: "neutral" },
+    ],
+    incident: [
+      { label: "abiertos", value: countOpen(incidentCases).toString() },
+      { label: "cerrados", value: countClosed(incidentCases).toString() },
+      { label: "críticos", value: incidentCases.filter((item) => item.priority === "P1").length.toString() },
+      { label: "MTTR", value: `${averageDuration(incidentCases)} min` },
+      { label: "aging", value: incidentCases.filter((item) => item.duration_minutes > item.sla_minutes).length.toString() },
+    ],
+    request: [
+      { label: "abiertas", value: countOpen(requestCases).toString() },
+      { label: "completadas", value: countClosed(requestCases).toString() },
+      { label: "tiempo promedio", value: `${averageDuration(requestCases)} min` },
+    ],
+    access: [
+      { label: "solicitados", value: accessCases.length.toString() },
+      { label: "aprobados", value: countClosed(accessCases).toString() },
+      { label: "pendientes", value: countOpen(accessCases).toString() },
+    ],
+    knowledge: [
+      { label: "artículos usados", value: knowledge.reduce((sum, item) => sum + item.value, 0).toString() },
+      { label: "self-service success", value: kpiValue(kpis, "Resolución autónoma") },
+      { label: "fallback humano", value: escalated.toString() },
+    ],
+  };
+}
+
+function countOpen(items: OperationalCase[]) {
+  return items.filter((item) => item.status !== "Resuelto").length;
+}
+
+function countClosed(items: OperationalCase[]) {
+  return items.filter((item) => item.status === "Resuelto").length;
+}
+
+function averageDuration(items: OperationalCase[]) {
+  if (!items.length) return 0;
+  return Math.round(items.reduce((sum, item) => sum + item.duration_minutes, 0) / items.length);
+}
+
+function ExecutiveKpiCard({ kpi }: { kpi: { label: string; value: string; meta: string; tone: string } }) {
   const tone =
-    kpi.emphasis === "critical"
-      ? "border-rose-300/16 bg-rose-300/[0.045] text-rose-100"
-      : kpi.emphasis === "positive"
-        ? "border-cyan-300/16 bg-cyan-300/[0.045] text-cyan-50"
-        : "border-white/10 bg-white/[0.04] text-white";
+    kpi.tone === "warning"
+      ? "border-amber-300/16 bg-amber-300/[0.045]"
+      : kpi.tone === "positive"
+        ? "border-cyan-300/16 bg-cyan-300/[0.045]"
+        : "border-white/10 bg-white/[0.04]";
 
   return (
-    <article className={`rounded-xl border p-2.5 shadow-sm shadow-black/10 ${tone}`}>
-      <p className="text-[12px] font-medium text-slate-400">{kpi.label}</p>
-      <p className="mt-1.5 text-[26px] font-semibold leading-7 tracking-[-0.03em]">{kpi.value}</p>
-      <p className="mt-1.5 text-[12px] text-slate-500">{kpi.delta}</p>
+    <article className={`rounded-lg border px-2.5 py-2 shadow-sm shadow-black/10 ${tone}`}>
+      <p className="text-[11px] font-medium text-slate-400">{kpi.label}</p>
+      <p className="mt-1 text-[22px] font-semibold leading-6 tracking-[-0.03em] text-white">{kpi.value}</p>
+      <p className="mt-1 text-[11px] text-slate-500">{kpi.meta}</p>
     </article>
   );
 }
 
-function ITILReportLine({ kpis }: { kpis: AdminKpi[] }) {
-  const items = [
-    { label: "Incidentes", value: kpiValue(kpis, "Conversaciones"), meta: "intake ITSM" },
-    { label: "Solicitudes", value: kpiValue(kpis, "Tickets generados"), meta: "tickets creados" },
-    { label: "SLA", value: kpiValue(kpis, "Cumplimiento SLA"), meta: "cumplimiento" },
-    { label: "Resolución", value: kpiValue(kpis, "Resolución autónoma"), meta: "autónoma" },
-    { label: "Escalamiento", value: kpiValue(kpis, "Escalados humanos"), meta: "humano" },
-    { label: "P1/P2 activos", value: kpiValue(kpis, "Críticos activos"), meta: "seguimiento" },
-  ];
-
+function DomainCard({ id, title, metrics }: { id: string; title: string; metrics: Array<{ label: string; value: string }> }) {
   return (
-    <article className="rounded-xl border border-cyan-300/14 bg-cyan-300/[0.035] px-3 py-2.5">
-      <div className="mb-2 flex items-center justify-between gap-3">
-        <h2 className="text-[12px] font-semibold uppercase tracking-[0.16em] text-cyan-100/85">KPI ITIL operativo</h2>
-        <span className="text-[11px] text-slate-500">Incidentes · Solicitudes · SLA · Escalamiento</span>
-      </div>
-      <div className="grid gap-2 sm:grid-cols-3 2xl:grid-cols-6">
-        {items.map((item) => (
-          <div key={item.label} className="rounded-lg border border-white/8 bg-slate-950/24 px-2.5 py-2">
-            <p className="text-[11px] font-medium text-slate-400">{item.label}</p>
-            <div className="mt-1 flex items-end justify-between gap-2">
-              <p className="text-xl font-semibold leading-6 text-white">{item.value}</p>
-              <p className="text-[10px] text-slate-500">{item.meta}</p>
-            </div>
+    <article id={id} className="scroll-mt-4 rounded-xl border border-white/10 bg-white/[0.035] p-3">
+      <h2 className="text-[13px] font-semibold text-white">{title}</h2>
+      <div className="mt-2 grid grid-cols-2 gap-1.5">
+        {metrics.map((metric) => (
+          <div key={metric.label} className="rounded-md border border-white/8 bg-slate-950/18 px-2 py-1.5">
+            <p className="text-[10px] uppercase tracking-[0.08em] text-slate-500">{metric.label}</p>
+            <p className="mt-0.5 text-[17px] font-semibold leading-5 text-slate-100">{metric.value}</p>
           </div>
         ))}
       </div>
@@ -469,10 +533,10 @@ function OperationalTable({ cases }: { cases: OperationalCase[] }) {
         <span className="text-[11px] text-slate-500">actualización operacional</span>
       </div>
       <div className="thin-scrollbar max-h-[520px] overflow-auto">
-        <table className="w-full min-w-[1080px] border-collapse text-left text-xs">
+        <table className="w-full min-w-[1040px] border-collapse text-left text-xs">
           <thead className="sticky top-0 bg-[#0b1727] text-slate-500">
             <tr>
-              {["Ticket", "Usuario", "Tipo", "Prioridad", "Estado", "Resolución", "Escalado", "Técnico", "Fecha", "Duración"].map(
+              {["Ticket ID", "Type", "Category", "Priority", "Status", "Owner", "Created", "Resolution Time", "Escalated", "SLA"].map(
                 (header) => (
                   <th key={header} className="px-3 py-2.5 font-medium">
                     {header}
@@ -485,7 +549,7 @@ function OperationalTable({ cases }: { cases: OperationalCase[] }) {
             {cases.map((item) => (
               <tr key={item.id} className="transition hover:bg-white/[0.035]">
                 <td className="px-3 py-2.5 font-mono font-semibold text-cyan-100">{item.id}</td>
-                <td className="px-3 py-2.5 text-slate-300">{item.user_name}</td>
+                <td className="px-3 py-2.5 text-slate-300">{item.issue_type.replaceAll("_", " ")}</td>
                 <td className="px-3 py-2.5 text-slate-300">{item.category}</td>
                 <td className="px-3 py-2.5">
                   <StatusBadge tone={item.priority === "P1" ? "red" : item.priority === "P2" ? "amber" : "cyan"}>
@@ -493,11 +557,15 @@ function OperationalTable({ cases }: { cases: OperationalCase[] }) {
                   </StatusBadge>
                 </td>
                 <td className="px-3 py-2.5 text-slate-300">{item.status}</td>
-                <td className="px-3 py-2.5 text-slate-300">{item.resolution_type}</td>
-                <td className="px-3 py-2.5 text-slate-300">{item.escalated ? "Sí" : "No"}</td>
                 <td className="px-3 py-2.5 text-slate-300">{item.assigned_technician}</td>
                 <td className="px-3 py-2.5 text-slate-400">{formatDate(item.created_at)}</td>
                 <td className="px-3 py-2.5 text-slate-300">{item.duration_minutes} min</td>
+                <td className="px-3 py-2.5 text-slate-300">{item.escalated ? "Sí" : "No"}</td>
+                <td className="px-3 py-2.5">
+                  <StatusBadge tone={item.duration_minutes > item.sla_minutes ? "red" : "green"}>
+                    {item.duration_minutes > item.sla_minutes ? "Breach" : "OK"}
+                  </StatusBadge>
+                </td>
               </tr>
             ))}
           </tbody>
