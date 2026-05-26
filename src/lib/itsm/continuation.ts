@@ -55,7 +55,7 @@ export function resolveContextualContinuation(input: ITSMResponseInput): ITSMRes
     input,
     article: activeArticle,
     message: `Avancemos con el siguiente descarte.\n\n${toUserInstruction(nextStep)}`,
-    suggestedActions: activeArticle.resolutionSteps,
+    suggestedActions: [nextStep],
   });
 }
 
@@ -227,6 +227,12 @@ function isFollowUp(message: string, context: SessionContext) {
 
 function toUserInstruction(step: string) {
   return step
+    .replace(/^Confirmar si el usuario puede/i, "Confirma si puedes")
+    .replace(/^Validar si el usuario puede/i, "Valida si puedes")
+    .replace(/^Confirmar si el usuario conserva/i, "Confirma si conservas")
+    .replace(/^Validar si el usuario está/i, "Valida si estás")
+    .replace(/^Validar si el usuario esta/i, "Valida si estás")
+    .replace(/\bsi usa\b/i, "si usas")
     .replace(/^Confirmar /i, "Confirma ")
     .replace(/^Validar /i, "Valida ")
     .replace(/^Revisar /i, "Revisa ")

@@ -50,6 +50,10 @@ export function detectIntent(message: string): ITSMIntent {
     return "INCIDENT";
   }
 
+  if (hasAny(text, ["correo", "mail", "outlook"]) && hasAny(text, ["no salen", "no envia", "no envía", "no llegan", "no recibe", "bandeja de salida", "sincroniza", "sincronizacion", "sincronización"])) {
+    return "INCIDENT";
+  }
+
   if (hasAny(text, ["vpn", "red", "internet", "conectividad", "wifi", "wi-fi", "latencia", "ethernet", "lan"])) {
     return "NETWORK_ISSUE";
   }

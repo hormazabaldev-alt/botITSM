@@ -790,6 +790,7 @@ export const knowledgeBase: KnowledgeArticle[] = [
 
 export function findKnowledgeMatches(message: string, intent?: ITSMIntent) {
   const normalizedMessage = normalizeSearchText(message);
+  const preferredArticleId = resolvePreferredArticleId(normalizedMessage);
 
   return knowledgeBase
     .map((article) => {
@@ -799,8 +800,9 @@ export function findKnowledgeMatches(message: string, intent?: ITSMIntent) {
       ).length;
       const contentScore = tagScore + symptomScore;
       const intentScore = contentScore > 0 && intent && article.intent === intent ? 3 : 0;
+      const preferredScore = preferredArticleId === article.id ? 8 : 0;
 
-      return { article, contentScore, score: intentScore + contentScore };
+      return { article, contentScore: contentScore + preferredScore, score: intentScore + contentScore + preferredScore };
     })
     .filter(({ contentScore }) => contentScore > 0)
     .sort((a, b) => b.score - a.score)
@@ -810,6 +812,21 @@ export function findKnowledgeMatches(message: string, intent?: ITSMIntent) {
 export function findKnowledgeArticleById(id: string | undefined) {
   if (!id) return undefined;
   return knowledgeBase.find((article) => article.id === id);
+}
+
+function resolvePreferredArticleId(normalizedMessage: string) {
+  if (
+    hasAnySearchText(normalizedMessage, ["correo", "mail", "outlook"]) &&
+    hasAnySearchText(normalizedMessage, ["no salen", "no envia", "no envía", "no llegan", "no recibe", "bandeja de salida", "sincroniza"])
+  ) {
+    return "kb-outlook-send-receive";
+  }
+
+  return undefined;
+}
+
+function hasAnySearchText(value: string, terms: string[]) {
+  return terms.some((term) => value.includes(normalizeSearchText(term)));
 }
 
 function normalizeSearchText(value: string) {

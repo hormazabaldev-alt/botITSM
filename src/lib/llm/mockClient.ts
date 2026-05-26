@@ -83,7 +83,7 @@ export async function generateMockITSMResponse(input: ITSMResponseInput): Promis
     classification: detectedIntent,
     priority,
     requiredFields,
-    suggestedActions: serviceDeskTurn?.suggestedActions ?? article?.resolutionSteps ?? ["Recopilar contexto", "Clasificar prioridad", "Escalar si persiste"],
+    suggestedActions: serviceDeskTurn?.suggestedActions ?? (article?.resolutionSteps[0] ? [article.resolutionSteps[0]] : ["Recopilar contexto"]),
     operationalStatuses: shouldCreateTicket
       ? ["Detectando intención", "Consultando base de conocimiento", "Preparando ticket"]
       : ["Detectando intención", "Consultando base de conocimiento", "Ejecutando guía de descarte"],
@@ -174,6 +174,12 @@ function normalizeText(message: string) {
 
 function formatStepForUser(step: string) {
   return step
+    .replace(/^Confirmar si el usuario puede/i, "Confirma si puedes")
+    .replace(/^Validar si el usuario puede/i, "Valida si puedes")
+    .replace(/^Confirmar si el usuario conserva/i, "Confirma si conservas")
+    .replace(/^Validar si el usuario está/i, "Valida si estás")
+    .replace(/^Validar si el usuario esta/i, "Valida si estás")
+    .replace(/\bsi usa\b/i, "si usas")
     .replace(/^Indicar al usuario que no abra/i, "No abras")
     .replace(/^Indicar al usuario que no apague/i, "No apagues")
     .replace(/^Indicar al usuario que /i, "")
