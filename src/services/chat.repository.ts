@@ -34,14 +34,14 @@ export async function persistChatTurn(context: SessionContext, messages: ChatMes
     }
 
     const insertedMessages = await supabase.from("chat_messages").insert(
-      messages.map((message) => ({
+      [...messages.map((message) => ({
         id: message.id,
         session_id: context.sessionId,
         role: message.role,
         content: message.content,
         metadata: message.metadata ?? null,
         created_at: message.createdAt,
-      })),
+      })), buildContextSnapshotMessage(context)],
     );
 
     if (insertedMessages.error) {
@@ -88,7 +88,24 @@ export async function getPersistedSessionContext(sessionId: string) {
       .eq("id", sessionId)
       .maybeSingle();
 
-    return isSessionContext(data?.context) ? data.context : undefined;
+    if (isSessionContext(data?.context)) {
+      return data.context;
+    }
+
+    const { data: snapshot } = await supabase
+      .from("chat_messages")
+      .select("metadata")
+      .eq("session_id", sessionId)
+      .eq("role", "system")
+      .eq("content", "__SESSION_CONTEXT__")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    const context = getContextFromSnapshot(snapshot?.metadata);
+    if (context) {
+      return context;
+    }
   }
 
   return inMemoryContexts.get(sessionId);
@@ -98,6 +115,26 @@ function persistInMemory(context: SessionContext, messages: ChatMessage[]) {
   const current = inMemoryMessages.get(context.sessionId) ?? [];
   inMemoryMessages.set(context.sessionId, [...current, ...messages]);
   inMemoryContexts.set(context.sessionId, context);
+}
+
+function buildContextSnapshotMessage(context: SessionContext) {
+  return {
+    id: crypto.randomUUID(),
+    session_id: context.sessionId,
+    role: "system",
+    content: "__SESSION_CONTEXT__",
+    metadata: { sessionContext: context } as unknown as Json,
+    created_at: new Date().toISOString(),
+  };
+}
+
+function getContextFromSnapshot(metadata: Json | undefined) {
+  if (!metadata || typeof metadata !== "object" || Array.isArray(metadata)) {
+    return undefined;
+  }
+
+  const snapshot = metadata as { sessionContext?: Json };
+  return isSessionContext(snapshot.sessionContext) ? snapshot.sessionContext : undefined;
 }
 
 function isSessionContext(value: Json | undefined): value is SessionContext {
