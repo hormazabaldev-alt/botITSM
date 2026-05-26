@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { findKnowledgeMatches, knowledgeBase } from "@/data/mock/knowledgeBase";
 import { createSessionContext, detectTurnIntent, extractFields } from "@/lib/itsm/engine";
+import { createTicketThroughITSM } from "@/lib/itsm/itsmGateway";
 import type { ChatMessage, SessionContext } from "@/lib/itsm/types";
 import { generateITSMResponse } from "@/lib/llm";
 import { getPersistedSessionContext, persistChatTurn } from "@/services/chat.repository";
@@ -47,6 +48,37 @@ export async function POST(request: Request) {
       priority: llmResponse.priority,
     },
   };
+  const diagnosticForTurn = llmResponse.diagnostic ?? sessionContext.diagnostic;
+  const itsmResult = llmResponse.shouldCreateTicket
+    ? await createTicketThroughITSM({
+        draft: llmResponse.ticketDraft,
+        sessionId: sessionContext.sessionId,
+        transcript: [...sessionContext.messages, userChatMessage, assistantChatMessage],
+        diagnostic: diagnosticForTurn,
+        source: "web-demo",
+      })
+    : undefined;
+
+  if (itsmResult) {
+    assistantChatMessage.metadata = {
+      ...assistantChatMessage.metadata,
+      ticketId: itsmResult.ticket.id,
+    };
+  }
+  const nextDiagnostic = itsmResult && diagnosticForTurn
+    ? {
+        ...diagnosticForTurn,
+        stage: "ticket_created" as const,
+        facts: {
+          ...diagnosticForTurn.facts,
+          ticketCreated: true,
+          ticketId: itsmResult.ticket.id,
+          itsmProvider: itsmResult.provider,
+        },
+        completedSteps: Array.from(new Set([...diagnosticForTurn.completedSteps, "Ticket creado en ITSM"])),
+        updatedAt: new Date().toISOString(),
+      }
+    : diagnosticForTurn;
 
   const nextContext: SessionContext = {
     ...sessionContext,
@@ -55,7 +87,8 @@ export async function POST(request: Request) {
     detectedIntent: llmResponse.classification,
     priority: llmResponse.priority,
     activeArticleId: resolveActiveArticleId(llmResponse.ticketDraft.description, knowledgeMatches, sessionContext),
-    ticketDraft: llmResponse.ticketDraft,
+    diagnostic: nextDiagnostic,
+    ticketDraft: itsmResult?.ticket ?? llmResponse.ticketDraft,
     stepsExecuted: Array.from(new Set([...sessionContext.stepsExecuted, ...llmResponse.suggestedActions])),
     awaitingResolutionConfirmation: !llmResponse.shouldCreateTicket,
   };
@@ -64,6 +97,15 @@ export async function POST(request: Request) {
 
   return NextResponse.json({
     response: llmResponse,
+    ticket: itsmResult?.ticket,
+    itsm: itsmResult
+      ? {
+          provider: itsmResult.provider,
+          mode: itsmResult.mode,
+          externalId: itsmResult.externalId,
+          externalUrl: itsmResult.externalUrl,
+        }
+      : undefined,
     sessionContext: nextContext,
     knowledgeMatches,
   });

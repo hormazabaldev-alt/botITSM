@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import type { TicketDraft } from "@/lib/itsm/types";
+import { hasSupabaseServerEnv } from "@/lib/supabase/server";
 import { createTicket, listTickets } from "@/services/tickets.repository";
 
 export async function GET() {
   const tickets = await listTickets();
-  return NextResponse.json({ tickets });
+  return NextResponse.json({ tickets, source: hasSupabaseServerEnv() ? "supabase" : "memory" });
 }
 
 export async function POST(request: Request) {
@@ -15,5 +16,5 @@ export async function POST(request: Request) {
   }
 
   const ticket = await createTicket(body.ticketDraft);
-  return NextResponse.json({ ticket });
+  return NextResponse.json({ ticket, source: hasSupabaseServerEnv() ? "supabase" : "memory" });
 }

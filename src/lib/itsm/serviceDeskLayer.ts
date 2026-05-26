@@ -1,4 +1,4 @@
-import type { ChatMessage } from "@/lib/itsm/types";
+import type { ChatMessage, DiagnosticContext, DiagnosticFactValue, DiagnosticStage, SessionContext } from "@/lib/itsm/types";
 
 export type ServiceDeskAsset =
   | "mouse"
@@ -10,9 +10,9 @@ export type ServiceDeskAsset =
 
 type ServiceDeskQualifier = "wired" | "wireless" | "external" | "internal";
 type ServiceDeskSymptom = "not_working" | "no_power" | "no_image" | "flicker" | "dim" | "visual_artifact";
-type PlaybookStage = "identify_asset" | "qualify_connection" | "run_first_check" | "isolate_component" | "prepare_escalation";
+type PlaybookStage = Extract<DiagnosticStage, "identify_asset" | "qualify_connection" | "run_first_check" | "isolate_component" | "prepare_escalation">;
 
-export type ServiceDeskTurn = {
+type ServiceDeskTurnCore = {
   asset: ServiceDeskAsset;
   qualifier?: ServiceDeskQualifier;
   symptoms: ServiceDeskSymptom[];
@@ -21,6 +21,10 @@ export type ServiceDeskTurn = {
   stage: PlaybookStage;
   response: string;
   suggestedActions: string[];
+};
+
+export type ServiceDeskTurn = ServiceDeskTurnCore & {
+  diagnostic: DiagnosticContext;
 };
 
 type ServiceDeskPlaybook = {
@@ -58,12 +62,14 @@ const playbooks: ServiceDeskPlaybook[] = [
   },
 ];
 
-export function resolveServiceDeskTurn(message: string, history: ChatMessage[]): ServiceDeskTurn | undefined {
+export function resolveServiceDeskTurn(message: string, context: SessionContext | ChatMessage[]): ServiceDeskTurn | undefined {
+  const history = Array.isArray(context) ? context : context.messages;
+  const previousDiagnostic = Array.isArray(context) ? undefined : context.diagnostic;
   const current = normalizeText(message);
   const userHistory = history.filter((item) => item.role === "user").map((item) => normalizeText(item.content));
   const assistantHistory = history.filter((item) => item.role === "assistant").map((item) => normalizeText(item.content));
   const allUserText = [...userHistory, current].join(" ");
-  const asset = resolveAsset(current, allUserText);
+  const asset = resolveAsset(current, allUserText) ?? resolveAssetFromDiagnostic(previousDiagnostic);
 
   if (!asset) {
     return undefined;
@@ -77,28 +83,28 @@ export function resolveServiceDeskTurn(message: string, history: ChatMessage[]):
     return undefined;
   }
 
+  let turn: ServiceDeskTurnCore;
+
   if (asset === "notebook_display") {
-    return resolveNotebookDisplayTurn({ current, assistantHistory, playbook, symptoms });
+    turn = resolveNotebookDisplayTurn({ current, assistantHistory, playbook, symptoms });
+  } else if (asset === "external_monitor") {
+    turn = resolveExternalMonitorTurn({ current, allUserText, previousDiagnostic, assistantHistory, playbook, symptoms });
+  } else if (asset === "mouse" || asset === "keyboard") {
+    turn = resolvePeripheralTurn({ asset, qualifier, current, assistantHistory, playbook, symptoms });
+  } else {
+    turn = {
+      asset,
+      qualifier,
+      symptoms,
+      playbookId: playbook.id,
+      knowledgeArticleId: playbook.knowledgeArticleId,
+      stage: "identify_asset",
+      response: playbook.firstQuestion(asset),
+      suggestedActions: [`Playbook ${playbook.id}: identificar activo`],
+    };
   }
 
-  if (asset === "external_monitor") {
-    return resolveExternalMonitorTurn({ current, assistantHistory, playbook, symptoms });
-  }
-
-  if (asset === "mouse" || asset === "keyboard") {
-    return resolvePeripheralTurn({ asset, qualifier, current, assistantHistory, playbook, symptoms });
-  }
-
-  return {
-    asset,
-    qualifier,
-    symptoms,
-    playbookId: playbook.id,
-    knowledgeArticleId: playbook.knowledgeArticleId,
-    stage: "identify_asset",
-    response: playbook.firstQuestion(asset),
-    suggestedActions: [`Playbook ${playbook.id}: identificar activo`],
-  };
+  return attachDiagnostic(turn, previousDiagnostic, current, allUserText);
 }
 
 function resolvePeripheralTurn(params: {
@@ -108,7 +114,7 @@ function resolvePeripheralTurn(params: {
   assistantHistory: string[];
   playbook: ServiceDeskPlaybook;
   symptoms: ServiceDeskSymptom[];
-}): ServiceDeskTurn {
+}): ServiceDeskTurnCore {
   const { asset, qualifier, current, assistantHistory, playbook, symptoms } = params;
   const askedConnection = assistantHistory.some((content) => content.includes("usb") && content.includes("inalambrico"));
   const askedPortTest = assistantHistory.some((content) => content.includes("otro puerto usb"));
@@ -228,7 +234,7 @@ function resolveNotebookDisplayTurn(params: {
   assistantHistory: string[];
   playbook: ServiceDeskPlaybook;
   symptoms: ServiceDeskSymptom[];
-}): ServiceDeskTurn {
+}): ServiceDeskTurnCore {
   const { assistantHistory, playbook, symptoms } = params;
   const askedSymptom = assistantHistory.some((content) => content.includes("pantalla integrada") && content.includes("queda negra"));
 
@@ -262,11 +268,13 @@ function resolveNotebookDisplayTurn(params: {
 
 function resolveExternalMonitorTurn(params: {
   current: string;
+  allUserText: string;
+  previousDiagnostic?: DiagnosticContext;
   assistantHistory: string[];
   playbook: ServiceDeskPlaybook;
   symptoms: ServiceDeskSymptom[];
-}): ServiceDeskTurn {
-  const { current, assistantHistory, playbook, symptoms } = params;
+}): ServiceDeskTurnCore {
+  const { current, allUserText, previousDiagnostic, assistantHistory, playbook, symptoms } = params;
 
   if (mentionsInternalDisplay(current)) {
     return resolveNotebookDisplayTurn({
@@ -279,6 +287,14 @@ function resolveExternalMonitorTurn(params: {
 
   const askedPowerAndCable = assistantHistory.some((content) => content.includes("monitor enciende") && content.includes("cable queda firme"));
   const askedPowerLight = assistantHistory.some((content) => content.includes("enciende alguna luz") || content.includes("queda totalmente apagado"));
+  const askedAnyPowerCheck = askedPowerAndCable || askedPowerLight;
+  const confirmedNoPower = mentionsMonitorNoPower(allUserText) || hasFact(previousDiagnostic, "monitorPowerAbsent");
+  const triedPowerBasics =
+    mentionsPowerBasicsTested(allUserText) ||
+    hasFact(previousDiagnostic, "powerBasicsTested") ||
+    hasFact(previousDiagnostic, "powerOutletTested") ||
+    hasFact(previousDiagnostic, "powerCableTested");
+  const alreadyReadyToEscalate = previousDiagnostic?.stage === "prepare_escalation" || hasFact(previousDiagnostic, "escalationReady");
 
   if (hasAnyText(current, ["hdmi", "displayport", "dp", "vga", "cable de video"])) {
     return {
@@ -296,7 +312,23 @@ function resolveExternalMonitorTurn(params: {
     };
   }
 
-  if (askedPowerAndCable && hasAnyText(current, ["apagado", "no enciende", "no prende", "boton", "botón", "sin luz", "sin energia", "sin energía"])) {
+  if (alreadyReadyToEscalate || (askedAnyPowerCheck && confirmedNoPower && (askedPowerLight || triedPowerBasics || mentionsRepeatedInstruction(current)))) {
+    return {
+      asset: "external_monitor",
+      qualifier: "external",
+      symptoms,
+      playbookId: playbook.id,
+      knowledgeArticleId: playbook.knowledgeArticleId,
+      stage: "prepare_escalation",
+      response: [
+        "Entendido. Con eso ya queda descartado lo básico: monitor sin luz, sin encender, y energía/cable revisados.",
+        "No sigamos repitiendo HDMI ni enchufe. Corresponde derivar para revisión o reemplazo del monitor. Confírmame nombre, correo y área para dejar el caso preparado con esos descartes.",
+      ].join("\n\n"),
+      suggestedActions: [`Playbook ${playbook.id}: derivar monitor sin energía tras descarte básico`],
+    };
+  }
+
+  if (askedPowerAndCable && mentionsMonitorNoPower(current)) {
     return {
       asset: "external_monitor",
       qualifier: "external",
@@ -338,6 +370,68 @@ function resolveExternalMonitorTurn(params: {
     response: playbook.firstQuestion("external_monitor"),
     suggestedActions: [`Playbook ${playbook.id}: validar energía y cable de monitor externo`],
   };
+}
+
+function attachDiagnostic(
+  turn: ServiceDeskTurnCore,
+  previousDiagnostic: DiagnosticContext | undefined,
+  current: string,
+  allUserText: string,
+): ServiceDeskTurn {
+  const facts: Record<string, DiagnosticFactValue> = { ...(previousDiagnostic?.facts ?? {}) };
+
+  facts.assetIdentified = true;
+  facts.asset = turn.asset;
+  facts.symptoms = turn.symptoms;
+
+  if (turn.qualifier) {
+    facts.qualifier = turn.qualifier;
+  }
+
+  if (turn.asset === "external_monitor") {
+    facts.externalMonitorConfirmed = true;
+    if (mentionsMonitorNoPower(allUserText)) facts.monitorPowerAbsent = true;
+    if (mentionsVideoCable(allUserText)) facts.videoCableMentioned = true;
+    if (mentionsCableFirm(allUserText)) facts.cableFirm = true;
+    if (mentionsPowerOutletTested(allUserText)) facts.powerOutletTested = true;
+    if (mentionsPowerCableTested(allUserText)) facts.powerCableTested = true;
+    if (mentionsPowerBasicsTested(allUserText)) facts.powerBasicsTested = true;
+  }
+
+  if (turn.stage === "prepare_escalation") {
+    facts.escalationReady = true;
+  }
+
+  const completedSteps = Array.from(new Set([...(previousDiagnostic?.completedSteps ?? []), ...turn.suggestedActions]));
+
+  return {
+    ...turn,
+    diagnostic: {
+      playbookId: turn.playbookId,
+      knowledgeArticleId: turn.knowledgeArticleId,
+      asset: turn.asset,
+      qualifier: turn.qualifier,
+      stage: turn.stage,
+      facts,
+      completedSteps,
+      updatedAt: new Date().toISOString(),
+    },
+  };
+}
+
+function resolveAssetFromDiagnostic(diagnostic: DiagnosticContext | undefined): ServiceDeskAsset | undefined {
+  return isServiceDeskAsset(diagnostic?.asset) ? diagnostic.asset : undefined;
+}
+
+function isServiceDeskAsset(value: string | undefined): value is ServiceDeskAsset {
+  return (
+    value === "mouse" ||
+    value === "keyboard" ||
+    value === "external_monitor" ||
+    value === "notebook_display" ||
+    value === "printer" ||
+    value === "notebook"
+  );
 }
 
 function resolveAsset(current: string, allUserText: string): ServiceDeskAsset | undefined {
@@ -393,7 +487,7 @@ function assetLabel(asset: ServiceDeskAsset) {
 }
 
 function mentionsNoDetection(text: string) {
-  return hasAnyText(text, ["no enciende", "no prende", "no detecta", "no aparece", "nada", "sigue igual", "no funciona"]);
+  return hasAnyText(text, ["no enciende", "no enciuende", "no prende", "no detecta", "no aparece", "nada", "sigue igual", "no funciona", "no fuicna"]);
 }
 
 function mentionsReplacementWorks(text: string) {
@@ -402,6 +496,55 @@ function mentionsReplacementWorks(text: string) {
 
 function mentionsDetected(text: string) {
   return hasAnyText(text, ["si lo detecta", "sí lo detecta", "lo detecta", "funciona", "aparece", "conecto", "conectó"]);
+}
+
+function mentionsMonitorNoPower(text: string) {
+  return hasAnyText(text, [
+    "apagado",
+    "queda apagado",
+    "totalmente apagado",
+    "no enciende",
+    "no enciuende",
+    "no prende",
+    "no prende luz",
+    "sin luz",
+    "luz ni nada",
+    "sin energia",
+    "sin energía",
+  ]);
+}
+
+function mentionsPowerBasicsTested(text: string) {
+  return mentionsPowerOutletTested(text) || mentionsPowerCableTested(text) || mentionsCableFirm(text);
+}
+
+function mentionsPowerOutletTested(text: string) {
+  return hasAnyText(text, ["otro enchufe", "cambie el enchufe", "cambié el enchufe", "probe otro enchufe", "probé otro enchufe"]);
+}
+
+function mentionsPowerCableTested(text: string) {
+  return hasAnyText(text, ["otro cable", "oitro cakbe", "probe otro cable", "probé otro cable", "cable de poder", "cable poder"]);
+}
+
+function mentionsVideoCable(text: string) {
+  return hasAnyText(text, ["hdmi", "displayport", "dp", "vga", "cable de video"]);
+}
+
+function mentionsCableFirm(text: string) {
+  return hasAnyText(text, ["esta firme", "está firme", "cable firme", "enchufe firme"]);
+}
+
+function mentionsRepeatedInstruction(text: string) {
+  return hasAnyText(text, [
+    "3 vez",
+    "tercera vez",
+    "otra vez",
+    "ya te dije",
+    "te dije",
+    "te digo",
+    "no repitas",
+    "no enciende!!!",
+  ]);
 }
 
 function mentionsInternalDisplay(text: string) {
@@ -427,6 +570,10 @@ function mentionsExternalMonitor(text: string) {
 
 function hasAnyText(value: string, terms: string[]) {
   return terms.some((term) => value.includes(normalizeText(term)));
+}
+
+function hasFact(diagnostic: DiagnosticContext | undefined, key: string) {
+  return diagnostic?.facts[key] === true;
 }
 
 function normalizeText(message: string) {

@@ -20,6 +20,28 @@ export type OperationalStatus =
   | "Preparando ticket"
   | "Cerrando caso";
 
+export type DiagnosticStage =
+  | "identify_asset"
+  | "qualify_connection"
+  | "run_first_check"
+  | "isolate_component"
+  | "prepare_escalation"
+  | "ticket_created"
+  | "resolved";
+
+export type DiagnosticFactValue = boolean | string | string[];
+
+export type DiagnosticContext = {
+  playbookId: string;
+  knowledgeArticleId: string;
+  asset: string;
+  qualifier?: string;
+  stage: DiagnosticStage;
+  facts: Record<string, DiagnosticFactValue>;
+  completedSteps: string[];
+  updatedAt: string;
+};
+
 export type KnowledgeArticle = {
   id: string;
   title: string;
@@ -79,6 +101,7 @@ export type SessionContext = {
   detectedIntent?: ITSMIntent;
   priority?: ITSMPriority;
   activeArticleId?: string;
+  diagnostic?: DiagnosticContext;
   ticketDraft?: TicketDraft;
   stepsExecuted: string[];
   awaitingResolutionConfirmation?: boolean;
@@ -101,6 +124,7 @@ export type ITSMResponse = {
   operationalStatuses: OperationalStatus[];
   shouldCreateTicket: boolean;
   shouldEscalate: boolean;
+  diagnostic?: DiagnosticContext;
   ticketDraft: TicketDraft;
 };
 

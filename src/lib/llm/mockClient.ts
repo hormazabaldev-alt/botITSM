@@ -21,10 +21,11 @@ export async function generateMockITSMResponse(input: ITSMResponseInput): Promis
   const knowledgeMatches = input.knowledgeMatches.length
     ? input.knowledgeMatches
     : findKnowledgeMatches(input.userMessage, detectedIntent);
-  const serviceDeskTurn = detectedIntent === "HARDWARE_ISSUE" ? resolveServiceDeskTurn(input.userMessage, input.sessionContext.messages) : undefined;
+  const serviceDeskTurn = detectedIntent === "HARDWARE_ISSUE" ? resolveServiceDeskTurn(input.userMessage, input.sessionContext) : undefined;
   const serviceDeskArticle = findKnowledgeArticleById(serviceDeskTurn?.knowledgeArticleId);
   const article = serviceDeskArticle ?? knowledgeMatches[0];
   const requiredFields = getMissingFields(mergedContext, priority);
+  const hasMinimumRequesterData = requiredFields.length === 0;
   const ticketDraft = buildTicketDraft({
     message: input.userMessage,
     intent: detectedIntent,
@@ -34,8 +35,10 @@ export async function generateMockITSMResponse(input: ITSMResponseInput): Promis
   });
   const baseShouldEscalate =
     priority === "P1" || detectedIntent === "SECURITY_INCIDENT" || shouldCreateTicketFromMessage(input.userMessage, priority, detectedIntent);
-  const shouldEscalate = serviceDeskTurn && serviceDeskTurn.stage !== "prepare_escalation" ? false : baseShouldEscalate;
-  const shouldCreateTicket = shouldEscalate && !isResolvedMessage(input.userMessage);
+  const serviceDeskReadyForEscalation = serviceDeskTurn?.stage === "prepare_escalation";
+  const shouldEscalate = serviceDeskTurn && serviceDeskTurn.stage !== "prepare_escalation" ? false : baseShouldEscalate || serviceDeskReadyForEscalation;
+  const shouldCreateTicket =
+    ((shouldEscalate || serviceDeskReadyForEscalation) && hasMinimumRequesterData) && !isResolvedMessage(input.userMessage);
   if (isGreetingOnly(input.userMessage)) {
     return {
       assistantMessage: "Hola. Escríbeme qué falla y te guío con el siguiente paso.",
@@ -46,6 +49,7 @@ export async function generateMockITSMResponse(input: ITSMResponseInput): Promis
       operationalStatuses: ["Detectando intención"],
       shouldCreateTicket: false,
       shouldEscalate: false,
+      diagnostic: serviceDeskTurn?.diagnostic,
       ticketDraft,
     };
   }
@@ -61,6 +65,9 @@ export async function generateMockITSMResponse(input: ITSMResponseInput): Promis
       operationalStatuses: ["Detectando intención", "Consultando base de conocimiento", "Cerrando caso"],
       shouldCreateTicket: false,
       shouldEscalate: false,
+      diagnostic: serviceDeskTurn?.diagnostic
+        ? { ...serviceDeskTurn.diagnostic, stage: "resolved", facts: { ...serviceDeskTurn.diagnostic.facts, resolvedByUser: true } }
+        : undefined,
       ticketDraft: { ...ticketDraft, status: "resolved" },
     };
   }
@@ -82,6 +89,7 @@ export async function generateMockITSMResponse(input: ITSMResponseInput): Promis
       : ["Detectando intención", "Consultando base de conocimiento", "Ejecutando guía de descarte"],
     shouldCreateTicket,
     shouldEscalate,
+    diagnostic: serviceDeskTurn?.diagnostic,
     ticketDraft,
   };
 }
@@ -100,6 +108,13 @@ function buildOperationalMessage({
   serviceDeskTurn?: ServiceDeskTurn;
 }) {
   if (shouldCreateTicket) {
+    if (serviceDeskTurn?.stage === "prepare_escalation") {
+      return [
+        "Perfecto. Con los descartes realizados y tus datos, voy a registrar el caso para revisión o reemplazo.",
+        "Dejo incluido el síntoma, las pruebas ya realizadas y el activo afectado para que soporte no te pida repetir lo mismo.",
+      ].join("\n\n");
+    }
+
     const firstStep = article?.resolutionSteps[0] ? formatStepForUser(article.resolutionSteps[0]) : undefined;
 
     return [

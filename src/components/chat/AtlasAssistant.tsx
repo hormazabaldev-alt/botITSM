@@ -24,6 +24,7 @@ import type { ChatMessage, ITSMResponse, OperationalStatus, SessionContext, Tick
 type ChatApiResponse = {
   response: ITSMResponse;
   sessionContext: SessionContext;
+  ticket?: Ticket;
 };
 
 const sessionContextStorageKey = "atlas-active-session-context";
@@ -150,18 +151,9 @@ export function AtlasAssistant() {
       setMessages([initialMessage, ...refinedContext.messages]);
       setStatus(resolveStatus(payload.response.operationalStatuses));
 
-      if (payload.response.shouldCreateTicket) {
-        const ticketResponse = await fetch("/api/tickets", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ticketDraft: payload.response.ticketDraft }),
-        });
-
-        if (ticketResponse.ok) {
-          const ticketPayload = (await ticketResponse.json()) as { ticket: Ticket };
-          setTicket(ticketPayload.ticket);
-          setStatus("caso registrado");
-        }
+      if (payload.ticket) {
+        setTicket(payload.ticket);
+        setStatus("caso registrado");
       }
     } catch {
       setMessages((current) => [

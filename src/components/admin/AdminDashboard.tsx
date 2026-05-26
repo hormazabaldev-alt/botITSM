@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import {
   Activity,
   BarChart3,
@@ -21,17 +21,9 @@ import {
 import { BrandMark } from "@/components/shared/BrandMark";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import {
-  getAdminKpis,
-  getAgingBuckets,
-  getEscalationFunnel,
-  getHourlyHeatmap,
-  getKnowledgeUsage,
-  getSentimentBreakdown,
-  getSlaBreachesByDay,
-  getVolumeByDay,
-  groupByField,
   listOperationalCases,
 } from "@/services/operations.repository";
+import type { Ticket as ITSMDemoTicket } from "@/lib/itsm/types";
 import type { AdminKpi, ChartPoint, OperationalCase } from "@/types/operational";
 
 const navItems = [
@@ -169,22 +161,227 @@ function kpiValue(kpis: AdminKpi[], label: string) {
   return kpis.find((kpi) => kpi.label === label)?.value ?? "-";
 }
 
+function ticketToOperationalCase(ticket: ITSMDemoTicket): OperationalCase {
+  const duration = Math.max(1, Math.round((Date.now() - new Date(ticket.createdAt).getTime()) / 60000));
+  const escalated = ticket.status === "escalated" || ticket.status === "created";
+
+  return {
+    id: ticket.id,
+    user_name: ticket.requesterName,
+    department: ticket.businessArea ?? "Área pendiente",
+    issue_type: ticket.type,
+    category: ticket.category,
+    priority: ticket.priority,
+    status: ticketStatusToCaseStatus(ticket.status),
+    created_at: ticket.createdAt,
+    resolved_at: ticket.status === "resolved" ? ticket.createdAt : null,
+    resolution_type: ticket.status === "resolved" ? "Autónoma" : escalated ? "Escalada" : "Pendiente",
+    escalated,
+    assigned_technician: ticket.assignedTeam,
+    sentiment: ticket.priority === "P1" ? "Crítico" : escalated ? "Tenso" : "Neutral",
+    conversation_summary: ticket.description,
+    sla_minutes: slaMinutes(ticket.priority),
+    duration_minutes: duration,
+    knowledge_article: extractKnowledgeArticle(ticket.description),
+  };
+}
+
+function mergeOperationalCases(realCases: OperationalCase[], mockCases: OperationalCase[]) {
+  const seen = new Set(realCases.map((item) => item.id));
+  return [...realCases, ...mockCases.filter((item) => !seen.has(item.id))]
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    .slice(0, 100);
+}
+
+function ticketStatusToCaseStatus(status: ITSMDemoTicket["status"]): OperationalCase["status"] {
+  if (status === "resolved") return "Resuelto";
+  if (status === "escalated" || status === "created") return "Escalado";
+  return "En diagnóstico";
+}
+
+function slaMinutes(priority: ITSMDemoTicket["priority"]) {
+  const minutes: Record<ITSMDemoTicket["priority"], number> = {
+    P1: 240,
+    P2: 480,
+    P3: 1440,
+    P4: 4320,
+  };
+
+  return minutes[priority];
+}
+
+function extractKnowledgeArticle(description: string) {
+  return description.match(/Referencia KB:\s*([^|]+)/)?.[1]?.trim() ?? description.match(/Playbook:\s*([^|]+)/)?.[1]?.trim() ?? "Diagnóstico conversacional";
+}
+
+function buildAdminKpis(cases: OperationalCase[]): AdminKpi[] {
+  const total = Math.max(cases.length, 1);
+  const generatedTickets = cases.filter((item) => item.status !== "Resuelto" || item.escalated).length;
+  const autonomous = cases.filter((item) => item.resolution_type === "Autónoma").length;
+  const escalated = cases.filter((item) => item.escalated).length;
+  const criticalActive = cases.filter((item) => item.priority === "P1" && item.status !== "Resuelto").length;
+  const resolved = cases.filter((item) => item.status === "Resuelto");
+  const avgResolution = resolved.length
+    ? Math.round(resolved.reduce((sum, item) => sum + item.duration_minutes, 0) / resolved.length)
+    : Math.round(cases.reduce((sum, item) => sum + item.duration_minutes, 0) / total);
+  const slaMet = Math.round((cases.filter((item) => item.duration_minutes <= item.sla_minutes).length / total) * 100);
+  const positiveSentiment = Math.round(
+    (cases.filter((item) => item.sentiment === "Positivo" || item.sentiment === "Neutral").length / total) * 100,
+  );
+
+  return [
+    { label: "Conversaciones", value: cases.length.toLocaleString("es-CL"), delta: "incluye tickets reales", emphasis: "neutral" },
+    { label: "Tickets generados", value: generatedTickets.toString(), delta: "desde bot + demo", emphasis: "neutral" },
+    { label: "Resolución autónoma", value: `${Math.round((autonomous / total) * 100)}%`, delta: "sin derivación humana", emphasis: "positive" },
+    { label: "Escalados humanos", value: escalated.toString(), delta: "con contexto completo", emphasis: "neutral" },
+    { label: "Tiempo promedio", value: `${avgResolution} min`, delta: "casos gestionados", emphasis: "positive" },
+    { label: "Cumplimiento SLA", value: `${slaMet}%`, delta: "según prioridad", emphasis: slaMet >= 95 ? "positive" : "critical" },
+    { label: "Sentiment usuarios", value: `${positiveSentiment}%`, delta: "positivo o neutral", emphasis: "positive" },
+    { label: "Críticos activos", value: criticalActive.toString(), delta: "requiere seguimiento", emphasis: criticalActive ? "critical" : "positive" },
+  ];
+}
+
+function getVolumeByDay(cases: OperationalCase[]): ChartPoint[] {
+  const buckets = new Map<string, number>();
+  for (const item of cases) {
+    const label = new Intl.DateTimeFormat("es-CL", { day: "2-digit", month: "short", timeZone: "UTC" }).format(
+      new Date(item.created_at),
+    );
+    buckets.set(label, (buckets.get(label) ?? 0) + 1);
+  }
+
+  return Array.from(buckets.entries())
+    .map(([label, value]) => ({ label, value }))
+    .reverse()
+    .slice(-10);
+}
+
+function groupByField<T extends keyof OperationalCase>(cases: OperationalCase[], field: T, limit = 8): ChartPoint[] {
+  const buckets = new Map<string, number>();
+  for (const item of cases) {
+    buckets.set(String(item[field]), (buckets.get(String(item[field])) ?? 0) + 1);
+  }
+
+  return Array.from(buckets.entries())
+    .map(([label, value]) => ({ label, value }))
+    .sort((a, b) => b.value - a.value)
+    .slice(0, limit);
+}
+
+function getHourlyHeatmap(cases: OperationalCase[]): ChartPoint[] {
+  const hours = Array.from({ length: 12 }, (_, index) => 8 + index);
+
+  return hours.map((hour) => ({
+    label: `${String(hour).padStart(2, "0")}:00`,
+    value: cases.filter((item) => new Date(item.created_at).getUTCHours() === hour).length,
+  }));
+}
+
+function getKnowledgeUsage(cases: OperationalCase[]): ChartPoint[] {
+  const buckets = new Map<string, number>();
+  for (const item of cases) {
+    buckets.set(item.knowledge_article, (buckets.get(item.knowledge_article) ?? 0) + 1);
+  }
+
+  return Array.from(buckets.entries())
+    .map(([label, value]) => ({ label, value }))
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 7);
+}
+
+function getSlaBreachesByDay(cases: OperationalCase[]): ChartPoint[] {
+  const buckets = new Map<string, number>();
+  for (const item of cases) {
+    if (item.duration_minutes <= item.sla_minutes) continue;
+
+    const label = new Intl.DateTimeFormat("es-CL", { day: "2-digit", month: "short", timeZone: "UTC" }).format(
+      new Date(item.created_at),
+    );
+    buckets.set(label, (buckets.get(label) ?? 0) + 1);
+  }
+
+  return Array.from(buckets.entries())
+    .map(([label, value]) => ({ label, value }))
+    .reverse()
+    .slice(-10);
+}
+
+function getEscalationFunnel(cases: OperationalCase[]): ChartPoint[] {
+  return [
+    { label: "Intake", value: cases.length },
+    { label: "Clasificados", value: cases.filter((item) => item.issue_type).length },
+    { label: "Con KB", value: cases.filter((item) => item.knowledge_article).length },
+    { label: "Escalados", value: cases.filter((item) => item.escalated).length },
+    { label: "Resueltos", value: cases.filter((item) => item.status === "Resuelto").length },
+  ];
+}
+
+function getAgingBuckets(cases: OperationalCase[]): ChartPoint[] {
+  const buckets = [
+    { label: "<4h", value: 0 },
+    { label: "4-8h", value: 0 },
+    { label: "8-24h", value: 0 },
+    { label: ">24h", value: 0 },
+  ];
+
+  for (const item of cases) {
+    if (item.status === "Resuelto") continue;
+    const hours = item.duration_minutes / 60;
+    if (hours < 4) buckets[0].value += 1;
+    else if (hours < 8) buckets[1].value += 1;
+    else if (hours < 24) buckets[2].value += 1;
+    else buckets[3].value += 1;
+  }
+
+  return buckets;
+}
+
 function AdminWorkspace() {
   const [activeSection, setActiveSection] = useState("overview");
-  const kpis = useMemo(() => getAdminKpis(), []);
-  const cases = useMemo(() => listOperationalCases(100), []);
-  const byDay = useMemo(() => getVolumeByDay(), []);
-  const byType = useMemo(() => groupByField("category", 7), []);
-  const byPriority = useMemo(() => groupByField("priority", 4), []);
-  const heatmap = useMemo(() => getHourlyHeatmap(), []);
-  const topIntents = useMemo(() => groupByField("issue_type", 7), []);
+  const [realTickets, setRealTickets] = useState<ITSMDemoTicket[]>([]);
+  const [ticketSource, setTicketSource] = useState<"cargando" | "supabase" | "demo">("cargando");
+  const mockCases = useMemo(() => listOperationalCases(100), []);
+  const realCases = useMemo(() => realTickets.map(ticketToOperationalCase), [realTickets]);
+  const cases = useMemo(() => mergeOperationalCases(realCases, mockCases), [realCases, mockCases]);
+  const kpis = useMemo(() => buildAdminKpis(cases), [cases]);
+  const byDay = useMemo(() => getVolumeByDay(cases), [cases]);
+  const byType = useMemo(() => groupByField(cases, "category", 7), [cases]);
+  const byPriority = useMemo(() => groupByField(cases, "priority", 4), [cases]);
+  const heatmap = useMemo(() => getHourlyHeatmap(cases), [cases]);
+  const topIntents = useMemo(() => groupByField(cases, "issue_type", 7), [cases]);
   const escalated = useMemo(() => cases.filter((item) => item.escalated).slice(0, 7), [cases]);
-  const knowledge = useMemo(() => getKnowledgeUsage(), []);
-  const slaBreachesByDay = useMemo(() => getSlaBreachesByDay(), []);
-  const escalationFunnel = useMemo(() => getEscalationFunnel(), []);
-  const agingBuckets = useMemo(() => getAgingBuckets(), []);
-  const sentimentBreakdown = useMemo(() => getSentimentBreakdown(), []);
+  const knowledge = useMemo(() => getKnowledgeUsage(cases), [cases]);
+  const slaBreachesByDay = useMemo(() => getSlaBreachesByDay(cases), [cases]);
+  const escalationFunnel = useMemo(() => getEscalationFunnel(cases), [cases]);
+  const agingBuckets = useMemo(() => getAgingBuckets(cases), [cases]);
+  const sentimentBreakdown = useMemo(() => groupByField(cases, "sentiment", 5), [cases]);
   const operationalModel = useMemo(() => buildOperationalModel(cases, kpis, knowledge), [cases, kpis, knowledge]);
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadTickets() {
+      try {
+        const response = await fetch("/api/tickets", { cache: "no-store" });
+        if (!response.ok) throw new Error("tickets unavailable");
+        const payload = (await response.json()) as { tickets?: ITSMDemoTicket[]; source?: "supabase" | "memory" };
+        if (!active) return;
+        setRealTickets(payload.tickets ?? []);
+        setTicketSource(payload.source === "supabase" ? "supabase" : "demo");
+      } catch {
+        if (!active) return;
+        setTicketSource("demo");
+      }
+    }
+
+    void loadTickets();
+    const interval = window.setInterval(loadTickets, 15000);
+
+    return () => {
+      active = false;
+      window.clearInterval(interval);
+    };
+  }, []);
 
   function goToSection(id: string) {
     setActiveSection(id);
@@ -236,6 +433,9 @@ function AdminWorkspace() {
               <div className="flex flex-wrap gap-1.5">
                 <StatusBadge tone="cyan">Mercury-ready</StatusBadge>
                 <StatusBadge tone="cyan">Supabase-ready</StatusBadge>
+                <StatusBadge tone={ticketSource === "supabase" ? "green" : "amber"}>
+                  {ticketSource === "supabase" ? `${realTickets.length} tickets reales` : "tickets demo"}
+                </StatusBadge>
                 <StatusBadge tone="slate">ITIL aligned</StatusBadge>
               </div>
             </div>
@@ -312,7 +512,9 @@ function AdminWorkspace() {
                 <div className="flex flex-wrap gap-1.5">
                   <StatusBadge tone="cyan">ITSM taxonomy</StatusBadge>
                   <StatusBadge tone="slate">Audit-ready</StatusBadge>
-                  <StatusBadge tone="slate">Mock data</StatusBadge>
+                  <StatusBadge tone={realTickets.length ? "green" : "slate"}>
+                    {realTickets.length ? "Supabase live" : "Mock + live ready"}
+                  </StatusBadge>
                 </div>
               </div>
             </section>

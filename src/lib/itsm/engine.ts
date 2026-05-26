@@ -75,12 +75,16 @@ export function detectIntent(message: string): ITSMIntent {
 
 export function detectTurnIntent(message: string, context?: SessionContext): ITSMIntent {
   const detectedIntent = detectIntent(message);
+  const text = normalize(message);
+
+  if (context?.detectedIntent && (context.activeArticleId || context.diagnostic) && isRequesterDataMessage(text)) {
+    return context.detectedIntent;
+  }
 
   if (detectedIntent !== "INCIDENT" || !context?.detectedIntent) {
     return detectedIntent;
   }
 
-  const text = normalize(message);
   const explicitIncident = hasAny(text, ["se cayo", "caida", "indisponible", "produccion", "detenido", "sistema", "aplicacion", "servicio", "barra", "windows", "inicio", "escritorio"]);
 
   return explicitIncident ? detectedIntent : context.detectedIntent;
@@ -257,6 +261,13 @@ function hasAny(value: string, terms: string[]) {
 
 function isGreetingOnly(value: string) {
   return /^(hola|buenas|buenos dias|buenas tardes|buenas noches|hello|hi)[.!¡! ]*$/.test(value);
+}
+
+function isRequesterDataMessage(value: string) {
+  return (
+    hasAny(value, ["@", "correo", "mail", "nombre", "soy", "me llamo", "area", "área", "departamento"]) &&
+    !hasAny(value, ["no puedo", "no abre", "no funciona", "falla", "error", "problema", "acceso", "clave", "password", "mfa"])
+  );
 }
 
 function cleanValue(value: string) {
