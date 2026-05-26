@@ -245,80 +245,39 @@ export function SupportPortal() {
   );
 }
 
-/* ── Wordmark + Isotipo SONDA — Diseño de Alta Fidelidad en SVG ───────────────────────────
-   Fiel al restyling oficial: letras blancas y el isotipo de curvas dinámicas en gradiente cyan */
 function SondaLogoModern({ width = 280 }: { width?: number }) {
-  const h = Math.round(width * 0.35);
+  const h = Math.round(width * 0.32);
   return (
     <svg
       width={width}
       height={h}
-      viewBox="0 0 540 160"
+      viewBox="0 0 520 160"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       aria-label="SONDA"
       role="img"
     >
-      <defs>
-        {/* Gradiente cyan premium oficial */}
-        <linearGradient id="sondaCyanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#00FFFF" />
-          <stop offset="100%" stopColor="#0066FF" />
-        </linearGradient>
-        
-        {/* Glow de alta fidelidad para el isotipo */}
-        <filter id="sondaGlow" x="-20%" y="-20%" width="140%" height="140%">
-          <feGaussianBlur stdDeviation="6" result="blur" />
-          <feComposite in="SourceGraphic" in2="blur" operator="over" />
-        </filter>
-      </defs>
-
-      {/* ── ISOTIPO SONDA (Curvas entrelazadas en cyan y blanco) ── */}
-      <g transform="translate(15, 12)" filter="url(#sondaGlow)">
-        {/* Órbita principal cyan */}
-        <path
-          d="M 55,108 C 25,108 8,82 8,55 C 8,28 25,6 55,6 C 85,6 102,28 102,55 C 102,82 85,108 55,108 Z"
-          stroke="url(#sondaCyanGrad)"
-          strokeWidth="11"
-          fill="none"
-          strokeLinecap="round"
-          opacity="0.95"
-        />
-        
-        {/* Cinta interna blanca para efecto 3D tecnológico */}
-        <path
-          d="M 28,68 C 22,55 25,38 35,28 C 45,18 62,18 72,28 C 82,38 85,55 79,68 C 73,81 60,94 45,94"
-          stroke="#FFFFFF"
-          strokeWidth="5"
-          fill="none"
-          strokeLinecap="round"
-          opacity="0.75"
-        />
-
-        {/* Punto de brillo central (núcleo) */}
-        <circle cx="55" cy="55" r="7" fill="#00FFFF" />
-      </g>
-
-      {/* ── WORDMARK SONDA — Tipografía oficial en blanco ── */}
+      {/* ── WORDMARK SONDA — Tipografía oficial centrada en blanco ── */}
       <text
-        x="135"
-        y="108"
+        x="50%"
+        y="120"
+        textAnchor="middle"
         fontFamily="'Kumbh Sans', 'Arial Black', sans-serif"
         fontWeight="900"
-        fontSize="106"
-        letterSpacing="-3"
+        fontSize="122"
+        letterSpacing="-3.5"
         fill="#FFFFFF"
       >
         SONDA
       </text>
 
-      {/* Registed trademark ® en superíndice */}
+      {/* Registed trademark ® en superíndice al lado derecho */}
       <text
-        x="506"
+        x="482"
         y="42"
         fontFamily="'Kumbh Sans', 'Arial', sans-serif"
         fontWeight="600"
-        fontSize="28"
+        fontSize="32"
         fill="rgba(0, 255, 255, 0.85)"
       >
         ®
