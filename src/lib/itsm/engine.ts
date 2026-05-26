@@ -123,6 +123,11 @@ export function extractFields(message: string, context: SessionContext): Session
     collected.activo = cleanValue(assetMatch[1]);
   }
 
+  const normalizedText = normalize(text);
+  if (!collected.activo && hasAny(normalizedText, ["mouse", "raton", "teclado", "monitor", "pantalla", "impresora"])) {
+    collected.activo = inferAssetFromText(normalizedText);
+  }
+
   const systemMatch = text.match(/(?:sistema|aplicación|aplicacion|servicio)\s*(?:es|:)\s*([A-Za-zÁÉÍÓÚÑáéíóúñ0-9._ -]{3,})/i);
   if (systemMatch?.[1]) {
     collected.sistema = cleanValue(systemMatch[1]);
@@ -242,6 +247,14 @@ function isGreetingOnly(value: string) {
 
 function cleanValue(value: string) {
   return value.replace(/[.,;].*$/, "").trim();
+}
+
+function inferAssetFromText(text: string) {
+  if (text.includes("mouse") || text.includes("raton")) return "Mouse";
+  if (text.includes("teclado")) return "Teclado";
+  if (text.includes("monitor") || text.includes("pantalla")) return "Monitor";
+  if (text.includes("impresora")) return "Impresora";
+  return "Periférico";
 }
 
 function categoryByIntent(intent: ITSMIntent) {

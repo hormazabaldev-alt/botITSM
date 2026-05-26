@@ -80,6 +80,26 @@ export const knowledgeBase: KnowledgeArticle[] = [
     tags: ["notebook", "lento", "rendimiento", "hardware", "equipo"],
   },
   {
+    id: "kb-wired-peripheral",
+    title: "Diagnóstico de mouse o teclado cableado",
+    category: "Puesto de trabajo",
+    intent: "HARDWARE_ISSUE",
+    symptoms: ["Mouse no funciona", "Teclado no responde", "Periférico USB no detectado"],
+    resolutionSteps: [
+      "Confirmar si el periférico es cableado, inalámbrico o Bluetooth.",
+      "Probar otro puerto USB del equipo, evitando hubs o adaptadores intermedios.",
+      "Validar si el periférico enciende luz o aparece como dispositivo conectado.",
+      "Probar otro periférico en el mismo equipo para aislar si falla el puerto o el accesorio.",
+      "Registrar activo afectado y resultado del descarte antes de escalar.",
+    ],
+    escalationCriteria: [
+      "El periférico no enciende ni es detectado en ningún puerto.",
+      "Otro periférico tampoco funciona en el equipo.",
+      "El usuario queda sin capacidad operativa para trabajar.",
+    ],
+    tags: ["mouse", "raton", "ratón", "teclado", "usb", "cable", "puerto", "enciende", "detecta", "conectado", "periferico", "periférico"],
+  },
+  {
     id: "kb-shared-folder-access",
     title: "Solicitud de acceso a carpeta compartida",
     category: "Accesos y permisos",
@@ -120,14 +140,14 @@ export const knowledgeBase: KnowledgeArticle[] = [
 ];
 
 export function findKnowledgeMatches(message: string, intent?: ITSMIntent) {
-  const normalizedMessage = message.toLowerCase();
+  const normalizedMessage = normalizeSearchText(message);
 
   return knowledgeBase
     .map((article) => {
       const intentScore = intent && article.intent === intent ? 5 : 0;
-      const tagScore = article.tags.filter((tag) => normalizedMessage.includes(tag)).length * 2;
+      const tagScore = article.tags.filter((tag) => normalizedMessage.includes(normalizeSearchText(tag))).length * 2;
       const symptomScore = article.symptoms.filter((symptom) =>
-        normalizedMessage.includes(symptom.toLowerCase()),
+        normalizedMessage.includes(normalizeSearchText(symptom)),
       ).length;
 
       return { article, score: intentScore + tagScore + symptomScore };
@@ -135,4 +155,8 @@ export function findKnowledgeMatches(message: string, intent?: ITSMIntent) {
     .filter(({ score }) => score > 0)
     .sort((a, b) => b.score - a.score)
     .map(({ article }) => article);
+}
+
+function normalizeSearchText(value: string) {
+  return value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
