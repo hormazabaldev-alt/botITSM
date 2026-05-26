@@ -68,14 +68,14 @@ const initialMessage: ChatMessage = {
   id: "atlas-welcome",
   role: "assistant",
   createdAt: new Date().toISOString(),
-  content: "Hola. Cuéntame qué necesitas resolver.",
+  content: "Hola. Escríbeme qué falla y te guío con el siguiente paso.",
 };
 
 const statusLabels: Partial<Record<OperationalStatus, string>> = {
   "Detectando intención": "analizando...",
   "Clasificando según ITIL": "analizando...",
   "Consultando base de conocimiento": "consultando guía...",
-  "Ejecutando guía de descarte": "revisando pasos...",
+  "Ejecutando guía de descarte": "validando guía...",
   "Preparando ticket": "preparando escalamiento...",
   "Cerrando caso": "cerrando...",
 };

@@ -34,7 +34,7 @@ export function detectIntent(message: string): ITSMIntent {
     return "SERVICE_REQUEST";
   }
 
-  if (hasAny(text, ["seguridad", "phishing", "malware", "ransomware", "cuenta comprometida"])) {
+  if (hasAny(text, ["seguridad", "phishing", "malware", "ransomware", "cuenta comprometida", "virus", "antivirus", "bitlocker", "correo sospechoso"])) {
     return "SECURITY_INCIDENT";
   }
 
@@ -42,11 +42,15 @@ export function detectIntent(message: string): ITSMIntent {
     return "INCIDENT";
   }
 
-  if (hasAny(text, ["vpn", "red", "internet", "conectividad", "wifi", "latencia"])) {
+  if (hasAny(text, ["excel", "office", "word", "powerpoint", "teams"]) && hasAny(text, ["problema", "falla", "error", "no abre", "no inicia", "se cierra", "queda pegado", "bloqueado"])) {
+    return "INCIDENT";
+  }
+
+  if (hasAny(text, ["vpn", "red", "internet", "conectividad", "wifi", "wi-fi", "latencia", "ethernet", "lan"])) {
     return "NETWORK_ISSUE";
   }
 
-  if (hasAny(text, ["correo", "mail", "outlook", "clave", "password", "mfa", "carpeta", "permiso", "acceso"])) {
+  if (hasAny(text, ["correo", "mail", "outlook", "clave", "password", "mfa", "carpeta", "permiso", "acceso", "certificado", "firma", "perfil", "rol"])) {
     return "ACCESS_REQUEST";
   }
 
@@ -54,7 +58,7 @@ export function detectIntent(message: string): ITSMIntent {
     return "SOFTWARE_REQUEST";
   }
 
-  if (hasAny(text, ["notebook", "equipo", "lento", "pantalla", "batería", "bateria", "hardware", "mouse", "raton", "ratón", "teclado", "monitor", "impresora", "periferico", "periférico"])) {
+  if (hasAny(text, ["notebook", "equipo", "lento", "pantalla", "batería", "bateria", "hardware", "mouse", "raton", "ratón", "teclado", "monitor", "impresora", "periferico", "periférico", "camara", "cámara", "microfono", "micrófono", "cargador"])) {
     return "HARDWARE_ISSUE";
   }
 
@@ -133,6 +137,10 @@ export function extractFields(message: string, context: SessionContext): Session
   const systemMatch = text.match(/(?:sistema|aplicación|aplicacion|servicio)\s*(?:es|:)\s*([A-Za-zÁÉÍÓÚÑáéíóúñ0-9._ -]{3,})/i);
   if (systemMatch?.[1]) {
     collected.sistema = cleanValue(systemMatch[1]);
+  }
+
+  if (!collected.sistema) {
+    collected.sistema = inferProductivitySystem(normalizedText);
   }
 
   if (hasAny(normalize(text), ["alto", "varios", "todos", "crítico", "critico", "detenido"])) {
@@ -257,6 +265,15 @@ function inferAssetFromText(text: string) {
   if (text.includes("monitor") || text.includes("pantalla")) return "Monitor";
   if (text.includes("impresora")) return "Impresora";
   return "Periférico";
+}
+
+function inferProductivitySystem(text: string) {
+  if (text.includes("excel")) return "Microsoft Excel";
+  if (text.includes("word")) return "Microsoft Word";
+  if (text.includes("powerpoint")) return "Microsoft PowerPoint";
+  if (text.includes("teams")) return "Microsoft Teams";
+  if (text.includes("office")) return "Microsoft Office";
+  return undefined;
 }
 
 function mentionsInternalDisplay(text: string) {

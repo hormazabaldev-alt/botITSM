@@ -9,7 +9,7 @@ import {
   shouldCreateTicketFromMessage,
 } from "@/lib/itsm/engine";
 import { resolveServiceDeskTurn, type ServiceDeskTurn } from "@/lib/itsm/serviceDeskLayer";
-import type { ITSMIntent, ITSMResponse, ITSMResponseInput, SessionContext } from "@/lib/itsm/types";
+import type { ITSMIntent, ITSMResponse, ITSMResponseInput, KnowledgeArticle, SessionContext } from "@/lib/itsm/types";
 
 export async function generateMockITSMResponse(input: ITSMResponseInput): Promise<ITSMResponse> {
   const mergedContext: SessionContext = {
@@ -67,6 +67,7 @@ export async function generateMockITSMResponse(input: ITSMResponseInput): Promis
   return {
     assistantMessage: buildOperationalMessage({
       intent: detectedIntent,
+      article,
       requiredFields,
       shouldCreateTicket,
       serviceDeskTurn,
@@ -74,7 +75,7 @@ export async function generateMockITSMResponse(input: ITSMResponseInput): Promis
     classification: detectedIntent,
     priority,
     requiredFields,
-    suggestedActions: serviceDeskTurn?.suggestedActions ?? article?.resolutionSteps ?? ["Recopilar contexto", "Clasificar prioridad", "Escalar si persiste"],
+    suggestedActions: article?.resolutionSteps ?? serviceDeskTurn?.suggestedActions ?? ["Recopilar contexto", "Clasificar prioridad", "Escalar si persiste"],
     operationalStatuses: shouldCreateTicket
       ? ["Detectando intención", "Consultando base de conocimiento", "Preparando ticket"]
       : ["Detectando intención", "Consultando base de conocimiento", "Ejecutando guía de descarte"],
@@ -86,19 +87,34 @@ export async function generateMockITSMResponse(input: ITSMResponseInput): Promis
 
 function buildOperationalMessage({
   intent,
+  article,
   requiredFields,
   shouldCreateTicket,
   serviceDeskTurn,
 }: {
   intent: ITSMIntent;
+  article?: KnowledgeArticle;
   requiredFields: string[];
   shouldCreateTicket: boolean;
   serviceDeskTurn?: ServiceDeskTurn;
 }) {
   if (shouldCreateTicket) {
+    const firstStep = article?.resolutionSteps[0] ? formatStepForUser(article.resolutionSteps[0]) : undefined;
+
     return [
-      "Entendido. Lo dejo listo para derivar con el contexto actual.",
+      firstStep ? `Entendido. ${firstStep}` : "Entendido. Lo dejo listo para derivar con el contexto actual.",
       requiredFields.length ? `Confírmame solo esto: ${requiredFields.join(", ")}.` : "Te aviso el siguiente paso apenas quede registrado.",
+    ].join("\n\n");
+  }
+
+  if (article?.id === "kb-excel-wont-open") {
+    return "Entendido: vamos con Excel/Office.\n\nPrimero confirma si falla solo Excel o también Word/Outlook; si es solo Excel, intenta abrirlo en modo seguro para descartar complementos.";
+  }
+
+  if (article?.resolutionSteps.length) {
+    return [
+      "Entendido. Probemos el primer descarte.",
+      formatStepForUser(article.resolutionSteps[0]),
     ].join("\n\n");
   }
 
@@ -138,6 +154,22 @@ function buildOperationalMessage({
 
 function normalizeText(message: string) {
   return message.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+function formatStepForUser(step: string) {
+  return step
+    .replace(/^Indicar al usuario que no abra/i, "No abras")
+    .replace(/^Indicar al usuario que no apague/i, "No apagues")
+    .replace(/^Indicar al usuario que /i, "")
+    .replace(/^Confirmar si el usuario /i, "Confirma si ")
+    .replace(/^Confirmar /i, "Confirma ")
+    .replace(/^Validar /i, "Valida ")
+    .replace(/^Revisar /i, "Revisa ")
+    .replace(/^Probar /i, "Prueba ")
+    .replace(/^Identificar /i, "Indícame ")
+    .replace(/^Registrar /i, "Registra ")
+    .replace("descargue adjuntos", "descargues adjuntos")
+    .replace("manipule archivos", "manipules archivos");
 }
 
 function isGreetingOnly(message: string) {
