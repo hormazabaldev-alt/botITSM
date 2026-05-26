@@ -12,6 +12,7 @@ import {
   MessageSquareText,
   Minus,
   PackageCheck,
+  Paperclip,
   RotateCcw,
   Send,
   ShieldCheck,
@@ -68,6 +69,66 @@ const smartActions = [
   },
 ];
 
+const demoScreenshots = [
+  {
+    name: "screenshot-administrador-tareas-cpu-99.png",
+    label: "📊 CPU al 99% (Chrome)",
+    url: "data:image/svg+xml;utf8," + encodeURIComponent(`
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 250" width="100%" height="100%">
+        <rect width="400" height="250" rx="8" fill="#1e1e2e"/>
+        <text x="20" y="30" fill="#cdd6f4" font-family="monospace" font-size="14" font-weight="bold">Task Manager - Resource Monitor</text>
+        <line x1="20" y1="45" x2="380" y2="45" stroke="#313244" stroke-width="2"/>
+        <rect x="20" y="60" width="360" height="40" rx="4" fill="#181825"/>
+        <text x="30" y="84" fill="#f38ba8" font-family="monospace" font-size="12" font-weight="bold">Google Chrome.exe</text>
+        <text x="200" y="84" fill="#f38ba8" font-family="monospace" font-size="12">CPU: 98.4%</text>
+        <text x="300" y="84" fill="#a6adc8" font-family="monospace" font-size="12">RAM: 7.2 GB</text>
+        <rect x="20" y="110" width="360" height="40" rx="4" fill="#181825"/>
+        <text x="30" y="134" fill="#cdd6f4" font-family="monospace" font-size="12">System Idle Process</text>
+        <text x="200" y="134" fill="#cdd6f4" font-family="monospace" font-size="12">CPU: 1.2%</text>
+        <text x="300" y="134" fill="#a6adc8" font-family="monospace" font-size="12">RAM: 16 KB</text>
+        <path d="M 20,230 L 100,210 L 180,225 L 260,160 L 340,90 L 380,80" fill="none" stroke="#f38ba8" stroke-width="3"/>
+        <text x="20" y="195" fill="#f38ba8" font-family="monospace" font-size="12" font-weight="bold">CPU UPTIME SPIKE: 99.1%</text>
+      </svg>
+    `.trim()),
+  },
+  {
+    name: "screenshot-analizador-disco-lleno.png",
+    label: "⚠️ Disco C:\\ Lleno",
+    url: "data:image/svg+xml;utf8," + encodeURIComponent(`
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 250" width="100%" height="100%">
+        <rect width="400" height="250" rx="8" fill="#1e1e2e"/>
+        <text x="20" y="30" fill="#cdd6f4" font-family="monospace" font-size="14" font-weight="bold">This PC - Drive Analyzer</text>
+        <line x1="20" y1="45" x2="380" y2="45" stroke="#313244" stroke-width="2"/>
+        <rect x="20" y="70" width="60" height="60" rx="6" fill="#313244"/>
+        <text x="40" y="108" fill="#bac2de" font-family="sans-serif" font-size="28" font-weight="bold">C:</text>
+        <text x="95" y="85" fill="#cdd6f4" font-family="sans-serif" font-size="13" font-weight="bold">OS (C:)</text>
+        <rect x="95" y="98" width="280" height="15" rx="3" fill="#313244"/>
+        <rect x="95" y="98" width="265" height="15" rx="3" fill="#f38ba8"/>
+        <text x="95" y="132" fill="#f38ba8" font-family="sans-serif" font-size="11" font-weight="bold">1.82 GB free of 256 GB (CRITICAL)</text>
+        <rect x="20" y="160" width="360" height="70" rx="6" fill="#181825" stroke="#f38ba8" stroke-width="1"/>
+        <text x="35" y="185" fill="#f38ba8" font-family="sans-serif" font-size="12" font-weight="bold">⚠️ Alerta de Memoria Virtual:</text>
+        <text x="35" y="205" fill="#a6adc8" font-family="sans-serif" font-size="11">El espacio disponible es insuficiente para el archivo pagefile.sys.</text>
+      </svg>
+    `.trim()),
+  },
+  {
+    name: "screenshot-pantalla-azul-bsod.png",
+    label: "❌ Pantallazo Azul (BSOD)",
+    url: "data:image/svg+xml;utf8," + encodeURIComponent(`
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 250" width="100%" height="100%">
+        <rect width="400" height="250" rx="8" fill="#0078d7"/>
+        <text x="30" y="60" fill="#ffffff" font-family="sans-serif" font-size="48" font-weight="normal">:(</text>
+        <text x="30" y="110" fill="#ffffff" font-family="sans-serif" font-size="13" font-weight="bold">Su PC sufrió un problema y necesita reiniciarse.</text>
+        <text x="30" y="130" fill="#ffffff" font-family="sans-serif" font-size="11">Solo estamos recopilando información sobre el error y luego se reiniciará.</text>
+        <text x="30" y="150" fill="#ffffff" font-family="sans-serif" font-size="11">100% completo</text>
+        <text x="30" y="185" fill="#ffffff" font-family="monospace" font-size="9" font-weight="bold">Código de parada: DRIVER_IRQL_NOT_LESS_OR_EQUAL</text>
+        <text x="30" y="200" fill="#ffffff" font-family="monospace" font-size="9" font-weight="bold">Lo que falló: tcpip.sys</text>
+        <text x="30" y="215" fill="#ffffff" font-family="monospace" font-size="9" font-weight="bold">Código de error: STOP 0x000000D1</text>
+      </svg>
+    `.trim()),
+  },
+];
+
 const initialMessage: ChatMessage = {
   id: "atlas-welcome",
   role: "assistant",
@@ -100,6 +161,11 @@ export function AtlasAssistant() {
   const [isLoading, setIsLoading] = useState(false);
   const [expanded, setExpanded] = useState(true);
   const [closed, setClosed] = useState(false);
+  
+  // Estados para Adjuntos de Evidencia Visual
+  const [attachedFile, setAttachedFile] = useState<{ name: string; url: string } | null>(null);
+  const [showAttachmentMenu, setShowAttachmentMenu] = useState(false);
+
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -120,12 +186,20 @@ export function AtlasAssistant() {
 
   const hasConversation = useMemo(() => messages.length > 1, [messages.length]);
 
-  async function sendMessage(message: string) {
+  async function sendMessage(
+    message: string,
+    fileToAttach?: { name: string; url: string } | null,
+    overrideContext?: SessionContext
+  ) {
     const cleanMessage = message.trim();
-    if (!cleanMessage || isLoading) return;
+    const activeFile = fileToAttach !== undefined ? fileToAttach : attachedFile;
+    if (!cleanMessage && !activeFile) return;
+    if (isLoading) return;
 
     setExpanded(true);
     setInput("");
+    setAttachedFile(null);
+    setShowAttachmentMenu(false);
     setTicket(null);
     setIsLoading(true);
     setStatus("analizando...");
@@ -133,23 +207,32 @@ export function AtlasAssistant() {
     const optimisticMessage: ChatMessage = {
       id: crypto.randomUUID(),
       role: "user",
-      content: cleanMessage,
+      content: cleanMessage || `[Evidencia Adjunta: ${activeFile?.name}]`,
       createdAt: new Date().toISOString(),
+      attachmentName: activeFile?.name,
+      attachmentUrl: activeFile?.url,
     };
 
     setMessages((current) => [...current, optimisticMessage]);
+
+    const activeContext = overrideContext ?? context;
 
     try {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userMessage: cleanMessage, sessionContext: context }),
+        body: JSON.stringify({ 
+          userMessage: cleanMessage || `[Evidencia Adjunta: ${activeFile?.name}]`, 
+          sessionContext: activeContext,
+          attachmentName: activeFile?.name,
+          attachmentUrl: activeFile?.url,
+        }),
       });
 
       if (!response.ok) throw new Error("No se pudo procesar el mensaje");
 
       const payload = (await response.json()) as ChatApiResponse;
-      const refinedContext = refineAssistantTurn(payload.sessionContext, cleanMessage);
+      const refinedContext = refineAssistantTurn(payload.sessionContext, cleanMessage || `[Evidencia: ${activeFile?.name}]`);
       setContext(refinedContext);
       storeSessionContext(refinedContext);
       setMessages([initialMessage, ...refinedContext.messages]);
@@ -165,7 +248,7 @@ export function AtlasAssistant() {
         {
           id: crypto.randomUUID(),
           role: "assistant",
-          content: "Tuve un problema procesando esto. Escríbeme nuevamente qué ocurre y lo retomamos.",
+          content: "Tuve un problema procesando esto. Escríbeme nuevamente qué ocurre y lo retornamos.",
           createdAt: new Date().toISOString(),
         },
       ]);
@@ -188,6 +271,8 @@ export function AtlasAssistant() {
     setMessages([initialMessage]);
     setInput("");
     setTicket(null);
+    setAttachedFile(null);
+    setShowAttachmentMenu(false);
     setStatus("listo");
     setExpanded(true);
   }
@@ -202,6 +287,8 @@ export function AtlasAssistant() {
       setMessages([initialMessage]);
       setInput("");
       setTicket(null);
+      setAttachedFile(null);
+      setShowAttachmentMenu(false);
       setStatus("listo");
       return;
     }
@@ -228,6 +315,8 @@ export function AtlasAssistant() {
     setMessages([greetingMsg]);
     setInput("");
     setTicket(null);
+    setAttachedFile(null);
+    setShowAttachmentMenu(false);
     setStatus("listo");
     storeSessionContext(newContext);
   }
@@ -235,34 +324,23 @@ export function AtlasAssistant() {
   function handleSuggestion(topic: string) {
     if (isLoading) return;
 
-    clearStoredSessionContext();
-    setContext(undefined);
+    // Crear un contexto fresco pero preservando el usuario POC activo
+    const freshContext: SessionContext = {
+      sessionId: `session-${crypto.randomUUID()}`,
+      collectedFields: context?.collectedFields ?? {},
+      messages: [],
+      stepsExecuted: [],
+    };
 
-    const assistantResponse = responseForSuggestion(topic);
-    if (!assistantResponse) {
-      void sendMessage(topic);
-      return;
-    }
-
-    setExpanded(true);
-    setInput("");
+    setContext(freshContext);
+    setMessages([initialMessage]);
     setTicket(null);
+    setAttachedFile(null);
+    setShowAttachmentMenu(false);
     setStatus("listo");
-    setMessages([
-      initialMessage,
-      {
-        id: crypto.randomUUID(),
-        role: "user",
-        content: topic,
-        createdAt: new Date().toISOString(),
-      },
-      {
-        id: crypto.randomUUID(),
-        role: "assistant",
-        content: assistantResponse,
-        createdAt: new Date().toISOString(),
-      },
-    ]);
+
+    // Enviar el mensaje con el contexto limpio para iniciar el flujo de forma pura
+    void sendMessage(topic, null, freshContext);
   }
 
   if (closed) {
@@ -363,14 +441,108 @@ export function AtlasAssistant() {
             </div>
           </div>
 
-          <div className="relative shrink-0 border-t border-white/10 bg-slate-950/72 px-3 py-2 backdrop-blur-xl">
-            <div className="mb-1.5 flex items-center text-[10.5px] font-medium">
+          <div className="relative shrink-0 border-t border-white/10 bg-slate-950/72 px-3 py-2 backdrop-blur-xl flex flex-col gap-1.5">
+            {/* Vista Previa de Archivo Adjunto */}
+            {attachedFile && (
+              <div className="flex items-center justify-between gap-2 rounded-xl border border-cyan-300/15 bg-cyan-300/5 p-2 text-xs">
+                <div className="flex items-center gap-2 min-w-0">
+                  <img
+                    src={attachedFile.url}
+                    alt={attachedFile.name}
+                    className="size-8 object-cover rounded-md border border-white/10 shrink-0"
+                  />
+                  <div className="min-w-0">
+                    <p className="font-semibold text-slate-200 truncate">{attachedFile.name}</p>
+                    <p className="text-[10px] text-cyan-400">Evidencia cargada listo para enviar</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setAttachedFile(null)}
+                  className="grid size-6 place-items-center rounded-full hover:bg-white/5 text-slate-400 hover:text-white"
+                  title="Eliminar adjunto"
+                >
+                  <X size={13} />
+                </button>
+              </div>
+            )}
+
+            {/* Menú de Capturas de Demo */}
+            {showAttachmentMenu && (
+              <div className="rounded-xl border border-white/10 bg-slate-950 p-2 shadow-2xl flex flex-col gap-1.5 animate-in fade-in slide-in-from-bottom-2 duration-200">
+                <div className="flex items-center justify-between px-1">
+                  <span className="text-[10.5px] font-semibold uppercase tracking-wider text-slate-400">Adjuntar Evidencia (Demo L2)</span>
+                  <button
+                    type="button"
+                    onClick={() => setShowAttachmentMenu(false)}
+                    className="text-slate-400 hover:text-white"
+                  >
+                    <X size={12} />
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 gap-1.5">
+                  {demoScreenshots.map((shot) => (
+                    <button
+                      key={shot.name}
+                      type="button"
+                      onClick={() => {
+                        setAttachedFile({ name: shot.name, url: shot.url });
+                        setShowAttachmentMenu(false);
+                      }}
+                      className="flex items-center gap-2.5 rounded-lg border border-white/5 bg-white/[0.03] px-2.5 py-2 text-left text-xs font-medium text-slate-200 hover:border-cyan-300/30 hover:bg-cyan-300/5 transition duration-150"
+                    >
+                      <span className="size-6 overflow-hidden rounded-md border border-white/10 bg-slate-900 shrink-0">
+                        <img src={shot.url} alt={shot.label} className="size-full object-cover" />
+                      </span>
+                      <span>{shot.label}</span>
+                    </button>
+                  ))}
+                  
+                  {/* Carga real simulada */}
+                  <label className="flex items-center justify-center gap-2 rounded-lg border border-dashed border-white/15 bg-white/[0.01] px-2.5 py-2 text-center text-xs font-semibold text-slate-400 hover:border-cyan-300/35 hover:text-slate-200 transition duration-150 cursor-pointer">
+                    <Paperclip size={13} />
+                    <span>Subir archivo desde el equipo...</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onload = () => {
+                            setAttachedFile({
+                              name: file.name,
+                              url: reader.result as string,
+                            });
+                            setShowAttachmentMenu(false);
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                    />
+                  </label>
+                </div>
+              </div>
+            )}
+
+            <div className="flex items-center justify-between text-[10.5px] font-medium mb-0.5">
               <div className="flex items-center gap-2 text-slate-400">
                 <span className={`size-1.5 rounded-full ${isLoading ? "animate-pulse bg-cyan-300 shadow-[0_0_14px_rgba(34,211,238,0.95)]" : "bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.7)]"}`} />
                 {status}
               </div>
             </div>
+
             <form onSubmit={handleSubmit} className="flex items-end gap-2">
+              <button
+                type="button"
+                onClick={() => setShowAttachmentMenu((prev) => !prev)}
+                className={`grid size-11 shrink-0 place-items-center rounded-2xl border border-white/10 transition duration-200 ${showAttachmentMenu ? "bg-cyan-300/10 border-cyan-300/40 text-cyan-400" : "bg-white/[0.055] text-slate-300 hover:bg-white/[0.08] hover:text-white"}`}
+                title="Adjuntar captura de pantalla"
+              >
+                <Paperclip size={16} />
+              </button>
+
               <textarea
                 ref={inputRef}
                 value={input}
@@ -382,12 +554,13 @@ export function AtlasAssistant() {
                   }
                 }}
                 rows={1}
-                placeholder="Escribe tu mensaje..."
+                placeholder={attachedFile ? "Agrega un comentario o envía..." : "Escribe tu mensaje..."}
                 className="max-h-28 min-h-11 flex-1 resize-none rounded-2xl border border-white/10 bg-white/[0.055] px-3.5 py-2.5 text-[13px] leading-5 text-slate-100 outline-none transition duration-200 placeholder:text-slate-500 focus:border-cyan-300/45 focus:bg-white/[0.075] focus:ring-4 focus:ring-cyan-300/10"
               />
+
               <button
                 type="submit"
-                disabled={!input.trim() || isLoading}
+                disabled={(!input.trim() && !attachedFile) || isLoading}
                 className="grid size-11 shrink-0 place-items-center rounded-2xl bg-cyan-300 text-slate-950 shadow-[0_10px_28px_rgba(34,211,238,0.18)] transition duration-200 hover:bg-cyan-200 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-500 disabled:shadow-none"
                 aria-label="Enviar"
               >
@@ -454,11 +627,24 @@ function Bubble({ message }: { message: ChatMessage }) {
       <div
         className={
           isUser
-            ? "max-w-[82%] rounded-xl bg-cyan-300 px-3 py-2 text-sm leading-5 text-slate-950 shadow-[0_10px_24px_rgba(34,211,238,0.14)]"
-            : "max-w-[calc(100%-32px)] rounded-xl border border-white/10 bg-white/[0.065] px-3 py-2 text-[13px] leading-5 text-slate-200"
+            ? "max-w-[82%] rounded-xl bg-cyan-300 px-3 py-2 text-sm leading-5 text-slate-950 shadow-[0_10px_24px_rgba(34,211,238,0.14)] flex flex-col gap-2"
+            : "max-w-[calc(100%-32px)] rounded-xl border border-white/10 bg-white/[0.065] px-3 py-2 text-[13px] leading-5 text-slate-200 flex flex-col gap-2"
         }
       >
-        <p className="whitespace-pre-line">{message.content}</p>
+        {message.attachmentUrl ? (
+          <div className="relative overflow-hidden rounded-lg border border-white/10 bg-slate-950/40 p-1 flex flex-col gap-1">
+            <img
+              src={message.attachmentUrl}
+              alt={message.attachmentName || "Evidencia adjunta"}
+              className="max-h-40 object-cover rounded-md"
+            />
+            <span className="text-[10px] font-mono text-slate-400 block px-1 truncate">
+              📎 {message.attachmentName || "evidencia.png"}
+            </span>
+          </div>
+        ) : null}
+        
+        {message.content ? <p className="whitespace-pre-line">{message.content}</p> : null}
       </div>
       {isUser ? (
         <span className="mt-1 grid size-6 shrink-0 place-items-center rounded-lg border border-white/10 bg-white/[0.075] text-slate-300">
@@ -480,18 +666,39 @@ function TypingIndicator() {
 
 function RegisteredCase({ ticket }: { ticket: Ticket }) {
   return (
-    <article className="ml-9 rounded-2xl border border-cyan-300/20 bg-cyan-300/[0.08] p-4 shadow-[0_16px_40px_rgba(2,8,23,0.18)]">
+    <article className="ml-9 rounded-2xl border border-cyan-300/20 bg-cyan-300/[0.08] p-4 shadow-[0_16px_40px_rgba(2,8,23,0.18)] flex flex-col gap-3">
       <div className="flex items-center gap-2 text-sm font-semibold text-cyan-50">
         <CheckCircle2 size={17} className="text-emerald-300" aria-hidden />
         Caso registrado
       </div>
-      <p className="mt-1 font-mono text-xs font-semibold text-cyan-200">{ticket.id}</p>
-      <div className="mt-4 space-y-3 text-sm">
+      <p className="font-mono text-xs font-semibold text-cyan-200">{ticket.id}</p>
+      <div className="space-y-3 text-sm">
         <CaseLine label="Resumen" value={summarize(ticket.description)} />
         <CaseLine label="Prioridad" value={priorityText(ticket.priority)} />
         <CaseLine label="Próximo paso" value={ticket.assignedTeam.includes("Redes") ? "derivación a soporte de redes" : ticket.nextAction} />
         <CaseLine label="SLA estimado" value={ticket.estimatedSla.replace("respuesta inicial", "")} />
       </div>
+
+      {ticket.attachmentName && (
+        <div className="mt-1 border-t border-white/5 pt-3 flex flex-col gap-1.5">
+          <p className="text-[11px] font-medium uppercase tracking-[0.1em] text-slate-500">Evidencia Técnica L2</p>
+          <div className="flex items-center gap-3 rounded-xl border border-cyan-300/10 bg-slate-950/45 p-2 text-xs">
+            {ticket.attachmentUrl ? (
+              <img
+                src={ticket.attachmentUrl}
+                alt={ticket.attachmentName}
+                className="size-11 object-cover rounded-lg border border-white/10 shrink-0"
+              />
+            ) : (
+              <Paperclip size={16} className="text-cyan-400 shrink-0" />
+            )}
+            <div className="min-w-0 flex-1">
+              <p className="font-semibold text-slate-200 truncate">{ticket.attachmentName}</p>
+              <p className="text-[10.5px] text-slate-400 italic mt-0.5 leading-4">{ticket.attachmentAnalysis || "Análisis técnico completado por Atlas L2"}</p>
+            </div>
+          </div>
+        </div>
+      )}
     </article>
   );
 }

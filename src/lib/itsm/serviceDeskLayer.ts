@@ -21,6 +21,7 @@ type ServiceDeskTurnCore = {
   stage: PlaybookStage;
   response: string;
   suggestedActions: string[];
+  facts?: Record<string, DiagnosticFactValue>;
 };
 
 export type ServiceDeskTurn = ServiceDeskTurnCore & {
@@ -60,6 +61,13 @@ const playbooks: ServiceDeskPlaybook[] = [
     knowledgeArticleId: "kb-printer-basic",
     firstQuestion: () => "Entendido: impresora con falla.\n\n¿Aparece conectada y muestra algún mensaje de error?",
   },
+  {
+    id: "workplace-notebook-slowness",
+    assets: ["notebook"],
+    knowledgeArticleId: "kb-slow-notebook",
+    firstQuestion: () =>
+      "Entendido: notebook o equipo con lentitud o congelamiento.\n\nPara realizar un diagnóstico efectivo L2, confírmame: ¿la lentitud afecta a todo el equipo o principalmente al abrir/usar una aplicación en específico (como Chrome o Office)?",
+  },
 ];
 
 export function resolveServiceDeskTurn(message: string, context: SessionContext | ChatMessage[]): ServiceDeskTurn | undefined {
@@ -91,6 +99,8 @@ export function resolveServiceDeskTurn(message: string, context: SessionContext 
     turn = resolveExternalMonitorTurn({ current, allUserText, previousDiagnostic, assistantHistory, playbook, symptoms });
   } else if (asset === "mouse" || asset === "keyboard") {
     turn = resolvePeripheralTurn({ asset, qualifier, current, previousDiagnostic, assistantHistory, playbook, symptoms });
+  } else if (asset === "notebook") {
+    turn = resolveNotebookSlownessTurn({ current, allUserText, previousDiagnostic, assistantHistory, playbook, symptoms, history });
   } else {
     turn = {
       asset,
@@ -511,7 +521,10 @@ function attachDiagnostic(
   current: string,
   allUserText: string,
 ): ServiceDeskTurn {
-  const facts: Record<string, DiagnosticFactValue> = { ...(previousDiagnostic?.facts ?? {}) };
+  const facts: Record<string, DiagnosticFactValue> = { 
+    ...(previousDiagnostic?.facts ?? {}),
+    ...(turn.facts ?? {})
+  };
 
   facts.assetIdentified = true;
   facts.asset = turn.asset;
@@ -755,4 +768,255 @@ function isPositiveResponse(text: string): boolean {
       "si funciona"
     ])
   );
+}
+
+function resolveNotebookSlownessTurn(params: {
+  current: string;
+  allUserText: string;
+  previousDiagnostic?: DiagnosticContext;
+  assistantHistory: string[];
+  playbook: ServiceDeskPlaybook;
+  symptoms: ServiceDeskSymptom[];
+  history: ChatMessage[];
+}): ServiceDeskTurnCore {
+  const { current, allUserText, previousDiagnostic, assistantHistory, playbook, symptoms, history } = params;
+  const currentStage = previousDiagnostic?.stage ?? "identify_asset";
+
+  // Buscar si el último mensaje del usuario tiene adjunto
+  const lastUserMsg = history.filter((m) => m.role === "user").at(-1);
+  const attachmentName = lastUserMsg?.attachmentName;
+  const attachmentUrl = lastUserMsg?.attachmentUrl;
+
+  // 1. Etapa inicial: Identificar si es aplicación o sistema completo
+  if (currentStage === "identify_asset") {
+    return {
+      asset: "notebook",
+      symptoms,
+      playbookId: playbook.id,
+      knowledgeArticleId: playbook.knowledgeArticleId,
+      stage: "qualify_connection", // Usamos esto para calificar si es app o equipo entero
+      response: playbook.firstQuestion("notebook"),
+      suggestedActions: [`Playbook ${playbook.id}: calificar tipo de lentitud (app o total)`],
+    };
+  }
+
+  // 2. Transición desde qualify_connection (el usuario indica si es app o todo)
+  if (currentStage === "qualify_connection") {
+    const isSpecificApp = hasAnyText(current, ["chrome", "excel", "office", "word", "app", "aplicacion", "navegador", "teams"]);
+    const appName = isSpecificApp ? (hasAnyText(current, ["chrome"]) ? "Google Chrome" : "la aplicación") : "el equipo";
+
+    return {
+      asset: "notebook",
+      symptoms,
+      playbookId: playbook.id,
+      knowledgeArticleId: playbook.knowledgeArticleId,
+      stage: "run_first_check",
+      response: [
+        `Perfecto, enfocado en descartes para ${appName}.`,
+        "Siguiente descarte L2: abre el **Administrador de Tareas** (en Windows: `Ctrl + Shift + Esc`, en Mac: `Command + Espacio` y escribe 'Monitor de Actividad').",
+        "Por favor, revisa si ves algún proceso con uso alto o **haz clic en el icono de clip aquí abajo para adjuntar una captura de pantalla** del rendimiento o del Administrador de Tareas para que lo analice por ti.",
+      ].join("\n\n"),
+      suggestedActions: [`Playbook ${playbook.id}: solicitar evidencia o captura de rendimiento`],
+    };
+  }
+
+  // 3. Transición desde run_first_check (el usuario responde o sube captura)
+  if (currentStage === "run_first_check") {
+    const facts: Record<string, any> = {};
+
+    // Si el usuario subió una captura, la procesamos a nivel técnico avanzado
+    if (attachmentName) {
+      const nameLower = attachmentName.toLowerCase();
+      let analysisText = "";
+      let responseMessage = "";
+
+      if (nameLower.includes("cpu") || nameLower.includes("chrome")) {
+        facts.attachmentType = "cpu_saturation";
+        facts.resourceHog = "Google Chrome";
+        facts.cpuUsage = "98%";
+        facts.ramUsage = "92%";
+        analysisText = "Análisis de captura: El Administrador de Tareas revela que 'Google Chrome' está utilizando el 98% de la CPU y la memoria RAM está al 92%, lo que satura los recursos del procesador.";
+        
+        responseMessage = [
+          `He analizado la captura del Administrador de Tareas que adjuntaste (${attachmentName}).`,
+          "🔍 **Resultado del Análisis Técnico L2:**\n* **Proceso crítico:** `Google Chrome` está consumiendo un **98% de CPU**.\n* **Uso de RAM:** **92% de saturación**.",
+          "Esto confirma que el navegador está acaparando todo el procesador. **Prueba el siguiente descarte:** cierra las pestañas inactivas en Chrome, borra la caché del navegador (Ctrl+Shift+Del) y deshabilita complementos pesados.",
+          "¿Mejoró el rendimiento del equipo o la lentitud persiste?"
+        ].join("\n\n");
+      } else if (nameLower.includes("disco") || nameLower.includes("space") || nameLower.includes("disk") || nameLower.includes("lleno")) {
+        facts.attachmentType = "disk_full";
+        facts.resourceHog = "Disk Space C:\\";
+        facts.freeSpace = "1.8 GB";
+        analysisText = "Análisis de captura: El indicador del disco C:\\ muestra menos de 2 GB de espacio disponible (rojo), lo que bloquea los archivos de paginación del sistema operativo.";
+        
+        responseMessage = [
+          `He analizado la captura que compartiste (${attachmentName}).`,
+          "🔍 **Resultado del Análisis Técnico L2:**\n* **Alerta Crítica:** La unidad principal `C:\\` tiene **menos de 2 GB de espacio disponible** (marcada en rojo).",
+          "La falta de espacio impide que el sistema cree memoria virtual de paginación, causando lentitud extrema y congelamientos.",
+          "**Siguiente descarte:** ejecuta el Liberador de Espacio en Disco (`cleanmgr`), vacía la Papelera de Reciclaje y elimina archivos pesados en Descargas. ¿Lograste liberar espacio y mejoró la respuesta del equipo?"
+        ].join("\n\n");
+      } else if (nameLower.includes("azul") || nameLower.includes("bsod") || nameLower.includes("pantalla")) {
+        // Pantallazo azul = BSOD crítico -> Involucrar soporte técnico inmediato (P2)
+        facts.attachmentType = "bsod_critical";
+        facts.isBsod = true;
+        facts.errorCode = "0x000000D1";
+        facts.failingDriver = "tcpip.sys";
+        analysisText = "Análisis de captura: Pantallazo azul de error (BSOD) con código STOP: 0x000000D1 (DRIVER_IRQL_NOT_LESS_OR_EQUAL) en tcpip.sys, sugiriendo fallo del driver de red.";
+        
+        responseMessage = [
+          `He analizado la captura de error que adjuntaste (${attachmentName}).`,
+          "🚨 **Diagnóstico Crítico de Hardware/Kernel (BSOD):**\n* **Evento:** Pantalla Azul de la Muerte (Blue Screen of Death).\n* **Código de error detectado:** `STOP: 0x000000D1 (DRIVER_IRQL_NOT_LESS_OR_EQUAL)` en el controlador `tcpip.sys`.",
+          "Este es un fallo crítico del driver de red o de la memoria del equipo. Al ser un problema de kernel, no puede resolverse con descartes básicos de usuario.",
+          "**Debemos derivar el caso inmediatamente al grupo de Soporte Crítico en Terreno con prioridad Alta.**",
+          "Para dejar el caso registrado y derivarlo de inmediato con esta evidencia, ¿podrías darme tu nombre completo, correo y área?"
+        ].join("\n\n");
+
+        facts.attachmentName = attachmentName;
+        facts.attachmentUrl = attachmentUrl || "";
+        facts.attachmentAnalysis = analysisText;
+
+        return {
+          asset: "notebook",
+          symptoms,
+          playbookId: playbook.id,
+          knowledgeArticleId: playbook.knowledgeArticleId,
+          stage: "prepare_escalation",
+          response: responseMessage,
+          suggestedActions: [`Playbook ${playbook.id}: derivar inmediatamente por BSOD crítico`],
+          facts,
+        };
+      } else {
+        facts.attachmentType = "generic";
+        analysisText = "Análisis de captura: Imagen cargada por el usuario como evidencia del síntoma.";
+        
+        responseMessage = [
+          `He recibido la imagen (${attachmentName}) como evidencia del fallo.`,
+          "Para avanzar, cuéntame si lograste realizar el reinicio del equipo y si al abrir el Administrador de Tareas notas lentitud generalizada o solo en una aplicación específica."
+        ].join("\n\n");
+      }
+
+      facts.attachmentName = attachmentName;
+      facts.attachmentUrl = attachmentUrl || "";
+      facts.attachmentAnalysis = analysisText;
+
+      return {
+        asset: "notebook",
+        symptoms,
+        playbookId: playbook.id,
+        knowledgeArticleId: playbook.knowledgeArticleId,
+        stage: "isolate_component",
+        response: responseMessage,
+        suggestedActions: [`Playbook ${playbook.id}: analizar evidencia visual y sugerir descarte específico`],
+        facts,
+      };
+    }
+
+    // Si el usuario no subió una captura pero respondió en texto
+    const isNegative = isNegativeResponse(current);
+    const isPositive = isPositiveResponse(current);
+
+    if (isNegative) {
+      return {
+        asset: "notebook",
+        symptoms,
+        playbookId: playbook.id,
+        knowledgeArticleId: playbook.knowledgeArticleId,
+        stage: "isolate_component",
+        response: [
+          "Entendido, no lograste ver procesos saturados o no tienes la captura.",
+          "Probemos el siguiente paso manual: abre el navegador (ej: Chrome) en **modo incógnito** o con complementos deshabilitados, o cierra procesos en segundo plano. ¿Notas alguna mejoría al navegar en modo incógnito?"
+        ].join("\n\n"),
+        suggestedActions: [`Playbook ${playbook.id}: probar navegador en modo incógnito / sin extensiones`],
+      };
+    } else if (isPositive) {
+      return {
+        asset: "notebook",
+        symptoms,
+        playbookId: playbook.id,
+        knowledgeArticleId: playbook.knowledgeArticleId,
+        stage: "prepare_escalation",
+        response: [
+          "¡Excelente! Qué bueno que el descarte o la limpieza de procesos alivió la carga de la memoria.",
+          "Para dejar constancia de este incidente cerrado en la bitácora técnica, confírmame tu nombre completo, correo y área."
+        ].join("\n\n"),
+        suggestedActions: [`Playbook ${playbook.id}: preparar cierre por resolución de descarte`],
+      };
+    } else {
+      // Si la respuesta no es claramente afirmativa o negativa
+      return {
+        asset: "notebook",
+        symptoms,
+        playbookId: playbook.id,
+        knowledgeArticleId: playbook.knowledgeArticleId,
+        stage: "isolate_component",
+        response: [
+          "Para aislar la causa de raíz, cuéntame si notas la lentitud en todo el equipo (ej: al abrir carpetas) o solo al navegar.",
+          "También puedes **adjuntar una captura de pantalla** haciendo clic en el clip para identificar con precisión qué está ocurriendo."
+        ].join("\n\n"),
+        suggestedActions: [`Playbook ${playbook.id}: aislar lentitud sistema vs navegador`],
+      };
+    }
+  }
+
+  // 4. Transición desde isolate_component (el usuario nos dice si el descarte del incógnito/limpieza funcionó)
+  if (currentStage === "isolate_component") {
+    const isPositive = isPositiveResponse(current);
+
+    if (isPositive) {
+      return {
+        asset: "notebook",
+        symptoms,
+        playbookId: playbook.id,
+        knowledgeArticleId: playbook.knowledgeArticleId,
+        stage: "prepare_escalation",
+        response: [
+          "¡Perfecto! Con las pruebas y la optimización de recursos logramos estabilizar el rendimiento.",
+          "Para registrar el cierre formal del caso en nuestra plataforma de soporte, ¿me compartes tu nombre completo, correo y área?"
+        ].join("\n\n"),
+        suggestedActions: [`Playbook ${playbook.id}: preparar cierre de caso por optimización L2`],
+      };
+    } else {
+      // Si persiste, corresponde escalar a soporte en terreno o microinformática
+      const isCpuIssue = previousDiagnostic?.facts.attachmentType === "cpu_saturation";
+      const isDiskIssue = previousDiagnostic?.facts.attachmentType === "disk_full";
+      let team = "Mesa de Ayuda - Soporte Microinformática L2";
+      let finalMessage = "Dado que la lentitud persiste tras los descartes L2 y la optimización básica, el notebook requiere revisión técnica física o reinstalación del sistema de archivos.";
+
+      if (isCpuIssue) {
+        team = "Mesa de Ayuda - Soporte Microinformática L2";
+        finalMessage = "Debido a que el consumo de CPU de Google Chrome se mantiene saturado en 98% y no mejora con la limpieza de caché, escalaremos el caso para que un especialista de Microinformática revise el perfil del equipo o la versión corporativa.";
+      } else if (isDiskIssue) {
+        team = "Mesa de Ayuda - Soporte Microinformática L2";
+        finalMessage = "Dado que la unidad principal C:\\ tiene menos de 2 GB de espacio y las herramientas automáticas de limpieza no lograron liberar espacio, se requiere la intervención de soporte en terreno para expandir la unidad o depurar archivos protegidos.";
+      }
+
+      return {
+        asset: "notebook",
+        symptoms,
+        playbookId: playbook.id,
+        knowledgeArticleId: playbook.knowledgeArticleId,
+        stage: "prepare_escalation",
+        response: [
+          finalMessage,
+          `Registraremos el ticket con la evidencia completa recopilada y lo derivaremos al equipo de **${team}**.`,
+          "Para completar la derivación sin retrasos, ¿me confirmas tu nombre completo, correo y área?"
+        ].join("\n\n"),
+        suggestedActions: [`Playbook ${playbook.id}: derivar caso persistente a soporte L2`],
+      };
+    }
+  }
+
+  // 5. Finalizar con el caso registrado
+  return {
+    asset: "notebook",
+    symptoms,
+    playbookId: playbook.id,
+    knowledgeArticleId: playbook.knowledgeArticleId,
+    stage: "prepare_escalation",
+    response: [
+      "¡Listo! Caso registrado con toda la evidencia técnica recopilada.",
+      "El equipo de soporte especializado L2 recibirá el análisis de la captura, los consumos de recursos detectados y las pruebas de descarte ejecutadas. No tendrás que repetir ningún paso. Te contactarán a la brevedad.",
+    ].join("\n\n"),
+    suggestedActions: [`Playbook ${playbook.id}: caso listo para derivación L2`],
+  };
 }

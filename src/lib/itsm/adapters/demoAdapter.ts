@@ -34,7 +34,16 @@ function buildTicketDescription(input: ITSMCreateTicketInput) {
       ].join(" | ")
     : undefined;
 
-  return [input.draft.description, diagnosticSummary, userSummary ? `Contexto conversación: ${userSummary}` : undefined]
+  const attachmentSummary = input.draft.attachmentName
+    ? `Evidencia Adjunta: ${input.draft.attachmentName} | Análisis Técnico: ${input.draft.attachmentAnalysis || "Sin análisis"}`
+    : undefined;
+
+  return [
+    input.draft.description, 
+    attachmentSummary,
+    diagnosticSummary, 
+    userSummary ? `Contexto conversación: ${userSummary}` : undefined
+  ]
     .filter(Boolean)
     .join(" | ");
 }

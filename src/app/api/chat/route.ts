@@ -10,6 +10,8 @@ type ChatRequest = {
   userMessage: string;
   sessionContext?: SessionContext;
   sessionId?: string;
+  attachmentName?: string;
+  attachmentUrl?: string;
 };
 
 export async function POST(request: Request) {
@@ -21,23 +23,33 @@ export async function POST(request: Request) {
   }
 
   const sessionContext = body.sessionContext ?? (body.sessionId ? await getPersistedSessionContext(body.sessionId) : undefined) ?? createSessionContext();
-  const detectedIntent = detectTurnIntent(userMessage, sessionContext);
-  const knowledgeMatches = findKnowledgeMatches(userMessage, detectedIntent);
-  const llmResponse = await generateITSMResponse({
-    userMessage,
-    sessionContext,
-    detectedIntent,
-    knowledgeMatches,
-    ticketDraft: sessionContext.ticketDraft,
-  });
-
+  
   const now = new Date().toISOString();
   const userChatMessage: ChatMessage = {
     id: crypto.randomUUID(),
     role: "user",
     content: userMessage,
     createdAt: now,
+    attachmentName: body.attachmentName,
+    attachmentUrl: body.attachmentUrl,
   };
+
+  // Insertar el mensaje del usuario con su adjunto en el contexto del motor
+  const sessionContextForEngine = {
+    ...sessionContext,
+    messages: [...sessionContext.messages, userChatMessage]
+  };
+
+  const detectedIntent = detectTurnIntent(userMessage, sessionContextForEngine);
+  const knowledgeMatches = findKnowledgeMatches(userMessage, detectedIntent);
+  const llmResponse = await generateITSMResponse({
+    userMessage,
+    sessionContext: sessionContextForEngine,
+    detectedIntent,
+    knowledgeMatches,
+    ticketDraft: sessionContextForEngine.ticketDraft,
+  });
+
   const assistantChatMessage: ChatMessage = {
     id: crypto.randomUUID(),
     role: "assistant",
@@ -48,8 +60,8 @@ export async function POST(request: Request) {
       priority: llmResponse.priority,
     },
   };
-  const diagnosticForTurn = llmResponse.diagnostic ?? sessionContext.diagnostic;
-  const conversationTurns = sessionContext.messages.filter((m) => m.role === "user").length;
+  const diagnosticForTurn = llmResponse.diagnostic ?? sessionContextForEngine.diagnostic;
+  const conversationTurns = sessionContextForEngine.messages.filter((m) => m.role === "user").length;
   const isResolved = isResolvedMessage(userMessage);
 
   // ── Determinar si crear ticket ────────────────────────────────────────────
@@ -75,12 +87,12 @@ export async function POST(request: Request) {
       }
     : llmResponse.ticketDraft;
 
-  const fullTranscript = [...sessionContext.messages, userChatMessage, assistantChatMessage];
+  const fullTranscript = [...sessionContextForEngine.messages, assistantChatMessage];
 
   const itsmResult = (llmResponse.shouldCreateTicket || shouldForceTicket)
     ? await createTicketThroughITSM({
         draft: draftForTicket,
-        sessionId: sessionContext.sessionId,
+        sessionId: sessionContextForEngine.sessionId,
         transcript: fullTranscript,
         diagnostic: diagnosticForTurn,
         source: "web-demo",
@@ -115,15 +127,15 @@ export async function POST(request: Request) {
     : "active";
 
   const nextContext: SessionContext = {
-    ...sessionContext,
-    collectedFields: extractFields(userMessage, sessionContext),
+    ...sessionContextForEngine,
+    collectedFields: extractFields(userMessage, sessionContextForEngine),
     messages: fullTranscript,
     detectedIntent: llmResponse.classification,
     priority: llmResponse.priority,
-    activeArticleId: resolveActiveArticleId(llmResponse.ticketDraft.description, knowledgeMatches, sessionContext),
+    activeArticleId: resolveActiveArticleId(llmResponse.ticketDraft.description, knowledgeMatches, sessionContextForEngine),
     diagnostic: nextDiagnostic,
     ticketDraft: itsmResult?.ticket ?? llmResponse.ticketDraft,
-    stepsExecuted: Array.from(new Set([...sessionContext.stepsExecuted, ...llmResponse.suggestedActions])),
+    stepsExecuted: Array.from(new Set([...sessionContextForEngine.stepsExecuted, ...llmResponse.suggestedActions])),
     awaitingResolutionConfirmation: !llmResponse.shouldCreateTicket && !isResolved,
   };
 

@@ -72,6 +72,9 @@ export type TicketDraft = {
   assignedTeam: string;
   estimatedSla: string;
   status: TicketStatus;
+  attachmentUrl?: string;
+  attachmentName?: string;
+  attachmentAnalysis?: string;
 };
 
 export type ChatMessage = {
@@ -79,6 +82,9 @@ export type ChatMessage = {
   role: "user" | "assistant" | "system";
   content: string;
   createdAt: string;
+  attachmentUrl?: string;
+  attachmentName?: string;
+  attachmentAnalysis?: string;
   metadata?: {
     intent?: ITSMIntent;
     priority?: ITSMPriority;

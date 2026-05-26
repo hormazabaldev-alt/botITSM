@@ -234,11 +234,26 @@ export function buildTicketDraft(params: {
 }): TicketDraft {
   const { message, intent, priority, article, context } = params;
   const category = article?.category ?? categoryByIntent(intent);
-  const assignedTeam = teamByIntent(intent, priority);
+  const baseAssignedTeam = teamByIntent(intent, priority);
+
+  // Extraer información de adjuntos del diagnóstico o del historial de mensajes
+  const diagnosticFacts = context.diagnostic?.facts;
+  const lastUserMsg = context.messages.filter((m) => m.role === "user").at(-1);
+  const attachmentName = (diagnosticFacts?.attachmentName as string) ?? lastUserMsg?.attachmentName;
+  const attachmentUrl = (diagnosticFacts?.attachmentUrl as string) ?? lastUserMsg?.attachmentUrl;
+  const attachmentAnalysis = (diagnosticFacts?.attachmentAnalysis as string) ?? lastUserMsg?.attachmentAnalysis;
+
+  // Ajustar gravedad y equipo resolutor de forma automática ante eventos críticos (ej. BSOD / Pantallazo Azul)
+  const isBsod = diagnosticFacts?.isBsod === true;
+  const adjustedPriority = isBsod && priority !== "P1" ? ("P2" as const) : priority;
+  const assignedTeam = isBsod ? "Soporte Técnico en Terreno L3" : baseAssignedTeam;
+  const nextAction = isBsod 
+    ? "Intervención presencial de Soporte en Terreno por Pantalla Azul (BSOD)" 
+    : nextActionByPriority(adjustedPriority, intent);
 
   return {
     type: intent,
-    priority,
+    priority: adjustedPriority,
     category,
     description: summarizeDescription(message, article),
     affectedSystem: context.collectedFields.sistema ?? inferAffectedSystem(intent, article),
@@ -246,13 +261,16 @@ export function buildTicketDraft(params: {
     requesterName: context.collectedFields.nombre ?? "Usuario pendiente",
     requesterEmail: context.collectedFields.correo ?? "pendiente@example.com",
     businessArea: context.collectedFields.area ?? "Área pendiente",
-    impact: context.collectedFields.impacto ?? impactByPriority(priority),
-    urgency: context.collectedFields.urgencia ?? urgencyByPriority(priority),
+    impact: context.collectedFields.impacto ?? impactByPriority(adjustedPriority),
+    urgency: context.collectedFields.urgencia ?? urgencyByPriority(adjustedPriority),
     executedSteps: article?.resolutionSteps.slice(0, 4) ?? context.stepsExecuted,
-    nextAction: nextActionByPriority(priority, intent),
+    nextAction,
     assignedTeam,
-    estimatedSla: slaByPriority(priority),
-    status: priority === "P1" || intent === "SECURITY_INCIDENT" ? "escalated" : "draft",
+    estimatedSla: slaByPriority(adjustedPriority),
+    status: adjustedPriority === "P1" || intent === "SECURITY_INCIDENT" || isBsod ? "escalated" : "draft",
+    attachmentUrl,
+    attachmentName,
+    attachmentAnalysis,
   };
 }
 
