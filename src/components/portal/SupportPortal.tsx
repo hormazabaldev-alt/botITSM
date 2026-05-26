@@ -80,20 +80,6 @@ export function SupportPortal() {
           zIndex: 0,
         }} />
 
-        {/* ── Anillos de pulso HUD (Cyan) ── */}
-        {!chatOpen && ["s-ring-1", "s-ring-2", "s-ring-3"].map((cls) => (
-          <div key={cls} className={cls} style={{
-            position: "absolute",
-            width: 380,
-            height: 220,
-            borderRadius: "50%",
-            border: "1px solid rgba(0, 255, 255, 0.08)",
-            boxShadow: "0 0 12px rgba(0, 255, 255, 0.02)",
-            pointerEvents: "none",
-            zIndex: 0,
-          }} />
-        ))}
-
         {/* ── Contenido central ── */}
         <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
 
@@ -114,39 +100,13 @@ export function SupportPortal() {
             </div>
           </div>
 
-          {/* Separador sutil */}
-          {!chatOpen && (
-            <div className="s-fade-2" style={{
-              marginTop: 40,
-              width: 1,
-              height: 48,
-              background: "linear-gradient(to bottom, rgba(0, 255, 255, 0.35), transparent)",
-            }} />
-          )}
-
-          {/* Tagline */}
-          {!chatOpen && (
-            <p className="s-fade-2" style={{
-              marginTop: 24,
-              fontSize: 12,
-              letterSpacing: "0.24em",
-              textTransform: "uppercase",
-              color: "rgba(0, 255, 255, 0.6)",
-              fontWeight: 600,
-              margin: "0 0 0 0",
-              textShadow: "0 0 10px rgba(0, 255, 255, 0.15)",
-            }}>
-              Mesa de Ayuda · ITSM
-            </p>
-          )}
-
           {/* ── CTA o chat ── */}
           {!chatOpen ? (
             <button
               className="s-btn s-fade-3"
               onClick={() => setChatOpen(true)}
               style={{
-                marginTop: 48,
+                marginTop: 64,
                 padding: "16px 56px",
                 border: "1px solid rgba(0, 255, 255, 0.28)",
                 borderRadius: 12,
@@ -183,39 +143,8 @@ export function SupportPortal() {
               </span>
             </button>
           ) : (
-            <div className="s-chat" style={{ width: "100%", display: "flex", justifyContent: "center" }}>
+            <div className="s-chat" style={{ width: "100%", display: "flex", justifyContent: "center", marginTop: 48 }}>
               <SondaAssistant />
-            </div>
-          )}
-
-          {/* Indicador de estado */}
-          {!chatOpen && (
-            <div className="s-fade-3" style={{
-              marginTop: 40,
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-            }}>
-              <span style={{
-                display: "inline-flex",
-                gap: 4,
-                alignItems: "center",
-              }}>
-                {[0, 1, 2].map(i => (
-                  <span key={i} style={{
-                    width: 6,
-                    height: 6,
-                    borderRadius: "50%",
-                    background: "#00FFFF",
-                    boxShadow: "0 0 8px rgba(0, 255, 255, 0.6)",
-                    animation: `sonda-dot-blink 1.5s ease-in-out ${i * 0.18}s infinite`,
-                    display: "inline-block",
-                  }} />
-                ))}
-              </span>
-              <span style={{ fontSize: 11, color: "rgba(255, 255, 255, 0.4)", letterSpacing: "0.12em", fontWeight: 500 }}>
-                sistema disponible
-              </span>
             </div>
           )}
         </div>
