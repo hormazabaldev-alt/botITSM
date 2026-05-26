@@ -94,13 +94,15 @@ export function resolveServiceDeskTurn(message: string, context: SessionContext 
   let turn: ServiceDeskTurnCore;
 
   if (asset === "notebook_display") {
-    turn = resolveNotebookDisplayTurn({ current, assistantHistory, playbook, symptoms });
+    turn = resolveNotebookDisplayTurn({ current, previousDiagnostic, assistantHistory, playbook, symptoms });
   } else if (asset === "external_monitor") {
     turn = resolveExternalMonitorTurn({ current, allUserText, previousDiagnostic, assistantHistory, playbook, symptoms });
   } else if (asset === "mouse" || asset === "keyboard") {
     turn = resolvePeripheralTurn({ asset, qualifier, current, previousDiagnostic, assistantHistory, playbook, symptoms });
   } else if (asset === "notebook") {
     turn = resolveNotebookSlownessTurn({ current, allUserText, previousDiagnostic, assistantHistory, playbook, symptoms, history });
+  } else if (asset === "printer") {
+    turn = resolvePrinterTurn({ current, previousDiagnostic, playbook, symptoms });
   } else {
     turn = {
       asset,
@@ -374,14 +376,16 @@ function resolvePeripheralTurn(params: {
 
 function resolveNotebookDisplayTurn(params: {
   current: string;
+  previousDiagnostic?: DiagnosticContext;
   assistantHistory: string[];
   playbook: ServiceDeskPlaybook;
   symptoms: ServiceDeskSymptom[];
 }): ServiceDeskTurnCore {
-  const { assistantHistory, playbook, symptoms } = params;
-  const askedSymptom = assistantHistory.some((content) => content.includes("pantalla integrada") && content.includes("queda negra"));
+  const { current, previousDiagnostic, playbook, symptoms } = params;
+  const currentStage = previousDiagnostic?.stage ?? "identify_asset";
 
-  if (askedSymptom) {
+  // 1. Etapa inicial: Confirmar síntoma de pantalla integrada
+  if (currentStage === "identify_asset") {
     return {
       asset: "notebook_display",
       qualifier: "internal",
@@ -389,12 +393,77 @@ function resolveNotebookDisplayTurn(params: {
       playbookId: playbook.id,
       knowledgeArticleId: playbook.knowledgeArticleId,
       stage: "run_first_check",
+      response: playbook.firstQuestion("notebook_display"),
+      suggestedActions: [`Playbook ${playbook.id}: confirmar síntoma de pantalla integrada`],
+    };
+  }
+
+  // 2. Transición desde identify_asset a run_first_check (proponer brillo/arranque)
+  if (currentStage === "run_first_check") {
+    return {
+      asset: "notebook_display",
+      qualifier: "internal",
+      symptoms,
+      playbookId: playbook.id,
+      knowledgeArticleId: playbook.knowledgeArticleId,
+      stage: "isolate_component",
       response: [
         "Bien, sigo con pantalla integrada del notebook.",
-        "Sube el brillo, conecta el cargador y reinicia el equipo. ¿Se ve imagen durante el arranque?",
+        "Siguiente descarte L2: sube el brillo al máximo (teclas Fn), conecta el cargador a la corriente y reinicia el equipo manteniendo presionado el botón de encendido por 10 segundos. ¿Aparece el logo del fabricante o alguna imagen durante el arranque?",
       ].join("\n\n"),
       suggestedActions: [`Playbook ${playbook.id}: validar brillo, energía y arranque`],
     };
+  }
+
+  // 3. Transición desde run_first_check a isolate_component (aislar con monitor externo)
+  if (currentStage === "isolate_component") {
+    const isNegative = isNegativeResponse(current);
+    const isPositive = isPositiveResponse(current);
+
+    if (isPositive) {
+      return {
+        asset: "notebook_display",
+        qualifier: "internal",
+        symptoms,
+        playbookId: playbook.id,
+        knowledgeArticleId: playbook.knowledgeArticleId,
+        stage: "prepare_escalation",
+        response: [
+          "¡Excelente! Qué bueno que el reinicio o el ajuste de energía resolvió el fallo en la pantalla integrada.",
+          "Para dejar constancia de este incidente resuelto en la bitácora técnica, confírmame tu nombre completo, correo y área."
+        ].join("\n\n"),
+        suggestedActions: [`Playbook ${playbook.id}: preparar cierre por resolución de pantalla`],
+      };
+    }
+
+    // Si persiste o responde negativo, aislamos pantalla física versus tarjeta gráfica (GPU)
+    return {
+      asset: "notebook_display",
+      qualifier: "internal",
+      symptoms,
+      playbookId: playbook.id,
+      knowledgeArticleId: playbook.knowledgeArticleId,
+      stage: "prepare_escalation", // El siguiente paso recolecta datos para escalar
+      response: [
+        "Con ese resultado, aislaremos si la falla es de la pantalla física o del chip gráfico (GPU).",
+        "Por favor, conecta un **monitor externo** (por HDMI o USB-C) al notebook. ¿El monitor externo sí da imagen o se queda en negro también?",
+      ].join("\n\n"),
+      suggestedActions: [`Playbook ${playbook.id}: aislar pantalla interna vs monitor externo`],
+    };
+  }
+
+  // 4. Transición final a derivación según resultado del aislamiento
+  const facts: Record<string, any> = {};
+  const isExternalPositive = isPositiveResponse(current) || hasAnyText(current, ["el otro si", "el otro sí", "el externo si", "el externo sí", "externo funciona"]);
+  let finalMessage = "";
+
+  if (isExternalPositive) {
+    facts.gpuWorking = true;
+    facts.lcdPanelDefective = true;
+    finalMessage = "Perfecto. Si el monitor externo sí da imagen, confirmamos que el procesador gráfico (GPU) está operativo y el daño está aislado en el panel LCD físico del notebook (requiere reemplazo físico de pantalla).";
+  } else {
+    facts.gpuDefective = true;
+    finalMessage = "Si tampoco hay señal en el monitor externo, el descarte apunta a un fallo crítico en la tarjeta gráfica (GPU) o en la placa base del notebook (requiere soporte en terreno para diagnóstico de hardware).";
   }
 
   return {
@@ -403,9 +472,13 @@ function resolveNotebookDisplayTurn(params: {
     symptoms,
     playbookId: playbook.id,
     knowledgeArticleId: playbook.knowledgeArticleId,
-    stage: "identify_asset",
-    response: playbook.firstQuestion("notebook_display"),
-    suggestedActions: [`Playbook ${playbook.id}: confirmar síntoma de pantalla integrada`],
+    stage: "prepare_escalation",
+    response: [
+      finalMessage,
+      "Procederemos a registrar el ticket de derivación técnica. ¿Me confirmas tu nombre completo, correo y área?",
+    ].join("\n\n"),
+    suggestedActions: [`Playbook ${playbook.id}: derivar reemplazo de pantalla o placa base`],
+    facts,
   };
 }
 
@@ -661,7 +734,7 @@ function mentionsMonitorNoPower(text: string) {
 }
 
 function mentionsPowerBasicsTested(text: string) {
-  return mentionsPowerOutletTested(text) || mentionsPowerCableTested(text) || mentionsCableFirm(text);
+  return mentionsPowerOutletTested(text) || mentionsPowerCableTested(text);
 }
 
 function mentionsPowerOutletTested(text: string) {
@@ -1018,5 +1091,104 @@ function resolveNotebookSlownessTurn(params: {
       "El equipo de soporte especializado L2 recibirá el análisis de la captura, los consumos de recursos detectados y las pruebas de descarte ejecutadas. No tendrás que repetir ningún paso. Te contactarán a la brevedad.",
     ].join("\n\n"),
     suggestedActions: [`Playbook ${playbook.id}: caso listo para derivación L2`],
+  };
+}
+
+function resolvePrinterTurn(params: {
+  current: string;
+  previousDiagnostic?: DiagnosticContext;
+  playbook: ServiceDeskPlaybook;
+  symptoms: ServiceDeskSymptom[];
+}): ServiceDeskTurnCore {
+  const { current, previousDiagnostic, playbook, symptoms } = params;
+  const currentStage = previousDiagnostic?.stage ?? "identify_asset";
+
+  // 1. Etapa inicial: Confirmar síntoma de impresora
+  if (currentStage === "identify_asset") {
+    return {
+      asset: "printer",
+      symptoms,
+      playbookId: playbook.id,
+      knowledgeArticleId: playbook.knowledgeArticleId,
+      stage: "run_first_check",
+      response: playbook.firstQuestion("printer"),
+      suggestedActions: [`Playbook ${playbook.id}: identificar activo y mensaje de error`],
+    };
+  }
+
+  // 2. Transición desde identify_asset a run_first_check (proponer descarte físico)
+  if (currentStage === "run_first_check") {
+    return {
+      asset: "printer",
+      symptoms,
+      playbookId: playbook.id,
+      knowledgeArticleId: playbook.knowledgeArticleId,
+      stage: "isolate_component",
+      response: [
+        "Entendido. Vamos con descartes básicos físicos de la impresora.",
+        "Siguiente descarte L2: por favor, apaga y vuelve a encender la impresora. Verifica que la bandeja tenga suficiente papel alineado y que el cartucho de tóner/tinta esté firme en su posición y sin cintas protectoras. ¿El panel de la impresora muestra alguna luz roja de alerta o mensaje de error después de esto?",
+      ].join("\n\n"),
+      suggestedActions: [`Playbook ${playbook.id}: validar papel, energía y tóner físico`],
+    };
+  }
+
+  // 3. Transición desde run_first_check a isolate_component (aislar cola de impresión y cable lógico)
+  if (currentStage === "isolate_component") {
+    const isNegative = isNegativeResponse(current);
+    const isPositive = isPositiveResponse(current);
+
+    if (isPositive) {
+      return {
+        asset: "printer",
+        symptoms,
+        playbookId: playbook.id,
+        knowledgeArticleId: playbook.knowledgeArticleId,
+        stage: "prepare_escalation",
+        response: [
+          "¡Excelente! Qué bueno que el reinicio físico o el reacomodo del papel/tóner resolvió el problema.",
+          "Para dejar constancia de este incidente resuelto en la bitácora técnica, confírmame tu nombre completo, correo y área."
+        ].join("\n\n"),
+        suggestedActions: [`Playbook ${playbook.id}: preparar cierre por resolución física`],
+      };
+    }
+
+    return {
+      asset: "printer",
+      symptoms,
+      playbookId: playbook.id,
+      knowledgeArticleId: playbook.knowledgeArticleId,
+      stage: "prepare_escalation",
+      response: [
+        "Con ese descarte físico completado, aislaremos la parte lógica (conexión y cola de impresión).",
+        "Abre la cola de impresión en tu equipo (Configuración -> Dispositivos e Impresoras). Elimina cualquier documento pendiente de impresión que esté atascado. Si la impresora se conecta por cable USB, cámbialo de puerto; si es Wi-Fi/Red, confirma si otros computadores pueden imprimir. ¿Lograste liberar la cola de impresión y realizar una página de prueba?",
+      ].join("\n\n"),
+      suggestedActions: [`Playbook ${playbook.id}: validar cola de impresión y conectividad lógica`],
+    };
+  }
+
+  // 4. Transición final a derivación
+  const facts: Record<string, any> = {};
+  const isLogicResolved = isPositiveResponse(current);
+  let finalMessage = "";
+
+  if (isLogicResolved) {
+    finalMessage = "Perfecto. Al liberar la cola de impresión o reconectar el cable de red/USB, la impresora ha vuelto a su estado operativo normal.";
+  } else {
+    facts.hardwareOrDriverDefective = true;
+    finalMessage = "Dado que la impresora sigue sin responder tras los descartes físicos (papel, energía, tóner) y lógicos (cola de impresión y puertos), el problema requiere soporte especializado para revisión de placa de red o reinstalación de controladores corporativos.";
+  }
+
+  return {
+    asset: "printer",
+    symptoms,
+    playbookId: playbook.id,
+    knowledgeArticleId: playbook.knowledgeArticleId,
+    stage: "prepare_escalation",
+    response: [
+      finalMessage,
+      "Procederemos a registrar el ticket de derivación técnica. ¿Me confirmas tu nombre completo, correo y área?",
+    ].join("\n\n"),
+    suggestedActions: [`Playbook ${playbook.id}: derivar reemplazo de fusor o soporte de drivers`],
+    facts,
   };
 }

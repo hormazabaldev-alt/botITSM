@@ -296,7 +296,29 @@ export function shouldCreateTicketFromMessage(message: string, priority: ITSMPri
 
 export function isResolvedMessage(message: string) {
   const text = normalize(message);
-  return hasAny(text, ["resuelto", "funcionó", "funciono", "solucionado", "ya puedo", "cerrar caso"]);
+  return hasAny(text, [
+    "resuelto", 
+    "funcionó", 
+    "funciono", 
+    "solucionado", 
+    "ya puedo", 
+    "cerrar caso",
+    "ahora si",
+    "ahora sí",
+    "ya si",
+    "ya sí",
+    "muchas gracias",
+    "gracias",
+    "listo",
+    "quedo listo",
+    "quedó listo",
+    "se arreglo",
+    "se arregló",
+    "impecable",
+    "excelente",
+    "perfecto",
+    "ya me funciona"
+  ]);
 }
 
 export function intentLabel(intent: ITSMIntent) {
