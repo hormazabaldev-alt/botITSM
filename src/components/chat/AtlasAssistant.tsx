@@ -278,9 +278,37 @@ export function SondaAssistant() {
   // Se restablece todo limpiamente
   function startNewChat() {
     if (isLoading) return;
-    clearStoredSessionContext();
-    setContext(undefined);
-    setMessages([initialMessage]);
+    
+    if (!selectedUserEmail) {
+      clearStoredSessionContext();
+      setContext(undefined);
+      setMessages([initialMessage]);
+    } else {
+      const email = selectedUserEmail;
+      const userData =
+        email === "lilian.leon@sonda.cl"
+          ? { nombre: "Lilian Leon", correo: "lilian.leon@sonda.cl", area: "Operaciones" }
+          : { nombre: "Francisco Martinez", correo: "francisco.martinez@sonda.cl", area: "Soporte TI" };
+
+      const newContext: SessionContext = {
+        sessionId: `session-${crypto.randomUUID()}`,
+        collectedFields: userData,
+        messages: [],
+        stepsExecuted: [],
+      };
+
+      const greetingMsg: ChatMessage = {
+        id: "sonda-welcome-personal",
+        role: "assistant",
+        createdAt: new Date().toISOString(),
+        content: `Hola ${userData.nombre}. Soy el asistente de soporte TI de SONDA.\n\nVeo en la CMDB que perteneces al área de ${userData.area}. Escríbeme qué falla con tus equipos y lo resolvemos juntos.`,
+      };
+
+      setContext(newContext);
+      setMessages([greetingMsg]);
+      storeSessionContext(newContext);
+    }
+
     setInput("");
     setTicket(null);
     setAttachedFile(null);
