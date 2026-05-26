@@ -416,14 +416,14 @@ function AdminWorkspace() {
           </div>
           <nav className="mt-6 grid gap-1">
             {[
-              { id: "overview", label: "Overview", icon: Activity },
-              { id: "incidents", label: "Incident Management", icon: ShieldAlert },
-              { id: "requests", label: "Request Management", icon: BarChart3 },
-              { id: "access", label: "Access Management", icon: UsersRound },
-              { id: "knowledge", label: "Knowledge Base", icon: BookOpen },
-              { id: "analytics", label: "Advanced Analytics", icon: Gauge },
-              { id: "cases", label: "Case Log", icon: Ticket },
-              { id: "configuration", label: "Governance", icon: Gauge },
+              { id: "overview", label: "Vista General", icon: Activity },
+              { id: "incidents", label: "Gestión de Incidentes", icon: ShieldAlert },
+              { id: "requests", label: "Gestión de Requerimientos", icon: BarChart3 },
+              { id: "access", label: "Gestión de Accesos", icon: UsersRound },
+              { id: "knowledge", label: "Base de Conocimiento", icon: BookOpen },
+              { id: "analytics", label: "Analítica Avanzada", icon: Gauge },
+              { id: "cases", label: "Bitácora de Casos", icon: Ticket },
+              { id: "configuration", label: "Gobernanza", icon: Gauge },
             ].map((item) => (
               <button
                 key={item.label}
@@ -444,7 +444,7 @@ function AdminWorkspace() {
           <header className="border-b border-white/10 bg-[#07111f]/92 px-4 py-2.5 backdrop-blur-xl lg:px-5">
             <div className="flex flex-col gap-2 xl:flex-row xl:items-end xl:justify-between">
               <div>
-                <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-cyan-200/75">Operations Command Center</p>
+                <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-cyan-200/75">Centro de Operaciones ITSM</p>
                 <h1 className="mt-0.5 text-[22px] font-semibold leading-7 tracking-[-0.025em] text-white">Panel ejecutivo ITSM</h1>
                 <p className="mt-1 max-w-2xl text-[12px] leading-4 text-slate-400">
                   Vista ejecutiva de incidentes, solicitudes, accesos, SLA, escalamiento y efectividad de conocimiento.
@@ -496,10 +496,10 @@ function AdminWorkspace() {
                       </div>
                     </section>
                     <section className="grid gap-2 xl:grid-cols-4">
-                      <DomainCard id="incidents" title="Incident Management" metrics={operationalModel.incident} />
-                      <DomainCard id="requests" title="Request Management" metrics={operationalModel.request} />
-                      <DomainCard id="access" title="Access Management" metrics={operationalModel.access} />
-                      <DomainCard id="knowledge" title="Knowledge Effectiveness" metrics={operationalModel.knowledge} />
+                      <DomainCard id="incidents" title="Gestión de Incidentes" metrics={operationalModel.incident} />
+                      <DomainCard id="requests" title="Gestión de Requerimientos" metrics={operationalModel.request} />
+                      <DomainCard id="access" title="Gestión de Accesos" metrics={operationalModel.access} />
+                      <DomainCard id="knowledge" title="Efectividad de Base de Conocimiento" metrics={operationalModel.knowledge} />
                     </section>
                     <div id="analytics" className="grid gap-2.5 xl:grid-cols-[1.15fr_0.85fr_0.85fr]">
                       <Panel title="Volumen por día" icon={Activity}>
@@ -508,7 +508,7 @@ function AdminWorkspace() {
                       <Panel title="Prioridades" icon={ShieldAlert}>
                         <PriorityStack items={byPriority} />
                       </Panel>
-                      <Panel title="Hourly demand heatmap" icon={Clock3}>
+                      <Panel title="Demanda horaria" icon={Clock3}>
                         <Heatmap items={heatmap} />
                       </Panel>
                     </div>
@@ -517,11 +517,11 @@ function AdminWorkspace() {
                 {activeSection === "incidents" && (
                   <div className="space-y-3">
                     <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4">
-                      <h2 className="text-base font-semibold text-white">Incident Management (Gestión de Incidentes)</h2>
+                      <h2 className="text-base font-semibold text-white">Gestión de Incidentes (Incident Management)</h2>
                       <p className="text-slate-400 mt-1">Monitoreo técnico de fallas activas de hardware, sistemas operativos, VPN y conectividad.</p>
                     </div>
                     <div className="grid gap-2.5 xl:grid-cols-[1fr_3fr]">
-                      <DomainCard id="incidents-detail" title="Incident Metrics" metrics={operationalModel.incident} />
+                      <DomainCard id="incidents-detail" title="Métricas de Incidentes" metrics={operationalModel.incident} />
                       <div className="grid gap-2.5">
                         <Panel title="Tendencia de Incidentes" icon={BarChart3}>
                           <HorizontalBars items={topIntents.filter(x => ["INCIDENT", "NETWORK_ISSUE", "HARDWARE_ISSUE"].includes(x.label))} />
@@ -534,11 +534,11 @@ function AdminWorkspace() {
                 {activeSection === "requests" && (
                   <div className="space-y-3">
                     <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4">
-                      <h2 className="text-base font-semibold text-white">Request Management (Gestión de Requerimientos)</h2>
+                      <h2 className="text-base font-semibold text-white">Gestión de Requerimientos (Request Management)</h2>
                       <p className="text-slate-400 mt-1">Seguimiento de solicitudes de instalación de software autorizado, compras de licencias y aprovisionamiento base.</p>
                     </div>
                     <div className="grid gap-2.5 xl:grid-cols-[1fr_3fr]">
-                      <DomainCard id="requests-detail" title="Request Metrics" metrics={operationalModel.request} />
+                      <DomainCard id="requests-detail" title="Métricas de Requerimientos" metrics={operationalModel.request} />
                       <div className="grid gap-2.5">
                         <Panel title="Distribución de Requerimientos" icon={BarChart3}>
                           <HorizontalBars items={topIntents.filter(x => ["SERVICE_REQUEST", "SOFTWARE_REQUEST"].includes(x.label))} />
@@ -551,11 +551,11 @@ function AdminWorkspace() {
                 {activeSection === "access" && (
                   <div className="space-y-3">
                     <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4">
-                      <h2 className="text-base font-semibold text-white">Access Management (Gestión de Accesos e Identidades)</h2>
+                      <h2 className="text-base font-semibold text-white">Gestión de Accesos e Identidades (Access Management)</h2>
                       <p className="text-slate-400 mt-1">Aprobación y provisión de accesos de red, reseteo de contraseñas, onboarding y carpetas compartidas.</p>
                     </div>
                     <div className="grid gap-2.5 xl:grid-cols-[1fr_3fr]">
-                      <DomainCard id="access-detail" title="Access Metrics" metrics={operationalModel.access} />
+                      <DomainCard id="access-detail" title="Métricas de Accesos" metrics={operationalModel.access} />
                       <div className="grid gap-2.5">
                         <Panel title="Distribución de Categorías" icon={Gauge}>
                           <HorizontalBars items={byType.filter(x => ["Acceso a correo", "Permisos", "Password reset"].includes(x.label))} />
@@ -568,11 +568,11 @@ function AdminWorkspace() {
                 {activeSection === "knowledge" && (
                   <div className="space-y-3">
                     <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4">
-                      <h2 className="text-base font-semibold text-white">Knowledge Base Effectiveness (Efectividad de Conocimiento)</h2>
+                      <h2 className="text-base font-semibold text-white">Efectividad de Base de Conocimiento (Knowledge Base)</h2>
                       <p className="text-slate-400 mt-1">Efectividad en el uso de artículos L2 y desvío autónomo de casos por el bot.</p>
                     </div>
                     <div className="grid gap-2.5 xl:grid-cols-[1fr_3fr]">
-                      <DomainCard id="knowledge-detail" title="KB Summary" metrics={operationalModel.knowledge} />
+                      <DomainCard id="knowledge-detail" title="Resumen de Base de Conocimiento" metrics={operationalModel.knowledge} />
                       <Panel title="Artículos de Conocimiento Utilizados" icon={BookOpen}>
                         <KnowledgeList items={knowledge} />
                       </Panel>
@@ -585,7 +585,7 @@ function AdminWorkspace() {
                       <Panel title="Volumen por día" icon={Activity}>
                         <LineBars items={byDay} />
                       </Panel>
-                      <Panel title="Hourly demand heatmap" icon={Clock3}>
+                      <Panel title="Mapa de calor de demanda horaria" icon={Clock3}>
                         <Heatmap items={heatmap} />
                       </Panel>
                     </div>
@@ -593,21 +593,21 @@ function AdminWorkspace() {
                       <Panel title="Prioridades" icon={ShieldAlert}>
                         <PriorityStack items={byPriority} />
                       </Panel>
-                      <Panel title="SLA breaches by day" icon={Clock3}>
+                      <Panel title="Incumplimientos de SLA por día" icon={Clock3}>
                         <LineBars items={slaBreachesByDay} />
                       </Panel>
-                      <Panel title="Aging open workload" icon={Gauge}>
+                      <Panel title="Carga de trabajo pendiente por antigüedad" icon={Gauge}>
                         <HorizontalBars items={agingBuckets} />
                       </Panel>
                     </div>
                     <div className="grid gap-2.5 xl:grid-cols-3">
-                      <Panel title="Distribution by category" icon={Gauge}>
+                      <Panel title="Distribución por categorías" icon={Gauge}>
                         <HorizontalBars items={byType} />
                       </Panel>
-                      <Panel title="Incident trend" icon={BarChart3}>
+                      <Panel title="Tendencia de incidentes" icon={BarChart3}>
                         <HorizontalBars items={topIntents} compact />
                       </Panel>
-                      <Panel title="User sentiment mix" icon={UsersRound}>
+                      <Panel title="Distribución de sentimiento de usuarios" icon={UsersRound}>
                         <HorizontalBars items={sentimentBreakdown} />
                       </Panel>
                     </div>
@@ -626,7 +626,7 @@ function AdminWorkspace() {
                 {activeSection === "configuration" && (
                   <section id="configuration" className="rounded-xl border border-white/10 bg-white/[0.035] px-4 py-3.5 space-y-4">
                     <div>
-                      <h2 className="text-base font-semibold text-white">Configuration & Governance (Gobernanza)</h2>
+                      <h2 className="text-base font-semibold text-white">Gobernanza y Configuración (Governance)</h2>
                       <p className="mt-1 text-[11px] text-slate-500">Detalles de configuración de la mesa de soporte inteligente en base al modelo ITIL v4 de SONDA.</p>
                     </div>
                     <div className="grid gap-3 sm:grid-cols-3">
