@@ -1,0 +1,119 @@
+export type ITSMIntent =
+  | "INCIDENT"
+  | "SERVICE_REQUEST"
+  | "ACCESS_REQUEST"
+  | "SOFTWARE_REQUEST"
+  | "HARDWARE_ISSUE"
+  | "NETWORK_ISSUE"
+  | "SECURITY_INCIDENT"
+  | "HUMAN_ESCALATION";
+
+export type ITSMPriority = "P1" | "P2" | "P3" | "P4";
+
+export type TicketStatus = "draft" | "created" | "resolved" | "escalated";
+
+export type OperationalStatus =
+  | "Detectando intención"
+  | "Clasificando según ITIL"
+  | "Consultando base de conocimiento"
+  | "Ejecutando guía de descarte"
+  | "Preparando ticket"
+  | "Cerrando caso";
+
+export type KnowledgeArticle = {
+  id: string;
+  title: string;
+  category: string;
+  intent: ITSMIntent;
+  symptoms: string[];
+  resolutionSteps: string[];
+  escalationCriteria: string[];
+  tags: string[];
+};
+
+export type TicketDraft = {
+  id?: string;
+  type: ITSMIntent;
+  priority: ITSMPriority;
+  category: string;
+  description: string;
+  affectedSystem?: string;
+  affectedAsset?: string;
+  requesterName?: string;
+  requesterEmail?: string;
+  businessArea?: string;
+  impact?: string;
+  urgency?: string;
+  executedSteps: string[];
+  nextAction: string;
+  assignedTeam: string;
+  estimatedSla: string;
+  status: TicketStatus;
+};
+
+export type ChatMessage = {
+  id: string;
+  role: "user" | "assistant" | "system";
+  content: string;
+  createdAt: string;
+  metadata?: {
+    intent?: ITSMIntent;
+    priority?: ITSMPriority;
+    ticketId?: string;
+    status?: OperationalStatus;
+  };
+};
+
+export type SessionContext = {
+  sessionId: string;
+  collectedFields: Partial<{
+    nombre: string;
+    correo: string;
+    area: string;
+    activo: string;
+    impacto: string;
+    urgencia: string;
+    sistema: string;
+  }>;
+  messages: ChatMessage[];
+  detectedIntent?: ITSMIntent;
+  priority?: ITSMPriority;
+  activeArticleId?: string;
+  ticketDraft?: TicketDraft;
+  stepsExecuted: string[];
+  awaitingResolutionConfirmation?: boolean;
+};
+
+export type ITSMResponseInput = {
+  userMessage: string;
+  sessionContext: SessionContext;
+  detectedIntent?: ITSMIntent;
+  knowledgeMatches: KnowledgeArticle[];
+  ticketDraft?: TicketDraft;
+};
+
+export type ITSMResponse = {
+  assistantMessage: string;
+  classification: ITSMIntent;
+  priority: ITSMPriority;
+  requiredFields: string[];
+  suggestedActions: string[];
+  operationalStatuses: OperationalStatus[];
+  shouldCreateTicket: boolean;
+  shouldEscalate: boolean;
+  ticketDraft: TicketDraft;
+};
+
+export type Ticket = TicketDraft & {
+  id: string;
+  createdAt: string;
+  requesterName: string;
+  requesterEmail: string;
+};
+
+export type KPI = {
+  label: string;
+  value: string;
+  delta: string;
+  tone: "blue" | "cyan" | "green" | "amber";
+};
