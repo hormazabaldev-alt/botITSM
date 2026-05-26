@@ -1102,9 +1102,68 @@ function resolvePrinterTurn(params: {
 }): ServiceDeskTurnCore {
   const { current, previousDiagnostic, playbook, symptoms } = params;
   const currentStage = previousDiagnostic?.stage ?? "identify_asset";
+  const normalizedCurrent = normalizeText(current);
 
-  // 1. Etapa inicial: Confirmar síntoma de impresora
+  const mentionsNoPaper = hasAnyText(normalizedCurrent, ["sin papel", "falta papel", "no tiene papel", "sin hojas", "falta hojas", "no tiene hojas", "no papel", "no hojas", "out of paper", "error de papel"]);
+  const mentionsPaperJam = hasAnyText(normalizedCurrent, ["atasco", "atascado", "papel atascado", "atasco de papel", "hoja atascada", "hojas atascadas", "paper jam", "jammed"]);
+  const mentionsNoToner = hasAnyText(normalizedCurrent, ["sin toner", "sin tinta", "bajo toner", "reemplazar toner", "cambiar toner", "no toner", "no tinta", "out of toner", "toner vacio", "toner vaci"]);
+
+  // 1. Etapa inicial: Confirmar síntoma de impresora (o ir directo al grano si ya reportó el error físico)
   if (currentStage === "identify_asset") {
+    if (mentionsNoPaper) {
+      return {
+        asset: "printer",
+        symptoms,
+        playbookId: playbook.id,
+        knowledgeArticleId: playbook.knowledgeArticleId,
+        stage: "isolate_component",
+        response: [
+          "Entendido: impresora reporta estar sin papel.",
+          "Por favor, realiza este descarte físico básico:",
+          "1. Retira la bandeja principal de papel por completo.\n2. Carga hojas blancas limpias, asegurándote de no sobrepasar el límite máximo indicado y ajustando las guías laterales para que queden firmes contra el papel.\n3. Vuelve a introducir la bandeja con firmeza hasta que encaje.",
+          "Una vez realizado esto, ¿la impresora tomó el papel y logró imprimir tu documento?"
+        ].join("\n\n"),
+        suggestedActions: [`Playbook ${playbook.id}: cargar papel en bandeja`],
+        facts: { printerProblemType: "no_paper" }
+      };
+    }
+
+    if (mentionsPaperJam) {
+      return {
+        asset: "printer",
+        symptoms,
+        playbookId: playbook.id,
+        knowledgeArticleId: playbook.knowledgeArticleId,
+        stage: "isolate_component",
+        response: [
+          "Entendido: impresora con atasco de papel.",
+          "Por favor, sigue estos pasos con cuidado:",
+          "1. Apaga la impresora y abre la cubierta delantera.\n2. Retira suavemente el conjunto de unidad de tambor y cartucho de tóner.\n3. Sujeta el papel atascado con ambas manos y retíralo despacio hacia afuera para no romperlo.\n4. Vuelve a colocar el tambor/tóner firmemente y cierra la cubierta.",
+          "Una vez liberado el atasco y encendida la impresora, ¿se eliminó el error del panel y logró imprimir?"
+        ].join("\n\n"),
+        suggestedActions: [`Playbook ${playbook.id}: liberar atasco de papel`],
+        facts: { printerProblemType: "paper_jam" }
+      };
+    }
+
+    if (mentionsNoToner) {
+      return {
+        asset: "printer",
+        symptoms,
+        playbookId: playbook.id,
+        knowledgeArticleId: playbook.knowledgeArticleId,
+        stage: "isolate_component",
+        response: [
+          "Entendido: impresora con falta de tóner.",
+          "Probemos un descarte rápido antes de cambiarlo:",
+          "1. Abre la cubierta delantera y retira el cartucho de tóner.\n2. Sujeta el cartucho con ambas manos y agítalo suavemente de lado a lado (horizontalmente) 5 a 6 veces para redistribuir el tóner restante.\n3. Vuelve a instalar el cartucho y cierra la cubierta.",
+          "¿Esto permitió que la impresora vuelva a estar lista e imprima, o el panel sigue mostrando el aviso de cambiar tóner?"
+        ].join("\n\n"),
+        suggestedActions: [`Playbook ${playbook.id}: agitar cartucho de tóner`],
+        facts: { printerProblemType: "no_toner" }
+      };
+    }
+
     return {
       asset: "printer",
       symptoms,
@@ -1118,6 +1177,57 @@ function resolvePrinterTurn(params: {
 
   // 2. Transición desde identify_asset a run_first_check (proponer descarte físico)
   if (currentStage === "run_first_check") {
+    if (mentionsNoPaper) {
+      return {
+        asset: "printer",
+        symptoms,
+        playbookId: playbook.id,
+        knowledgeArticleId: playbook.knowledgeArticleId,
+        stage: "isolate_component",
+        response: [
+          "Entendido. Si el panel de la impresora reporta que está **sin papel**, por favor realiza lo siguiente:",
+          "1. Retira la bandeja principal de papel por completo.\n2. Carga hojas blancas limpias, asegurándote de no sobrepasar el límite máximo indicado y ajustando las guías laterales para que queden firmes contra el papel.\n3. Vuelve a introducir la bandeja con firmeza hasta que encaje.",
+          "Una vez realizado esto, ¿la impresora tomó el papel y logró imprimir tu documento?"
+        ].join("\n\n"),
+        suggestedActions: [`Playbook ${playbook.id}: cargar papel en bandeja`],
+        facts: { printerProblemType: "no_paper" }
+      };
+    }
+
+    if (mentionsPaperJam) {
+      return {
+        asset: "printer",
+        symptoms,
+        playbookId: playbook.id,
+        knowledgeArticleId: playbook.knowledgeArticleId,
+        stage: "isolate_component",
+        response: [
+          "Entendido. Si hay un **atasco de papel**, por favor sigue estos pasos con cuidado:",
+          "1. Apaga la impresora y abre la cubierta delantera.\n2. Retira suavemente el conjunto de unidad de tambor y cartucho de tóner.\n3. Sujeta el papel atascado con ambas manos y retíralo despacio hacia afuera para no romperlo.\n4. Vuelve a colocar el tambor/tóner firmemente y cierra la cubierta.",
+          "Una vez liberado el atasco y encendida la impresora, ¿se eliminó el error del panel y logró imprimir?"
+        ].join("\n\n"),
+        suggestedActions: [`Playbook ${playbook.id}: liberar atasco de papel`],
+        facts: { printerProblemType: "paper_jam" }
+      };
+    }
+
+    if (mentionsNoToner) {
+      return {
+        asset: "printer",
+        symptoms,
+        playbookId: playbook.id,
+        knowledgeArticleId: playbook.knowledgeArticleId,
+        stage: "isolate_component",
+        response: [
+          "Entendido. Si la impresora reporta **falta de tóner o tinta**, probemos un descarte rápido antes de cambiarlo:",
+          "1. Abre la cubierta delantera y retira el cartucho de tóner.\n2. Sujeta el cartucho con ambas manos y agítalo suavemente de lado a lado (horizontalmente) 5 a 6 veces para redistribuir el tóner restante.\n3. Vuelve a instalar el cartucho y cierra la cubierta.",
+          "¿Esto permitió que la impresora vuelva a estar lista e imprima, o el panel sigue mostrando el aviso de cambiar tóner?"
+        ].join("\n\n"),
+        suggestedActions: [`Playbook ${playbook.id}: agitar cartucho de tóner`],
+        facts: { printerProblemType: "no_toner" }
+      };
+    }
+
     return {
       asset: "printer",
       symptoms,
@@ -1136,6 +1246,7 @@ function resolvePrinterTurn(params: {
   if (currentStage === "isolate_component") {
     const isNegative = isNegativeResponse(current);
     const isPositive = isPositiveResponse(current);
+    const prevProblemType = previousDiagnostic?.facts.printerProblemType;
 
     if (isPositive) {
       return {
@@ -1145,10 +1256,58 @@ function resolvePrinterTurn(params: {
         knowledgeArticleId: playbook.knowledgeArticleId,
         stage: "prepare_escalation",
         response: [
-          "¡Excelente! Qué bueno que el reinicio físico o el reacomodo del papel/tóner resolvió el problema.",
+          "¡Excelente! Qué bueno que el descarte físico de la impresora resolvió el problema.",
           "Para dejar constancia de este incidente resuelto en la bitácora técnica, confírmame tu nombre completo, correo y área."
         ].join("\n\n"),
         suggestedActions: [`Playbook ${playbook.id}: preparar cierre por resolución física`],
+      };
+    }
+
+    if (prevProblemType === "no_paper") {
+      return {
+        asset: "printer",
+        symptoms,
+        playbookId: playbook.id,
+        knowledgeArticleId: playbook.knowledgeArticleId,
+        stage: "prepare_escalation",
+        response: [
+          "Entendido. Si tras cargar el papel y acomodar la bandeja la impresora sigue reportando 'sin papel', es probable que el sensor de presencia de papel de la bandeja principal esté dañado o requiera limpieza técnica interna.",
+          "Procederemos a registrar el ticket de derivación técnica para soporte en terreno. ¿Me confirmas tu nombre completo, correo y área?"
+        ].join("\n\n"),
+        suggestedActions: [`Playbook ${playbook.id}: derivar por sensor de papel dañado`],
+        facts: { ...previousDiagnostic?.facts, hardwareOrDriverDefective: true }
+      };
+    }
+
+    if (prevProblemType === "paper_jam") {
+      return {
+        asset: "printer",
+        symptoms,
+        playbookId: playbook.id,
+        knowledgeArticleId: playbook.knowledgeArticleId,
+        stage: "prepare_escalation",
+        response: [
+          "Entendido. Dado que el atasco persiste o el sensor de paso de papel sigue bloqueado tras retirar las hojas, un rodillo de alimentación o el fusor de la impresora podría estar dañado físicamente.",
+          "Procederemos a registrar el ticket de derivación técnica para soporte en terreno. ¿Me confirmas tu nombre completo, correo y área?"
+        ].join("\n\n"),
+        suggestedActions: [`Playbook ${playbook.id}: derivar por atasco mecánico persistente`],
+        facts: { ...previousDiagnostic?.facts, hardwareOrDriverDefective: true }
+      };
+    }
+
+    if (prevProblemType === "no_toner") {
+      return {
+        asset: "printer",
+        symptoms,
+        playbookId: playbook.id,
+        knowledgeArticleId: playbook.knowledgeArticleId,
+        stage: "prepare_escalation",
+        response: [
+          "Entendido. Al confirmarse que el cartucho de tóner está completamente agotado, registraremos una solicitud de reemplazo de insumos para tu equipo.",
+          "Para gestionar el envío del nuevo tóner con el área de logística, ¿me confirmas tu nombre completo, correo y área?"
+        ].join("\n\n"),
+        suggestedActions: [`Playbook ${playbook.id}: registrar solicitud de reemplazo de tóner`],
+        facts: { ...previousDiagnostic?.facts, tonerRequest: true }
       };
     }
 
@@ -1167,7 +1326,7 @@ function resolvePrinterTurn(params: {
   }
 
   // 4. Transición final a derivación
-  const facts: Record<string, any> = {};
+  const facts: Record<string, any> = { ...previousDiagnostic?.facts };
   const isLogicResolved = isPositiveResponse(current);
   let finalMessage = "";
 
