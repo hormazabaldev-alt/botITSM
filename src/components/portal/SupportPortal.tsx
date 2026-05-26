@@ -85,7 +85,7 @@ export function SupportPortal() {
 
           {/* Logo flotando */}
           <div className="s-fade-1">
-            <div className="s-float" style={{ position: "relative" }}>
+            <div className={chatOpen ? "" : "s-float"} style={{ position: "relative", transition: "transform 0.5s ease-in-out" }}>
               {/* Halo suave detrás del logo */}
               <div style={{
                 position: "absolute",
