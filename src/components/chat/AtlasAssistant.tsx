@@ -3,7 +3,6 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import {
   AlertTriangle,
-  BrainCircuit,
   CheckCircle2,
   ChevronUp,
   Headset,
@@ -29,43 +28,37 @@ type ChatApiResponse = {
 const smartActions = [
   {
     topic: "No puedo entrar al correo",
-    title: "Acceso / permisos",
-    description: "Usuarios, carpetas, credenciales",
+    title: "Acceso",
     icon: KeyRound,
     accent: "from-amber-300 to-orange-400",
   },
   {
     topic: "VPN no funciona",
     title: "Conectividad",
-    description: "VPN, Wi-Fi, acceso remoto",
     icon: Wifi,
     accent: "from-cyan-300 to-blue-400",
   },
   {
     topic: "Necesito instalar software",
     title: "Software",
-    description: "Instalaciones y licencias",
     icon: PackageCheck,
     accent: "from-blue-300 to-indigo-400",
   },
   {
     topic: "Mi notebook está lenta",
     title: "Hardware",
-    description: "Notebook, periféricos",
     icon: Laptop,
     accent: "from-slate-300 to-slate-500",
   },
   {
     topic: "Necesito acceso",
-    title: "Incidente crítico",
-    description: "Aplicación caída o servicio degradado",
+    title: "Incidente",
     icon: AlertTriangle,
     accent: "from-rose-300 to-red-500",
   },
   {
     topic: "Otro problema",
-    title: "Otro caso",
-    description: "Describe libremente",
+    title: "Otro",
     icon: MessageSquareText,
     accent: "from-violet-300 to-fuchsia-400",
   },
@@ -75,8 +68,7 @@ const initialMessage: ChatMessage = {
   id: "atlas-welcome",
   role: "assistant",
   createdAt: new Date().toISOString(),
-  content:
-    "Hola 👋\n\nSoy Atlas, tu asistente inteligente de soporte TI.\n\nPuedo ayudarte a resolver incidentes, accesos, conectividad y requerimientos operacionales.\n\nSelecciona una categoría o descríbeme lo que ocurre.",
+  content: "Hola. Cuéntame qué necesitas resolver.",
 };
 
 const statusLabels: Partial<Record<OperationalStatus, string>> = {
@@ -212,35 +204,31 @@ export function AtlasAssistant() {
           setClosed(false);
           setExpanded(true);
         }}
-        className="inline-flex h-11 items-center gap-2 rounded-full border border-cyan-300/20 bg-slate-950/92 px-4 text-sm font-semibold text-cyan-50 shadow-[0_18px_60px_rgba(8,47,73,0.32)] backdrop-blur-2xl transition hover:border-cyan-300/50 hover:shadow-cyan-500/20"
+        className="inline-flex h-10 items-center gap-2 rounded-full border border-cyan-300/20 bg-slate-950/92 px-4 text-sm font-semibold text-cyan-50 shadow-[0_18px_60px_rgba(8,47,73,0.26)] backdrop-blur-2xl transition hover:border-cyan-300/50"
       >
         <ShieldCheck size={17} aria-hidden />
-        Atlas ITSM Assistant
+        Atlas
       </button>
     );
   }
 
   return (
-    <section className="relative flex h-[min(600px,calc(100dvh-84px))] w-full max-w-[430px] flex-col overflow-hidden rounded-[26px] border border-cyan-200/12 bg-[#08111f]/96 text-slate-100 shadow-[0_34px_110px_rgba(2,8,23,0.42)] ring-1 ring-white/8 backdrop-blur-2xl">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_24%_0%,rgba(34,211,238,0.16),transparent_34%),radial-gradient(circle_at_92%_18%,rgba(59,130,246,0.12),transparent_30%)]" />
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(148,163,184,0.055)_1px,transparent_1px),linear-gradient(90deg,rgba(148,163,184,0.045)_1px,transparent_1px)] bg-[size:28px_28px] opacity-60 [mask-image:linear-gradient(to_bottom,black,transparent_72%)]" />
-      <header className="relative flex h-[70px] shrink-0 items-center justify-between border-b border-white/10 bg-[linear-gradient(135deg,rgba(15,23,42,0.98),rgba(8,47,73,0.92)_55%,rgba(2,6,23,0.98))] px-4 py-2.5">
-        <div className="flex items-center gap-3">
-          <div className="relative grid size-10 place-items-center rounded-2xl border border-cyan-300/25 bg-cyan-300/10 text-cyan-100 shadow-[0_0_34px_rgba(34,211,238,0.22)]">
-            <BrainCircuit size={19} aria-hidden />
-            <span className="absolute -right-1 -top-1 size-3 rounded-full bg-cyan-300 shadow-[0_0_18px_rgba(34,211,238,0.9)]" />
-            <span className="absolute -right-1 -top-1 size-3 animate-ping rounded-full bg-cyan-300/70" />
+    <section className="relative flex h-[min(520px,calc(100dvh-84px))] w-full max-w-[410px] flex-col overflow-hidden rounded-[20px] border border-cyan-200/12 bg-[#07111f]/96 text-slate-100 shadow-[0_24px_80px_rgba(2,8,23,0.34)] ring-1 ring-white/8 backdrop-blur-2xl">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_24%_0%,rgba(34,211,238,0.09),transparent_38%)]" />
+      <header className="relative flex h-14 shrink-0 items-center justify-between border-b border-white/10 bg-slate-950/42 px-4">
+        <div className="flex items-center gap-2.5">
+          <div className="grid size-8 place-items-center rounded-xl border border-cyan-300/20 bg-cyan-300/8 text-cyan-100">
+            <Headset size={16} aria-hidden />
           </div>
           <div className="min-w-0">
-            <h1 className="text-[14px] font-semibold text-white">Atlas ITSM Assistant</h1>
-            <p className="mt-0.5 text-[10px] font-medium uppercase tracking-[0.14em] text-cyan-100/68">Operational Intelligence Layer</p>
+            <h1 className="text-[14px] font-semibold text-white">Atlas</h1>
           </div>
         </div>
         <div className="flex items-center gap-1.5">
           <button
             type="button"
             onClick={() => setExpanded((current) => !current)}
-            className="grid size-8 place-items-center rounded-full border border-white/10 bg-white/[0.06] text-slate-300 transition duration-200 hover:border-cyan-300/40 hover:bg-cyan-300/10 hover:text-cyan-50 focus:outline-none focus:ring-2 focus:ring-cyan-300/30"
+            className="grid size-7 place-items-center rounded-full border border-white/10 bg-white/[0.05] text-slate-300 transition duration-200 hover:border-cyan-300/40 hover:bg-cyan-300/10 hover:text-cyan-50 focus:outline-none focus:ring-2 focus:ring-cyan-300/30"
             aria-label={expanded ? "Minimizar asistente" : "Expandir asistente"}
           >
             {expanded ? <Minus size={15} aria-hidden /> : <ChevronUp size={15} aria-hidden />}
@@ -248,7 +236,7 @@ export function AtlasAssistant() {
           <button
             type="button"
             onClick={() => setClosed(true)}
-            className="grid size-8 place-items-center rounded-full border border-white/10 bg-white/[0.06] text-slate-300 transition duration-200 hover:border-cyan-300/40 hover:bg-cyan-300/10 hover:text-cyan-50 focus:outline-none focus:ring-2 focus:ring-cyan-300/30"
+            className="grid size-7 place-items-center rounded-full border border-white/10 bg-white/[0.05] text-slate-300 transition duration-200 hover:border-cyan-300/40 hover:bg-cyan-300/10 hover:text-cyan-50 focus:outline-none focus:ring-2 focus:ring-cyan-300/30"
             aria-label="Cerrar asistente"
           >
             <X size={15} aria-hidden />
@@ -258,14 +246,14 @@ export function AtlasAssistant() {
 
       {expanded ? (
         <>
-          <div ref={scrollRef} className="thin-scrollbar relative min-h-0 flex-1 overflow-y-auto px-4 py-2">
-            <div className="space-y-2">
+          <div ref={scrollRef} className="thin-scrollbar relative min-h-0 flex-1 overflow-y-auto px-3 py-2.5">
+            <div className="space-y-2.5">
               {messages.map((message) => (
                 <Bubble key={message.id} message={message} />
               ))}
 
               {!hasConversation ? (
-                <div className="grid grid-cols-2 gap-1.5">
+                <div className="grid grid-cols-3 gap-1.5">
                   {smartActions.map((action) => (
                     <SmartActionCard key={action.topic} action={action} onClick={() => handleSuggestion(action.topic)} />
                   ))}
@@ -277,29 +265,34 @@ export function AtlasAssistant() {
             </div>
           </div>
 
-          <div className="relative shrink-0 border-t border-white/10 bg-slate-950/72 px-4 py-2 backdrop-blur-xl">
-            <div className="mb-1.5 flex items-center justify-between text-[11px] font-medium">
+          <div className="relative shrink-0 border-t border-white/10 bg-slate-950/72 px-3 py-2 backdrop-blur-xl">
+            <div className="mb-1.5 flex items-center text-[10.5px] font-medium">
               <div className="flex items-center gap-2 text-slate-400">
                 <span className={`size-1.5 rounded-full ${isLoading ? "animate-pulse bg-cyan-300 shadow-[0_0_14px_rgba(34,211,238,0.95)]" : "bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.7)]"}`} />
                 {status}
               </div>
-              <span className="rounded-full border border-cyan-300/15 bg-cyan-300/[0.07] px-2 py-0.5 text-cyan-100/72">AI ready</span>
             </div>
             <form onSubmit={handleSubmit} className="flex items-end gap-2">
               <textarea
                 value={input}
                 onChange={(event) => setInput(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" && !event.shiftKey) {
+                    event.preventDefault();
+                    void sendMessage(input);
+                  }
+                }}
                 rows={1}
-                placeholder="Describe tu problema o requerimiento..."
-                className="max-h-24 min-h-10 flex-1 resize-none rounded-2xl border border-white/10 bg-white/[0.055] px-3.5 py-2.5 text-sm leading-5 text-slate-100 outline-none transition duration-200 placeholder:text-slate-500 focus:border-cyan-300/45 focus:bg-white/[0.075] focus:ring-4 focus:ring-cyan-300/10"
+                placeholder="Escribe tu mensaje..."
+                className="max-h-20 min-h-9 flex-1 resize-none rounded-xl border border-white/10 bg-white/[0.055] px-3 py-2 text-sm leading-5 text-slate-100 outline-none transition duration-200 placeholder:text-slate-500 focus:border-cyan-300/45 focus:bg-white/[0.075] focus:ring-4 focus:ring-cyan-300/10"
               />
               <button
                 type="submit"
                 disabled={!input.trim() || isLoading}
-                className="grid size-10 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-cyan-300 to-blue-500 text-slate-950 shadow-[0_12px_34px_rgba(34,211,238,0.24)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_16px_42px_rgba(34,211,238,0.34)] disabled:cursor-not-allowed disabled:translate-y-0 disabled:from-slate-700 disabled:to-slate-800 disabled:text-slate-500 disabled:shadow-none"
+                className="grid size-9 shrink-0 place-items-center rounded-xl bg-cyan-300 text-slate-950 shadow-[0_10px_28px_rgba(34,211,238,0.18)] transition duration-200 hover:bg-cyan-200 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-500 disabled:shadow-none"
                 aria-label="Enviar"
               >
-                <Send size={17} aria-hidden />
+                <Send size={16} aria-hidden />
               </button>
             </form>
           </div>
@@ -310,18 +303,9 @@ export function AtlasAssistant() {
 }
 
 function WelcomeCard({ message }: { message: string }) {
-  const [, title = "", body = "", instruction = ""] = message.split("\n\n");
-
   return (
-    <div className="rounded-3xl border border-cyan-200/14 bg-[linear-gradient(145deg,rgba(255,255,255,0.105),rgba(255,255,255,0.045))] p-3 shadow-[0_22px_60px_rgba(2,8,23,0.22)] ring-1 ring-white/8">
-      <div className="mb-1.5 inline-flex items-center gap-2 rounded-full border border-cyan-300/15 bg-cyan-300/[0.08] px-2.5 py-0.5 text-[9px] font-medium uppercase tracking-[0.14em] text-cyan-100/76">
-        <span className="size-1.5 rounded-full bg-cyan-300 shadow-[0_0_14px_rgba(34,211,238,0.95)]" />
-        AI support orchestration
-      </div>
-      <p className="text-[13px] font-medium text-cyan-50">Hola 👋</p>
-      <h2 className="mt-1 text-[15px] font-semibold leading-5 text-white">{title}</h2>
-      <p className="mt-2 text-[11.5px] leading-4 text-slate-300">{body}</p>
-      <p className="mt-2 border-l-2 border-cyan-300/50 pl-3 text-[11.5px] font-medium leading-4 text-cyan-50">{instruction}</p>
+    <div className="max-w-[82%] rounded-xl border border-white/10 bg-white/[0.065] px-3 py-2 text-[13px] leading-5 text-slate-200">
+      <p>{message}</p>
     </div>
   );
 }
@@ -339,17 +323,15 @@ function SmartActionCard({
     <button
       type="button"
       onClick={onClick}
-      className="group relative min-h-[54px] overflow-hidden rounded-2xl border border-white/10 bg-white/[0.055] p-2 text-left shadow-[0_14px_34px_rgba(2,8,23,0.18)] transition duration-200 hover:-translate-y-0.5 hover:border-cyan-300/30 hover:bg-white/[0.085] hover:shadow-[0_18px_44px_rgba(8,47,73,0.24)] focus:outline-none focus:ring-2 focus:ring-cyan-300/25"
+      className="group relative min-h-10 overflow-hidden rounded-xl border border-white/10 bg-white/[0.045] px-2 py-1.5 text-left transition duration-200 hover:border-cyan-300/30 hover:bg-white/[0.075] focus:outline-none focus:ring-2 focus:ring-cyan-300/25"
     >
       <span className={`absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r ${action.accent}`} />
-      <span className={`absolute -right-6 -top-8 size-16 rounded-full bg-gradient-to-br ${action.accent} opacity-0 blur-2xl transition duration-300 group-hover:opacity-25`} />
-      <span className="relative flex items-start gap-2.5">
-        <span className="grid size-6 shrink-0 place-items-center rounded-lg border border-white/10 bg-slate-950/42 text-cyan-100 transition group-hover:border-cyan-300/30 group-hover:text-cyan-50">
-          <Icon size={13} aria-hidden />
+      <span className="relative flex items-center gap-2">
+        <span className="grid size-6 shrink-0 place-items-center rounded-lg border border-white/10 bg-slate-950/36 text-cyan-100 transition group-hover:border-cyan-300/30 group-hover:text-cyan-50">
+          <Icon size={12} aria-hidden />
         </span>
         <span className="min-w-0">
-          <span className="block text-[11.5px] font-semibold leading-4 text-slate-50">{action.title}</span>
-          <span className="mt-0.5 block text-[9.5px] leading-3 text-slate-400">{action.description}</span>
+          <span className="block truncate text-[11px] font-semibold leading-4 text-slate-50">{action.title}</span>
         </span>
       </span>
     </button>
@@ -366,22 +348,22 @@ function Bubble({ message }: { message: ChatMessage }) {
   return (
     <div className={`flex gap-2 ${isUser ? "justify-end" : "justify-start"}`}>
       {!isUser ? (
-        <span className="mt-1 grid size-7 shrink-0 place-items-center rounded-xl border border-cyan-300/15 bg-cyan-300/10 text-cyan-100">
-          <Headset size={13} aria-hidden />
+        <span className="mt-1 grid size-6 shrink-0 place-items-center rounded-lg border border-cyan-300/15 bg-cyan-300/10 text-cyan-100">
+          <Headset size={12} aria-hidden />
         </span>
       ) : null}
       <div
         className={
           isUser
-            ? "max-w-[82%] rounded-2xl bg-cyan-300 px-3.5 py-2.5 text-sm leading-6 text-slate-950 shadow-[0_10px_30px_rgba(34,211,238,0.18)]"
-            : "max-w-[calc(100%-36px)] rounded-2xl border border-white/10 bg-white/[0.075] px-3.5 py-2.5 text-[13px] leading-5 text-slate-200 shadow-[0_16px_40px_rgba(2,8,23,0.18)]"
+            ? "max-w-[82%] rounded-xl bg-cyan-300 px-3 py-2 text-sm leading-5 text-slate-950 shadow-[0_10px_24px_rgba(34,211,238,0.14)]"
+            : "max-w-[calc(100%-32px)] rounded-xl border border-white/10 bg-white/[0.065] px-3 py-2 text-[13px] leading-5 text-slate-200"
         }
       >
         <p className="whitespace-pre-line">{message.content}</p>
       </div>
       {isUser ? (
-        <span className="mt-1 grid size-7 shrink-0 place-items-center rounded-xl border border-white/10 bg-white/[0.075] text-slate-300">
-          <UserRound size={13} aria-hidden />
+        <span className="mt-1 grid size-6 shrink-0 place-items-center rounded-lg border border-white/10 bg-white/[0.075] text-slate-300">
+          <UserRound size={12} aria-hidden />
         </span>
       ) : null}
     </div>

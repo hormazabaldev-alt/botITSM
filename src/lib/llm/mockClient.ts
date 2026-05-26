@@ -8,7 +8,7 @@ import {
   isResolvedMessage,
   shouldCreateTicketFromMessage,
 } from "@/lib/itsm/engine";
-import type { ITSMIntent, ITSMResponse, ITSMResponseInput, KnowledgeArticle, SessionContext } from "@/lib/itsm/types";
+import type { ITSMIntent, ITSMResponse, ITSMResponseInput, SessionContext } from "@/lib/itsm/types";
 
 export async function generateMockITSMResponse(input: ITSMResponseInput): Promise<ITSMResponse> {
   const mergedContext: SessionContext = {
@@ -36,7 +36,7 @@ export async function generateMockITSMResponse(input: ITSMResponseInput): Promis
   if (isResolvedMessage(input.userMessage)) {
     return {
       assistantMessage:
-        "Perfecto, lo dejo cerrado. Me alegra que haya quedado operativo. Si vuelve a ocurrir, escríbeme con el mensaje de error o el sistema afectado y lo retomamos con contexto.",
+        "Perfecto, lo dejo cerrado. Si vuelve a ocurrir, escríbeme el sistema afectado y el mensaje de error.",
       classification: detectedIntent,
       priority,
       requiredFields: [],
@@ -51,7 +51,6 @@ export async function generateMockITSMResponse(input: ITSMResponseInput): Promis
   return {
     assistantMessage: buildConciergeMessage({
       intent: detectedIntent,
-      article,
       requiredFields,
       shouldCreateTicket,
     }),
@@ -70,52 +69,45 @@ export async function generateMockITSMResponse(input: ITSMResponseInput): Promis
 
 function buildConciergeMessage({
   intent,
-  article,
   requiredFields,
   shouldCreateTicket,
 }: {
   intent: ITSMIntent;
-  article?: KnowledgeArticle;
   requiredFields: string[];
   shouldCreateTicket: boolean;
 }) {
   if (shouldCreateTicket) {
     return [
-      "Entiendo. Para no hacerte repetir información, voy a dejar el caso registrado con el contexto que ya reunimos.",
-      "Lo derivaré al equipo correspondiente y mantendré el resumen operativo con las acciones ya revisadas.",
+      "Entendido. Lo dejo listo para derivar con el contexto actual.",
+      requiredFields.length ? `Confírmame solo esto: ${requiredFields.join(", ")}.` : "Te aviso el siguiente paso apenas quede registrado.",
     ].join("\n\n");
   }
 
   const introByIntent: Record<ITSMIntent, string> = {
-    INCIDENT: "Hugo, te ayudo. Primero necesito dimensionar el impacto para actuar con la prioridad correcta.",
-    SERVICE_REQUEST: "Hugo, te ayudo. Revisemos lo necesario para gestionar tu solicitud sin vueltas.",
-    ACCESS_REQUEST: "Hugo, te ayudo con el acceso. Necesito validar algunos datos mínimos para orientarlo bien.",
-    SOFTWARE_REQUEST: "Hugo, te ayudo con la instalación. Revisemos si corresponde a software autorizado y qué equipo usas.",
-    HARDWARE_ISSUE: "Hugo, te ayudo. Veamos si podemos aislar la causa antes de escalarlo.",
-    NETWORK_ISSUE: "Hugo, te ayudo con la conectividad. Revisemos lo básico para saber si es tu equipo, la red o el servicio.",
-    SECURITY_INCIDENT: "Hugo, lo tomo con prioridad. Evitemos hacer cambios hasta preservar el contexto del incidente.",
-    HUMAN_ESCALATION: "Hugo, puedo derivarlo a soporte humano con contexto, pero antes reuniré lo mínimo para que no partan desde cero.",
+    INCIDENT: "Te ayudo. Necesito ubicar el impacto.",
+    SERVICE_REQUEST: "Te ayudo. Revisemos lo mínimo para gestionarlo.",
+    ACCESS_REQUEST: "Te ayudo con el acceso.",
+    SOFTWARE_REQUEST: "Te ayudo con la instalación.",
+    HARDWARE_ISSUE: "Te ayudo. Aislemos la causa.",
+    NETWORK_ISSUE: "Te ayudo con la conectividad.",
+    SECURITY_INCIDENT: "Lo tomo con prioridad. Evita hacer cambios por ahora.",
+    HUMAN_ESCALATION: "Puedo derivarlo con contexto.",
   };
 
-  const questionsByIntent: Record<ITSMIntent, string[]> = {
-    INCIDENT: ["¿Afecta solo a tu usuario o a más personas?", "¿Qué sistema o aplicación está impactado?"],
-    SERVICE_REQUEST: ["¿Para qué área o proceso lo necesitas?", "¿Hay alguna fecha límite asociada?"],
-    ACCESS_REQUEST: ["¿A qué sistema, carpeta o recurso necesitas entrar?", "¿Tu jefatura o dueño del recurso ya lo aprobó?"],
-    SOFTWARE_REQUEST: ["¿Qué software necesitas instalar?", "¿Es para tu equipo corporativo o para otro activo?"],
-    HARDWARE_ISSUE: ["¿Desde cuándo notas el problema?", "¿Ocurre con todo el equipo o con una aplicación puntual?"],
-    NETWORK_ISSUE: ["¿Estás conectado por VPN, Wi-Fi o red cableada?", "¿Te aparece algún mensaje de error?"],
-    SECURITY_INCIDENT: ["¿Qué señal te hizo sospechar del incidente?", "¿Afecta correo, equipo, archivos o una aplicación?"],
-    HUMAN_ESCALATION: ["¿Qué necesitas que revise soporte?", "¿Hay algún impacto urgente para tu trabajo?"],
+  const questionsByIntent: Record<ITSMIntent, string> = {
+    INCIDENT: "¿Qué sistema falla y afecta solo a tu usuario o a más personas?",
+    SERVICE_REQUEST: "¿Para qué área lo necesitas y hay fecha límite?",
+    ACCESS_REQUEST: "¿A qué sistema o carpeta necesitas entrar y ya está aprobado?",
+    SOFTWARE_REQUEST: "¿Qué software necesitas y en qué equipo?",
+    HARDWARE_ISSUE: "¿Desde cuándo pasa y afecta todo el equipo o una app?",
+    NETWORK_ISSUE: "¿Estás por VPN, Wi-Fi o cable, y qué error aparece?",
+    SECURITY_INCIDENT: "¿Qué viste y qué servicio está afectado?",
+    HUMAN_ESCALATION: "¿Qué debe revisar soporte y qué tan urgente es?",
   };
-
-  const guide = article?.resolutionSteps.slice(0, 2).map((step) => `• ${step}`).join("\n");
-  const fieldHint = requiredFields.length ? `\n\nSi esto persiste, después te pediré solo: ${requiredFields.join(", ")}.` : "";
 
   return [
     introByIntent[intent],
-    questionsByIntent[intent].join("\n"),
-    guide ? `\nMientras me respondes, puedes revisar esto:\n${guide}` : "",
-    fieldHint,
+    questionsByIntent[intent],
   ]
     .filter(Boolean)
     .join("\n\n");
