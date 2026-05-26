@@ -13,8 +13,7 @@ export function resolveContextualContinuation(input: ITSMResponseInput): ITSMRes
   }
 
   const storedArticle = findKnowledgeArticleById(input.sessionContext.activeArticleId);
-  const asksHowToContinue = hasAny(normalizeText(input.userMessage), ["como", "cómo", "modo seguro", "reinicio", "reiniciar"]);
-  const activeArticle = asksHowToContinue ? storedArticle ?? input.knowledgeMatches[0] : input.knowledgeMatches[0] ?? storedArticle;
+  const activeArticle = storedArticle ?? input.knowledgeMatches[0];
 
   if (!activeArticle || !isFollowUp(input.userMessage, input.sessionContext)) {
     return undefined;
@@ -38,6 +37,15 @@ export function resolveContextualContinuation(input: ITSMResponseInput): ITSMRes
     });
   }
 
+  if (activeArticle.id === "kb-external-display") {
+    return buildContinuationResponse({
+      input,
+      article: activeArticle,
+      message: resolveExternalMonitorFollowUp(input.userMessage),
+      suggestedActions: activeArticle.resolutionSteps,
+    });
+  }
+
   const nextStep = resolveNextKnowledgeStep(activeArticle, input.sessionContext);
   if (!nextStep) {
     return undefined;
@@ -46,7 +54,7 @@ export function resolveContextualContinuation(input: ITSMResponseInput): ITSMRes
   return buildContinuationResponse({
     input,
     article: activeArticle,
-    message: `Sigo con el mismo caso.\n\n${toUserInstruction(nextStep)}`,
+    message: `Avancemos con el siguiente descarte.\n\n${toUserInstruction(nextStep)}`,
     suggestedActions: activeArticle.resolutionSteps,
   });
 }
@@ -145,6 +153,43 @@ function resolveTaskbarFollowUp(message: string) {
   return [
     "Sigo con la barra de tareas de Windows.",
     "Presiona la tecla Windows para validar si aparece el menú Inicio. Si no responde, reiniciamos el Explorador de Windows.",
+  ].join("\n\n");
+}
+
+function resolveExternalMonitorFollowUp(message: string) {
+  const text = normalizeText(message);
+
+  if (hasAny(text, ["hdmi", "displayport", "dp", "vga", "cable de video"])) {
+    return [
+      "HDMI confirma el cable de video, pero no alimenta el monitor.",
+      "Como al presionar el botón queda apagado, revisa primero energía: cable de poder firme en el monitor y enchufe, prueba otro enchufe si puedes. ¿Enciende alguna luz del monitor?",
+    ].join("\n\n");
+  }
+
+  if (hasAny(text, ["boton", "botón", "apagado", "no enciende", "no prende", "sin luz", "sin energia", "sin energía"])) {
+    return [
+      "Eso apunta primero a energía del monitor, no al cable de video.",
+      "Revisa que el cable de poder esté firme en el monitor y en el enchufe. Si puedes, prueba otro enchufe o cable de poder. ¿Se enciende alguna luz en el monitor?",
+    ].join("\n\n");
+  }
+
+  if (hasAny(text, ["cable esta firme", "cable está firme", "firme", "conectado", "conectada"])) {
+    return [
+      "Bien, dejamos el cable físico como revisado.",
+      "Ahora valida energía y entrada: ¿el monitor muestra alguna luz al presionar el botón o queda totalmente apagado?",
+    ].join("\n\n");
+  }
+
+  if (hasAny(text, ["luz", "enciende", "prende", "entrada", "input", "sin señal", "no signal"])) {
+    return [
+      "Si el monitor enciende pero muestra sin señal, el siguiente descarte es entrada de video.",
+      "Selecciona la entrada HDMI correcta desde el menú del monitor y vuelve a conectar el cable al notebook. ¿Aparece imagen?",
+    ].join("\n\n");
+  }
+
+  return [
+    "Avancemos con el monitor externo.",
+    "Primero separo energía de video: ¿queda totalmente apagado o enciende pero muestra sin señal?",
   ].join("\n\n");
 }
 

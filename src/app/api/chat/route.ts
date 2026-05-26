@@ -75,5 +75,17 @@ function resolveActiveArticleId(
   sessionContext: SessionContext,
 ) {
   const referencedArticle = knowledgeBase.find((article) => ticketDescription.includes(`Referencia KB: ${article.title}`));
+  if (referencedArticle && referencedArticle.id === sessionContext.activeArticleId) {
+    return referencedArticle.id;
+  }
+
+  if (sessionContext.activeArticleId && !referencesKnowledgeArticle(ticketDescription)) {
+    return sessionContext.activeArticleId;
+  }
+
   return referencedArticle?.id ?? knowledgeMatches[0]?.id ?? sessionContext.activeArticleId;
+}
+
+function referencesKnowledgeArticle(ticketDescription: string) {
+  return ticketDescription.includes("Referencia KB:");
 }

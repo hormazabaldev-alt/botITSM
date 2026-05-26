@@ -17,6 +17,7 @@ export type ServiceDeskTurn = {
   qualifier?: ServiceDeskQualifier;
   symptoms: ServiceDeskSymptom[];
   playbookId: string;
+  knowledgeArticleId: string;
   stage: PlaybookStage;
   response: string;
   suggestedActions: string[];
@@ -93,6 +94,7 @@ export function resolveServiceDeskTurn(message: string, history: ChatMessage[]):
     qualifier,
     symptoms,
     playbookId: playbook.id,
+    knowledgeArticleId: playbook.knowledgeArticleId,
     stage: "identify_asset",
     response: playbook.firstQuestion(asset),
     suggestedActions: [`Playbook ${playbook.id}: identificar activo`],
@@ -118,6 +120,7 @@ function resolvePeripheralTurn(params: {
       qualifier,
       symptoms,
       playbookId: playbook.id,
+      knowledgeArticleId: playbook.knowledgeArticleId,
       stage: "prepare_escalation",
       response: [
         `Entonces el equipo y el puerto quedan operativos; el problema queda aislado al ${assetLabel(asset)} original.`,
@@ -133,6 +136,7 @@ function resolvePeripheralTurn(params: {
       qualifier,
       symptoms,
       playbookId: playbook.id,
+      knowledgeArticleId: playbook.knowledgeArticleId,
       stage: "isolate_component",
       response: [
         "Con ese resultado, el descarte apunta al periférico o al puerto USB.",
@@ -148,6 +152,7 @@ function resolvePeripheralTurn(params: {
       qualifier,
       symptoms,
       playbookId: playbook.id,
+      knowledgeArticleId: playbook.knowledgeArticleId,
       stage: "run_first_check",
       response: [
         `Perfecto, queda como ${assetLabel(asset)} cableado.`,
@@ -163,6 +168,7 @@ function resolvePeripheralTurn(params: {
       qualifier,
       symptoms,
       playbookId: playbook.id,
+      knowledgeArticleId: playbook.knowledgeArticleId,
       stage: "run_first_check",
       response: [
         `Perfecto, queda como ${assetLabel(asset)} inalámbrico.`,
@@ -177,6 +183,7 @@ function resolvePeripheralTurn(params: {
     qualifier,
     symptoms,
     playbookId: playbook.id,
+    knowledgeArticleId: playbook.knowledgeArticleId,
     stage: "qualify_connection",
     response: playbook.firstQuestion(asset),
     suggestedActions: [`Playbook ${playbook.id}: calificar tipo de conexión`],
@@ -198,6 +205,7 @@ function resolveNotebookDisplayTurn(params: {
       qualifier: "internal",
       symptoms,
       playbookId: playbook.id,
+      knowledgeArticleId: playbook.knowledgeArticleId,
       stage: "run_first_check",
       response: [
         "Bien, sigo con pantalla integrada del notebook.",
@@ -212,6 +220,7 @@ function resolveNotebookDisplayTurn(params: {
     qualifier: "internal",
     symptoms,
     playbookId: playbook.id,
+    knowledgeArticleId: playbook.knowledgeArticleId,
     stage: "identify_asset",
     response: playbook.firstQuestion("notebook_display"),
     suggestedActions: [`Playbook ${playbook.id}: confirmar síntoma de pantalla integrada`],
@@ -240,6 +249,7 @@ function resolveExternalMonitorTurn(params: {
     qualifier: "external",
     symptoms,
     playbookId: playbook.id,
+    knowledgeArticleId: playbook.knowledgeArticleId,
     stage: "run_first_check",
     response: playbook.firstQuestion("external_monitor"),
     suggestedActions: [`Playbook ${playbook.id}: validar energía y cable de monitor externo`],

@@ -1,4 +1,4 @@
-import { findKnowledgeMatches } from "@/data/mock/knowledgeBase";
+import { findKnowledgeArticleById, findKnowledgeMatches } from "@/data/mock/knowledgeBase";
 import {
   buildTicketDraft,
   detectIntent,
@@ -21,7 +21,9 @@ export async function generateMockITSMResponse(input: ITSMResponseInput): Promis
   const knowledgeMatches = input.knowledgeMatches.length
     ? input.knowledgeMatches
     : findKnowledgeMatches(input.userMessage, detectedIntent);
-  const article = knowledgeMatches[0];
+  const serviceDeskTurn = detectedIntent === "HARDWARE_ISSUE" ? resolveServiceDeskTurn(input.userMessage, input.sessionContext.messages) : undefined;
+  const serviceDeskArticle = findKnowledgeArticleById(serviceDeskTurn?.knowledgeArticleId);
+  const article = serviceDeskArticle ?? knowledgeMatches[0];
   const requiredFields = getMissingFields(mergedContext, priority);
   const ticketDraft = buildTicketDraft({
     message: input.userMessage,
@@ -33,8 +35,6 @@ export async function generateMockITSMResponse(input: ITSMResponseInput): Promis
   const shouldEscalate =
     priority === "P1" || detectedIntent === "SECURITY_INCIDENT" || shouldCreateTicketFromMessage(input.userMessage, priority, detectedIntent);
   const shouldCreateTicket = shouldEscalate && !isResolvedMessage(input.userMessage);
-  const serviceDeskTurn = detectedIntent === "HARDWARE_ISSUE" ? resolveServiceDeskTurn(input.userMessage, input.sessionContext.messages) : undefined;
-
   if (isGreetingOnly(input.userMessage)) {
     return {
       assistantMessage: "Hola. Escríbeme qué falla y te guío con el siguiente paso.",
