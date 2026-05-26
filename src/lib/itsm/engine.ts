@@ -165,7 +165,18 @@ export function shouldCreateTicketFromMessage(message: string, priority: ITSMPri
   return (
     priority === "P1" ||
     intent === "SECURITY_INCIDENT" ||
-    hasAny(text, ["no se resolvió", "no se resolvio", "no funciona", "persiste", "crear ticket", "escalar", "no"])
+    hasAny(text, [
+      "no se resolvió",
+      "no se resolvio",
+      "persiste",
+      "crear ticket",
+      "escalar",
+      "escala",
+      "escalen",
+      "derivar",
+      "sigue igual",
+      "varios usuarios",
+    ])
   );
 }
 

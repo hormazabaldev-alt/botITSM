@@ -59,8 +59,42 @@ export async function generateMercuryITSMResponse(input: ITSMResponseInput): Pro
       return generateMockITSMResponse(input);
     }
 
-    return JSON.parse(content) as ITSMResponse;
+    const parsed = JSON.parse(extractJson(content)) as Partial<ITSMResponse>;
+
+    if (!isITSMResponse(parsed)) {
+      return generateMockITSMResponse(input);
+    }
+
+    return parsed;
   } catch {
     return generateMockITSMResponse(input);
   }
+}
+
+function extractJson(content: string) {
+  const fenced = content.match(/```(?:json)?\s*([\s\S]*?)```/i)?.[1];
+  if (fenced) return fenced.trim();
+
+  const firstBrace = content.indexOf("{");
+  const lastBrace = content.lastIndexOf("}");
+  if (firstBrace >= 0 && lastBrace > firstBrace) {
+    return content.slice(firstBrace, lastBrace + 1);
+  }
+
+  return content;
+}
+
+function isITSMResponse(value: Partial<ITSMResponse>): value is ITSMResponse {
+  return (
+    typeof value.assistantMessage === "string" &&
+    typeof value.classification === "string" &&
+    typeof value.priority === "string" &&
+    Array.isArray(value.requiredFields) &&
+    Array.isArray(value.suggestedActions) &&
+    Array.isArray(value.operationalStatuses) &&
+    typeof value.shouldCreateTicket === "boolean" &&
+    typeof value.shouldEscalate === "boolean" &&
+    typeof value.ticketDraft === "object" &&
+    value.ticketDraft !== null
+  );
 }
