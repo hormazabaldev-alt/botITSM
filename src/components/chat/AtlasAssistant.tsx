@@ -1,7 +1,24 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
-import { CheckCircle2, ChevronUp, Headset, Loader2, Minus, Send, ShieldCheck, UserRound, X } from "lucide-react";
+import {
+  AlertTriangle,
+  BrainCircuit,
+  CheckCircle2,
+  ChevronUp,
+  Headset,
+  KeyRound,
+  Laptop,
+  Loader2,
+  MessageSquareText,
+  Minus,
+  PackageCheck,
+  Send,
+  ShieldCheck,
+  UserRound,
+  Wifi,
+  X,
+} from "lucide-react";
 import type { ChatMessage, ITSMResponse, OperationalStatus, SessionContext, Ticket } from "@/lib/itsm/types";
 
 type ChatApiResponse = {
@@ -9,13 +26,49 @@ type ChatApiResponse = {
   sessionContext: SessionContext;
 };
 
-const frequentTopics = [
-  "No puedo entrar al correo",
-  "VPN no funciona",
-  "Necesito instalar software",
-  "Mi notebook está lenta",
-  "Necesito acceso",
-  "Otro problema",
+const smartActions = [
+  {
+    topic: "No puedo entrar al correo",
+    title: "Acceso / permisos",
+    description: "Usuarios, carpetas, credenciales",
+    icon: KeyRound,
+    accent: "from-amber-300 to-orange-400",
+  },
+  {
+    topic: "VPN no funciona",
+    title: "Conectividad",
+    description: "VPN, Wi-Fi, acceso remoto",
+    icon: Wifi,
+    accent: "from-cyan-300 to-blue-400",
+  },
+  {
+    topic: "Necesito instalar software",
+    title: "Software",
+    description: "Instalaciones y licencias",
+    icon: PackageCheck,
+    accent: "from-blue-300 to-indigo-400",
+  },
+  {
+    topic: "Mi notebook está lenta",
+    title: "Hardware",
+    description: "Notebook, periféricos",
+    icon: Laptop,
+    accent: "from-slate-300 to-slate-500",
+  },
+  {
+    topic: "Necesito acceso",
+    title: "Incidente crítico",
+    description: "Aplicación caída o servicio degradado",
+    icon: AlertTriangle,
+    accent: "from-rose-300 to-red-500",
+  },
+  {
+    topic: "Otro problema",
+    title: "Otro caso",
+    description: "Describe libremente",
+    icon: MessageSquareText,
+    accent: "from-violet-300 to-fuchsia-400",
+  },
 ];
 
 const initialMessage: ChatMessage = {
@@ -23,7 +76,7 @@ const initialMessage: ChatMessage = {
   role: "assistant",
   createdAt: new Date().toISOString(),
   content:
-    "Hola 👋\nSoy Atlas ITSM Assistant.\n\nEstoy aquí para ayudarte con soporte TI.\n\nPuedo ayudarte con accesos, conectividad, software, equipos o incidentes operacionales.\n\nSelecciona un tema frecuente o descríbeme directamente lo que está ocurriendo.",
+    "Hola 👋\n\nSoy Atlas, tu asistente inteligente de soporte TI.\n\nPuedo ayudarte a resolver incidentes, accesos, conectividad y requerimientos operacionales.\n\nSelecciona una categoría o descríbeme lo que ocurre.",
 };
 
 const statusLabels: Partial<Record<OperationalStatus, string>> = {
@@ -47,6 +100,7 @@ export function AtlasAssistant() {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (messages.length <= 1 && !ticket && !isLoading) return;
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, ticket, isLoading, expanded]);
 
@@ -158,7 +212,7 @@ export function AtlasAssistant() {
           setClosed(false);
           setExpanded(true);
         }}
-        className="inline-flex h-11 items-center gap-2 rounded-full border border-white/70 bg-white/88 px-4 text-sm font-semibold text-slate-800 shadow-[0_18px_50px_rgba(15,23,42,0.14)] backdrop-blur-2xl transition hover:border-cyan-200 hover:text-slate-950"
+        className="inline-flex h-11 items-center gap-2 rounded-full border border-cyan-300/20 bg-slate-950/92 px-4 text-sm font-semibold text-cyan-50 shadow-[0_18px_60px_rgba(8,47,73,0.32)] backdrop-blur-2xl transition hover:border-cyan-300/50 hover:shadow-cyan-500/20"
       >
         <ShieldCheck size={17} aria-hidden />
         Atlas ITSM Assistant
@@ -167,23 +221,26 @@ export function AtlasAssistant() {
   }
 
   return (
-    <section className="flex h-[min(600px,calc(100dvh-84px))] w-full max-w-[420px] flex-col overflow-hidden rounded-3xl border border-white/70 bg-white/88 shadow-[0_28px_90px_rgba(15,23,42,0.16)] backdrop-blur-2xl">
-      <header className="flex h-[68px] shrink-0 items-center justify-between border-b border-slate-200/70 px-4 py-3">
+    <section className="relative flex h-[min(600px,calc(100dvh-84px))] w-full max-w-[430px] flex-col overflow-hidden rounded-[26px] border border-cyan-200/12 bg-[#08111f]/96 text-slate-100 shadow-[0_34px_110px_rgba(2,8,23,0.42)] ring-1 ring-white/8 backdrop-blur-2xl">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_24%_0%,rgba(34,211,238,0.16),transparent_34%),radial-gradient(circle_at_92%_18%,rgba(59,130,246,0.12),transparent_30%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(148,163,184,0.055)_1px,transparent_1px),linear-gradient(90deg,rgba(148,163,184,0.045)_1px,transparent_1px)] bg-[size:28px_28px] opacity-60 [mask-image:linear-gradient(to_bottom,black,transparent_72%)]" />
+      <header className="relative flex h-[70px] shrink-0 items-center justify-between border-b border-white/10 bg-[linear-gradient(135deg,rgba(15,23,42,0.98),rgba(8,47,73,0.92)_55%,rgba(2,6,23,0.98))] px-4 py-2.5">
         <div className="flex items-center gap-3">
-          <div className="relative grid size-9 place-items-center rounded-2xl bg-slate-950 text-white shadow-lg shadow-slate-950/15">
-            <ShieldCheck size={17} aria-hidden />
-            <span className="absolute -bottom-0.5 -right-0.5 size-3 rounded-full border-2 border-white bg-emerald-400" />
+          <div className="relative grid size-10 place-items-center rounded-2xl border border-cyan-300/25 bg-cyan-300/10 text-cyan-100 shadow-[0_0_34px_rgba(34,211,238,0.22)]">
+            <BrainCircuit size={19} aria-hidden />
+            <span className="absolute -right-1 -top-1 size-3 rounded-full bg-cyan-300 shadow-[0_0_18px_rgba(34,211,238,0.9)]" />
+            <span className="absolute -right-1 -top-1 size-3 animate-ping rounded-full bg-cyan-300/70" />
           </div>
-          <div>
-            <h1 className="text-sm font-semibold tracking-[-0.01em] text-slate-950">Atlas ITSM Assistant</h1>
-            <p className="text-xs text-slate-500">Soporte inteligente</p>
+          <div className="min-w-0">
+            <h1 className="text-[14px] font-semibold text-white">Atlas ITSM Assistant</h1>
+            <p className="mt-0.5 text-[10px] font-medium uppercase tracking-[0.14em] text-cyan-100/68">Operational Intelligence Layer</p>
           </div>
         </div>
         <div className="flex items-center gap-1.5">
           <button
             type="button"
             onClick={() => setExpanded((current) => !current)}
-            className="grid size-8 place-items-center rounded-full border border-slate-200 bg-white/80 text-slate-500 transition hover:border-slate-300 hover:text-slate-900"
+            className="grid size-8 place-items-center rounded-full border border-white/10 bg-white/[0.06] text-slate-300 transition duration-200 hover:border-cyan-300/40 hover:bg-cyan-300/10 hover:text-cyan-50 focus:outline-none focus:ring-2 focus:ring-cyan-300/30"
             aria-label={expanded ? "Minimizar asistente" : "Expandir asistente"}
           >
             {expanded ? <Minus size={15} aria-hidden /> : <ChevronUp size={15} aria-hidden />}
@@ -191,7 +248,7 @@ export function AtlasAssistant() {
           <button
             type="button"
             onClick={() => setClosed(true)}
-            className="grid size-8 place-items-center rounded-full border border-slate-200 bg-white/80 text-slate-500 transition hover:border-slate-300 hover:text-slate-900"
+            className="grid size-8 place-items-center rounded-full border border-white/10 bg-white/[0.06] text-slate-300 transition duration-200 hover:border-cyan-300/40 hover:bg-cyan-300/10 hover:text-cyan-50 focus:outline-none focus:ring-2 focus:ring-cyan-300/30"
             aria-label="Cerrar asistente"
           >
             <X size={15} aria-hidden />
@@ -201,27 +258,18 @@ export function AtlasAssistant() {
 
       {expanded ? (
         <>
-          <div ref={scrollRef} className="thin-scrollbar min-h-0 flex-1 overflow-y-auto px-4 py-2.5">
-            <div className="space-y-2.5">
+          <div ref={scrollRef} className="thin-scrollbar relative min-h-0 flex-1 overflow-y-auto px-4 py-2">
+            <div className="space-y-2">
               {messages.map((message) => (
                 <Bubble key={message.id} message={message} />
               ))}
 
               {!hasConversation ? (
-                <>
-                  <div className="grid grid-cols-2 gap-1.5 pl-8">
-                    {frequentTopics.map((topic) => (
-                      <button
-                        key={topic}
-                        type="button"
-                        onClick={() => handleSuggestion(topic)}
-                        className="min-h-7 rounded-full border border-slate-200 bg-white/84 px-2.5 py-1 text-left text-[11px] font-medium leading-4 text-slate-600 shadow-sm transition hover:-translate-y-0.5 hover:border-cyan-300 hover:text-slate-950"
-                      >
-                        {topic}
-                      </button>
-                    ))}
-                  </div>
-                </>
+                <div className="grid grid-cols-2 gap-1.5">
+                  {smartActions.map((action) => (
+                    <SmartActionCard key={action.topic} action={action} onClick={() => handleSuggestion(action.topic)} />
+                  ))}
+                </div>
               ) : null}
 
               {isLoading ? <TypingIndicator /> : null}
@@ -229,23 +277,26 @@ export function AtlasAssistant() {
             </div>
           </div>
 
-          <div className="shrink-0 border-t border-slate-200/70 bg-white/76 px-4 py-2.5">
-            <div className="mb-2 flex items-center gap-2 text-[11px] font-medium text-slate-400">
-              <span className={`size-1.5 rounded-full ${isLoading ? "animate-pulse bg-cyan-500" : "bg-emerald-500"}`} />
-              {status}
+          <div className="relative shrink-0 border-t border-white/10 bg-slate-950/72 px-4 py-2 backdrop-blur-xl">
+            <div className="mb-1.5 flex items-center justify-between text-[11px] font-medium">
+              <div className="flex items-center gap-2 text-slate-400">
+                <span className={`size-1.5 rounded-full ${isLoading ? "animate-pulse bg-cyan-300 shadow-[0_0_14px_rgba(34,211,238,0.95)]" : "bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.7)]"}`} />
+                {status}
+              </div>
+              <span className="rounded-full border border-cyan-300/15 bg-cyan-300/[0.07] px-2 py-0.5 text-cyan-100/72">AI ready</span>
             </div>
             <form onSubmit={handleSubmit} className="flex items-end gap-2">
               <textarea
                 value={input}
                 onChange={(event) => setInput(event.target.value)}
                 rows={1}
-                placeholder="Describe brevemente tu problema..."
-                className="max-h-24 min-h-10 flex-1 resize-none rounded-2xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm leading-5 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-cyan-300 focus:ring-4 focus:ring-cyan-100/70"
+                placeholder="Describe tu problema o requerimiento..."
+                className="max-h-24 min-h-10 flex-1 resize-none rounded-2xl border border-white/10 bg-white/[0.055] px-3.5 py-2.5 text-sm leading-5 text-slate-100 outline-none transition duration-200 placeholder:text-slate-500 focus:border-cyan-300/45 focus:bg-white/[0.075] focus:ring-4 focus:ring-cyan-300/10"
               />
               <button
                 type="submit"
                 disabled={!input.trim() || isLoading}
-                className="grid size-10 shrink-0 place-items-center rounded-2xl bg-slate-950 text-white shadow-lg shadow-slate-950/10 transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+                className="grid size-10 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-cyan-300 to-blue-500 text-slate-950 shadow-[0_12px_34px_rgba(34,211,238,0.24)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_16px_42px_rgba(34,211,238,0.34)] disabled:cursor-not-allowed disabled:translate-y-0 disabled:from-slate-700 disabled:to-slate-800 disabled:text-slate-500 disabled:shadow-none"
                 aria-label="Enviar"
               >
                 <Send size={17} aria-hidden />
@@ -258,27 +309,78 @@ export function AtlasAssistant() {
   );
 }
 
+function WelcomeCard({ message }: { message: string }) {
+  const [, title = "", body = "", instruction = ""] = message.split("\n\n");
+
+  return (
+    <div className="rounded-3xl border border-cyan-200/14 bg-[linear-gradient(145deg,rgba(255,255,255,0.105),rgba(255,255,255,0.045))] p-3 shadow-[0_22px_60px_rgba(2,8,23,0.22)] ring-1 ring-white/8">
+      <div className="mb-1.5 inline-flex items-center gap-2 rounded-full border border-cyan-300/15 bg-cyan-300/[0.08] px-2.5 py-0.5 text-[9px] font-medium uppercase tracking-[0.14em] text-cyan-100/76">
+        <span className="size-1.5 rounded-full bg-cyan-300 shadow-[0_0_14px_rgba(34,211,238,0.95)]" />
+        AI support orchestration
+      </div>
+      <p className="text-[13px] font-medium text-cyan-50">Hola 👋</p>
+      <h2 className="mt-1 text-[15px] font-semibold leading-5 text-white">{title}</h2>
+      <p className="mt-2 text-[11.5px] leading-4 text-slate-300">{body}</p>
+      <p className="mt-2 border-l-2 border-cyan-300/50 pl-3 text-[11.5px] font-medium leading-4 text-cyan-50">{instruction}</p>
+    </div>
+  );
+}
+
+function SmartActionCard({
+  action,
+  onClick,
+}: {
+  action: (typeof smartActions)[number];
+  onClick: () => void;
+}) {
+  const Icon = action.icon;
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="group relative min-h-[54px] overflow-hidden rounded-2xl border border-white/10 bg-white/[0.055] p-2 text-left shadow-[0_14px_34px_rgba(2,8,23,0.18)] transition duration-200 hover:-translate-y-0.5 hover:border-cyan-300/30 hover:bg-white/[0.085] hover:shadow-[0_18px_44px_rgba(8,47,73,0.24)] focus:outline-none focus:ring-2 focus:ring-cyan-300/25"
+    >
+      <span className={`absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r ${action.accent}`} />
+      <span className={`absolute -right-6 -top-8 size-16 rounded-full bg-gradient-to-br ${action.accent} opacity-0 blur-2xl transition duration-300 group-hover:opacity-25`} />
+      <span className="relative flex items-start gap-2.5">
+        <span className="grid size-6 shrink-0 place-items-center rounded-lg border border-white/10 bg-slate-950/42 text-cyan-100 transition group-hover:border-cyan-300/30 group-hover:text-cyan-50">
+          <Icon size={13} aria-hidden />
+        </span>
+        <span className="min-w-0">
+          <span className="block text-[11.5px] font-semibold leading-4 text-slate-50">{action.title}</span>
+          <span className="mt-0.5 block text-[9.5px] leading-3 text-slate-400">{action.description}</span>
+        </span>
+      </span>
+    </button>
+  );
+}
+
 function Bubble({ message }: { message: ChatMessage }) {
   const isUser = message.role === "user";
+
+  if (message.id === "atlas-welcome") {
+    return <WelcomeCard message={message.content} />;
+  }
 
   return (
     <div className={`flex gap-2 ${isUser ? "justify-end" : "justify-start"}`}>
       {!isUser ? (
-        <span className="mt-1 grid size-6 shrink-0 place-items-center rounded-xl bg-slate-950 text-white">
+        <span className="mt-1 grid size-7 shrink-0 place-items-center rounded-xl border border-cyan-300/15 bg-cyan-300/10 text-cyan-100">
           <Headset size={13} aria-hidden />
         </span>
       ) : null}
       <div
         className={
           isUser
-            ? "max-w-[82%] rounded-2xl bg-slate-950 px-3.5 py-2.5 text-sm leading-6 text-white"
-            : "max-w-[calc(100%-32px)] rounded-2xl border border-slate-200 bg-white px-3.5 py-2.5 text-[13px] leading-5 text-slate-700 shadow-sm"
+            ? "max-w-[82%] rounded-2xl bg-cyan-300 px-3.5 py-2.5 text-sm leading-6 text-slate-950 shadow-[0_10px_30px_rgba(34,211,238,0.18)]"
+            : "max-w-[calc(100%-36px)] rounded-2xl border border-white/10 bg-white/[0.075] px-3.5 py-2.5 text-[13px] leading-5 text-slate-200 shadow-[0_16px_40px_rgba(2,8,23,0.18)]"
         }
       >
         <p className="whitespace-pre-line">{message.content}</p>
       </div>
       {isUser ? (
-        <span className="mt-1 grid size-6 shrink-0 place-items-center rounded-xl bg-slate-100 text-slate-500">
+        <span className="mt-1 grid size-7 shrink-0 place-items-center rounded-xl border border-white/10 bg-white/[0.075] text-slate-300">
           <UserRound size={13} aria-hidden />
         </span>
       ) : null}
@@ -288,7 +390,7 @@ function Bubble({ message }: { message: ChatMessage }) {
 
 function TypingIndicator() {
   return (
-    <div className="flex items-center gap-2 pl-9 text-sm text-slate-500">
+    <div className="flex items-center gap-2 pl-9 text-sm text-slate-400">
       <Loader2 size={15} className="animate-spin text-cyan-600" aria-hidden />
       revisando contexto...
     </div>
@@ -297,12 +399,12 @@ function TypingIndicator() {
 
 function RegisteredCase({ ticket }: { ticket: Ticket }) {
   return (
-    <article className="ml-10 rounded-2xl border border-cyan-200 bg-gradient-to-br from-white to-cyan-50/70 p-4 shadow-sm">
-      <div className="flex items-center gap-2 text-sm font-semibold text-slate-950">
-        <CheckCircle2 size={17} className="text-emerald-600" aria-hidden />
+    <article className="ml-9 rounded-2xl border border-cyan-300/20 bg-cyan-300/[0.08] p-4 shadow-[0_16px_40px_rgba(2,8,23,0.18)]">
+      <div className="flex items-center gap-2 text-sm font-semibold text-cyan-50">
+        <CheckCircle2 size={17} className="text-emerald-300" aria-hidden />
         Caso registrado
       </div>
-      <p className="mt-1 font-mono text-xs font-semibold text-cyan-700">{ticket.id}</p>
+      <p className="mt-1 font-mono text-xs font-semibold text-cyan-200">{ticket.id}</p>
       <div className="mt-4 space-y-3 text-sm">
         <CaseLine label="Resumen" value={summarize(ticket.description)} />
         <CaseLine label="Prioridad" value={priorityText(ticket.priority)} />
@@ -316,8 +418,8 @@ function RegisteredCase({ ticket }: { ticket: Ticket }) {
 function CaseLine({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-[11px] font-medium uppercase tracking-[0.1em] text-slate-400">{label}</p>
-      <p className="mt-1 leading-5 text-slate-700">{value}</p>
+      <p className="text-[11px] font-medium uppercase tracking-[0.1em] text-slate-500">{label}</p>
+      <p className="mt-1 leading-5 text-slate-200">{value}</p>
     </div>
   );
 }
