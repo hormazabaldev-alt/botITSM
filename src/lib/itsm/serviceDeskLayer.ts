@@ -113,6 +113,23 @@ function resolvePeripheralTurn(params: {
   const askedConnection = assistantHistory.some((content) => content.includes("usb") && content.includes("inalambrico"));
   const askedPortTest = assistantHistory.some((content) => content.includes("otro puerto usb"));
   const askedReplacementTest = assistantHistory.some((content) => content.includes(`otro ${assetLabel(asset)}`));
+  const askedWirelessEnergy = assistantHistory.some((content) => content.includes("bateria") && content.includes("emparejar"));
+
+  if (mentionsDetected(current) && (askedPortTest || askedReplacementTest)) {
+    return {
+      asset,
+      qualifier,
+      symptoms,
+      playbookId: playbook.id,
+      knowledgeArticleId: playbook.knowledgeArticleId,
+      stage: "prepare_escalation",
+      response: [
+        "Perfecto, con esa prueba el equipo sí detecta el periférico.",
+        `Si el ${assetLabel(asset)} original sigue fallando después del descarte, corresponde reemplazarlo o revisar garantía. Confírmame nombre, correo y área para dejar el caso preparado.`,
+      ].join("\n\n"),
+      suggestedActions: [`Playbook ${playbook.id}: preparar cierre o reemplazo`],
+    };
+  }
 
   if (mentionsReplacementWorks(current) && askedReplacementTest) {
     return {
@@ -163,6 +180,22 @@ function resolvePeripheralTurn(params: {
   }
 
   if (qualifier === "wireless" && askedConnection) {
+    if (askedWirelessEnergy && mentionsNoDetection(current)) {
+      return {
+        asset,
+        qualifier,
+        symptoms,
+        playbookId: playbook.id,
+        knowledgeArticleId: playbook.knowledgeArticleId,
+        stage: "isolate_component",
+        response: [
+          "Si con batería/carga sigue igual, aislamos receptor o Bluetooth.",
+          `Conecta el receptor USB directo al notebook, sin hub, o elimina y vuelve a emparejar el ${assetLabel(asset)} por Bluetooth. Si sigue igual, prueba otro ${assetLabel(asset)} en el mismo equipo. ¿Alguna de esas pruebas lo detecta?`,
+        ].join("\n\n"),
+        suggestedActions: [`Playbook ${playbook.id}: aislar receptor o Bluetooth`],
+      };
+    }
+
     return {
       asset,
       qualifier,
@@ -172,7 +205,7 @@ function resolvePeripheralTurn(params: {
       stage: "run_first_check",
       response: [
         `Perfecto, queda como ${assetLabel(asset)} inalámbrico.`,
-        "Cambia la batería o carga, reconecta el receptor USB y prueba emparejarlo nuevamente. ¿El equipo lo detecta después de eso?",
+        "Primer descarte: cambia la batería o ponlo a cargar. Luego reconecta el receptor USB o vuelve a emparejar Bluetooth. ¿El equipo lo detecta después de eso?",
       ].join("\n\n"),
       suggestedActions: [`Playbook ${playbook.id}: validar energía y receptor inalámbrico`],
     };
@@ -233,7 +266,7 @@ function resolveExternalMonitorTurn(params: {
   playbook: ServiceDeskPlaybook;
   symptoms: ServiceDeskSymptom[];
 }): ServiceDeskTurn {
-  const { current, playbook, symptoms } = params;
+  const { current, assistantHistory, playbook, symptoms } = params;
 
   if (mentionsInternalDisplay(current)) {
     return resolveNotebookDisplayTurn({
@@ -242,6 +275,57 @@ function resolveExternalMonitorTurn(params: {
       playbook: playbooks.find((item) => item.id === "workplace-display-integrated")!,
       symptoms,
     });
+  }
+
+  const askedPowerAndCable = assistantHistory.some((content) => content.includes("monitor enciende") && content.includes("cable queda firme"));
+  const askedPowerLight = assistantHistory.some((content) => content.includes("enciende alguna luz") || content.includes("queda totalmente apagado"));
+
+  if (hasAnyText(current, ["hdmi", "displayport", "dp", "vga", "cable de video"])) {
+    return {
+      asset: "external_monitor",
+      qualifier: "external",
+      symptoms,
+      playbookId: playbook.id,
+      knowledgeArticleId: playbook.knowledgeArticleId,
+      stage: "run_first_check",
+      response: [
+        "HDMI confirma el cable de video, pero no alimenta el monitor.",
+        "Ahora revisa energía: cable de poder firme en el monitor y en el enchufe. Si puedes, prueba otro enchufe. ¿Se enciende alguna luz del monitor?",
+      ].join("\n\n"),
+      suggestedActions: [`Playbook ${playbook.id}: separar energía de video`],
+    };
+  }
+
+  if (askedPowerAndCable && hasAnyText(current, ["apagado", "no enciende", "no prende", "boton", "botón", "sin luz", "sin energia", "sin energía"])) {
+    return {
+      asset: "external_monitor",
+      qualifier: "external",
+      symptoms,
+      playbookId: playbook.id,
+      knowledgeArticleId: playbook.knowledgeArticleId,
+      stage: "run_first_check",
+      response: [
+        "Eso apunta primero a energía del monitor, no al cable de video.",
+        "Revisa que el cable de poder esté firme en el monitor y en el enchufe. Si puedes, prueba otro enchufe o cable de poder. ¿Se enciende alguna luz en el monitor?",
+      ].join("\n\n"),
+      suggestedActions: [`Playbook ${playbook.id}: validar energía del monitor`],
+    };
+  }
+
+  if (askedPowerLight && hasAnyText(current, ["enciende", "luz", "sin señal", "no signal", "entrada", "input"])) {
+    return {
+      asset: "external_monitor",
+      qualifier: "external",
+      symptoms,
+      playbookId: playbook.id,
+      knowledgeArticleId: playbook.knowledgeArticleId,
+      stage: "isolate_component",
+      response: [
+        "Si el monitor enciende, el siguiente descarte es entrada de video.",
+        "Selecciona la entrada correcta en el monitor, por ejemplo HDMI, y vuelve a conectar el cable al notebook. ¿Aparece imagen?",
+      ].join("\n\n"),
+      suggestedActions: [`Playbook ${playbook.id}: validar entrada de video`],
+    };
   }
 
   return {
@@ -308,6 +392,10 @@ function mentionsNoDetection(text: string) {
 
 function mentionsReplacementWorks(text: string) {
   return hasAnyText(text, ["otro mouse funciona", "otro si funciona", "otro sí funciona", "con otro funciona", "el otro funciona"]);
+}
+
+function mentionsDetected(text: string) {
+  return hasAnyText(text, ["si lo detecta", "sí lo detecta", "lo detecta", "funciona", "aparece", "conecto", "conectó"]);
 }
 
 function mentionsInternalDisplay(text: string) {

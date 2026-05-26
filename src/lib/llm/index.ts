@@ -8,6 +8,10 @@ export async function generateITSMResponse(input: ITSMResponseInput): Promise<IT
     return generateMockITSMResponse(input);
   }
 
+  if (isHardwareTroubleshooting(input)) {
+    return generateMockITSMResponse(input);
+  }
+
   const contextualResponse = resolveContextualContinuation(input);
   if (contextualResponse) {
     return contextualResponse;
@@ -23,4 +27,21 @@ export async function generateITSMResponse(input: ITSMResponseInput): Promise<IT
 function isGreetingOnly(message: string) {
   const text = message.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   return /^(hola|buenas|buenos dias|buenas tardes|buenas noches|hello|hi)[.!¡! ]*$/.test(text);
+}
+
+function isHardwareTroubleshooting(input: ITSMResponseInput) {
+  return (
+    input.detectedIntent === "HARDWARE_ISSUE" ||
+    [
+      "kb-wired-peripheral",
+      "kb-external-display",
+      "kb-notebook-display",
+      "kb-printer-not-printing",
+      "kb-printer-paper-toner",
+      "kb-scanner-issue",
+      "kb-laptop-no-power",
+      "kb-battery-charger",
+      "kb-camera-microphone-system",
+    ].includes(input.sessionContext.activeArticleId ?? "")
+  );
 }

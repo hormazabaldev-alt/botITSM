@@ -32,8 +32,9 @@ export async function generateMockITSMResponse(input: ITSMResponseInput): Promis
     article,
     context: mergedContext,
   });
-  const shouldEscalate =
+  const baseShouldEscalate =
     priority === "P1" || detectedIntent === "SECURITY_INCIDENT" || shouldCreateTicketFromMessage(input.userMessage, priority, detectedIntent);
+  const shouldEscalate = serviceDeskTurn && serviceDeskTurn.stage !== "prepare_escalation" ? false : baseShouldEscalate;
   const shouldCreateTicket = shouldEscalate && !isResolvedMessage(input.userMessage);
   if (isGreetingOnly(input.userMessage)) {
     return {
