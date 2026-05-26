@@ -95,11 +95,22 @@ export function AtlasAssistant() {
   const [expanded, setExpanded] = useState(true);
   const [closed, setClosed] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (messages.length <= 1 && !ticket && !isLoading) return;
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, ticket, isLoading, expanded]);
+
+  useEffect(() => {
+    const textarea = inputRef.current;
+    if (!textarea) return;
+
+    textarea.style.height = "0px";
+    const nextHeight = Math.min(textarea.scrollHeight, 112);
+    textarea.style.height = `${nextHeight}px`;
+    textarea.style.overflowY = textarea.scrollHeight > 112 ? "auto" : "hidden";
+  }, [input]);
 
   const hasConversation = useMemo(() => messages.length > 1, [messages.length]);
 
@@ -280,6 +291,7 @@ export function AtlasAssistant() {
             </div>
             <form onSubmit={handleSubmit} className="flex items-end gap-2">
               <textarea
+                ref={inputRef}
                 value={input}
                 onChange={(event) => setInput(event.target.value)}
                 onKeyDown={(event) => {
@@ -290,12 +302,12 @@ export function AtlasAssistant() {
                 }}
                 rows={1}
                 placeholder="Escribe tu mensaje..."
-                className="max-h-20 min-h-9 flex-1 resize-none rounded-xl border border-white/10 bg-white/[0.055] px-3 py-2 text-sm leading-5 text-slate-100 outline-none transition duration-200 placeholder:text-slate-500 focus:border-cyan-300/45 focus:bg-white/[0.075] focus:ring-4 focus:ring-cyan-300/10"
+                className="max-h-28 min-h-11 flex-1 resize-none rounded-2xl border border-white/10 bg-white/[0.055] px-3.5 py-2.5 text-[13px] leading-5 text-slate-100 outline-none transition duration-200 placeholder:text-slate-500 focus:border-cyan-300/45 focus:bg-white/[0.075] focus:ring-4 focus:ring-cyan-300/10"
               />
               <button
                 type="submit"
                 disabled={!input.trim() || isLoading}
-                className="grid size-9 shrink-0 place-items-center rounded-xl bg-cyan-300 text-slate-950 shadow-[0_10px_28px_rgba(34,211,238,0.18)] transition duration-200 hover:bg-cyan-200 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-500 disabled:shadow-none"
+                className="grid size-11 shrink-0 place-items-center rounded-2xl bg-cyan-300 text-slate-950 shadow-[0_10px_28px_rgba(34,211,238,0.18)] transition duration-200 hover:bg-cyan-200 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-500 disabled:shadow-none"
                 aria-label="Enviar"
               >
                 <Send size={16} aria-hidden />
