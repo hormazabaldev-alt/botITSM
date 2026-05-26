@@ -10,3 +10,4 @@ build/
 *.tsbuildinfo
 verification-*.png
 .DS_Store
+.vercel

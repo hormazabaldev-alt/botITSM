@@ -6,6 +6,14 @@ type MercuryPayload = ITSMResponseInput & {
   systemPrompt: string;
 };
 
+type InceptionChatCompletion = {
+  choices?: Array<{
+    message?: {
+      content?: string;
+    };
+  }>;
+};
+
 export function hasMercuryConfig() {
   return Boolean(process.env.MERCURY_API_KEY && process.env.MERCURY_BASE_URL);
 }
@@ -20,19 +28,22 @@ export async function generateMercuryITSMResponse(input: ITSMResponseInput): Pro
     systemPrompt: itsmSystemPrompt,
   };
 
-  const response = await fetch(`${process.env.MERCURY_BASE_URL}/chat/completions`, {
+  const baseUrl = process.env.MERCURY_BASE_URL!.replace(/\/$/, "");
+  const response = await fetch(`${baseUrl}/chat/completions`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${process.env.MERCURY_API_KEY}`,
     },
     body: JSON.stringify({
-      model: process.env.MERCURY_MODEL ?? "inception-itsm-enterprise",
+      model: process.env.MERCURY_MODEL ?? "mercury-2",
       messages: [
         { role: "system", content: itsmSystemPrompt },
-        { role: "user", content: JSON.stringify(payload) },
+        {
+          role: "user",
+          content: `Analiza este caso ITSM y responde exclusivamente un JSON válido con la forma ITSMResponse, sin markdown:\n${JSON.stringify(payload)}`,
+        },
       ],
-      response_format: { type: "json_object" },
     }),
   });
 
@@ -41,7 +52,14 @@ export async function generateMercuryITSMResponse(input: ITSMResponseInput): Pro
   }
 
   try {
-    return (await response.json()) as ITSMResponse;
+    const completion = (await response.json()) as InceptionChatCompletion;
+    const content = completion.choices?.[0]?.message?.content;
+
+    if (!content) {
+      return generateMockITSMResponse(input);
+    }
+
+    return JSON.parse(content) as ITSMResponse;
   } catch {
     return generateMockITSMResponse(input);
   }
