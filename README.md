@@ -1,8 +1,11 @@
-# Agente IA ITSM Enterprise
+# Portal de soporte inteligente ITSM
 
-Demo local en Next.js para presentar a SONDA un agente IA operacional de gestión ITSM basado en buenas prácticas ITIL.
+Producto enterprise en Next.js para presentar a SONDA una experiencia dual de soporte TI asistido por IA:
 
-La demo funciona sin credenciales reales, sin despliegue y sin servicios externos obligatorios. Todo corre en modo mock local, pero la arquitectura queda preparada para conectar Supabase, Mercury/Inception y un ITSM real.
+- Portal corporativo para usuarios finales.
+- Consola administrativa para operaciones, gobierno y analítica ITSM.
+
+La aplicación corre localmente sin depender de servicios externos. Cuando existen variables de Supabase, las API internas persisten conversaciones y tickets en la base configurada; si faltan, usan repositorios locales.
 
 ## Correr localmente
 
@@ -11,94 +14,93 @@ npm install
 npm run dev
 ```
 
-Luego abrir `http://localhost:3000`.
+Abrir `http://localhost:3000`.
 
 Rutas principales:
 
-- `/`: landing enterprise con arquitectura, KPIs y chat ITSM flotante.
-- `/dashboard`: dashboard operativo con métricas, distribuciones y últimos tickets.
-- `/api/chat`: motor conversacional mock con adapter LLM.
-- `/api/tickets`: creación/listado de tickets simulados.
+- `/`: portal de soporte inteligente para usuario final.
+- `/admin`: consola operacional con acceso mock `admin` / `demo`.
+- `/api/chat`: flujo conversacional ITSM con adapter LLM.
+- `/api/tickets`: creación y listado de tickets.
 - `/api/knowledge`: base de conocimiento local.
-- `/api/kpis`: KPIs demo.
+- `/api/kpis`: dataset analítico de operaciones.
 
 ## Arquitectura
 
-Capas principales:
+```text
+src/app
+  /(portal)
+  /(admin)
+  /api
 
-- `src/components`: UI reutilizable para landing, chat y dashboard.
-- `src/lib/itsm`: tipos, clasificación, prioridad, campos requeridos y construcción de ticket.
-- `src/lib/data`: knowledge base, KPIs y tickets demo.
-- `src/lib/llm`: adapter Mercury/Inception con fallback mock.
-- `src/lib/supabase`: clientes lazy que no fallan si faltan variables de entorno.
-- `src/services`: repositorios desacoplados para tickets y chat.
-- `src/app/api`: endpoints internos listos para reemplazar mocks por servicios reales.
-- `supabase/schema.sql`: esquema sugerido para persistencia futura.
+src/components
+  /portal
+  /chat
+  /admin
+  /shared
 
-## Variables futuras
+src/data/mock
+src/services
+src/types
+src/lib/itsm
+src/lib/llm
+src/lib/supabase
+```
 
-Supabase:
+## Variables de entorno
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
+
 SUPABASE_URL=
 SUPABASE_SERVICE_ROLE_KEY=
-```
 
-Mercury/Inception:
-
-```env
 MERCURY_API_KEY=
 MERCURY_BASE_URL=
 MERCURY_MODEL=
 ```
 
-Si estas variables no existen, la demo usa mocks locales automáticamente.
+Los secretos de servidor no deben exponerse en componentes cliente ni commitearse.
 
-## Conectar Supabase después
+## Supabase
 
-1. Crear proyecto Supabase.
-2. Ejecutar `supabase/schema.sql`.
-3. Configurar `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
-4. Reemplazar o ampliar los repositorios en `src/services` si se requiere lógica de negocio adicional.
-5. Mantener la inicialización lazy de clientes para evitar fallos durante build.
+El esquema sugerido está en `supabase/schema.sql`.
 
-## Conectar Mercury/Inception después
+Incluye:
 
-1. Configurar `MERCURY_API_KEY`, `MERCURY_BASE_URL` y `MERCURY_MODEL`.
-2. Ajustar `src/lib/llm/mercuryClient.ts` al contrato final de Mercury.
-3. Mantener `generateITSMResponse(input)` como interfaz estable.
-4. Usar el prompt rígido en `src/lib/llm/prompts/itsmSystemPrompt.ts`.
-5. Validar que la respuesta siga el shape `ITSMResponse`.
+- `chat_sessions`
+- `chat_messages`
+- `tickets`
+- `ticket_events`
+- `knowledge_articles`
+- `sla_rules`
 
-## Conectar un ITSM real después
+Las tablas públicas usan RLS y la aplicación escribe desde rutas API usando credenciales de servidor cuando están disponibles.
 
-La demo está preparada para integrar ServiceNow, Jira Service Management, GLPI, Freshservice o Aranda mediante un repository/adapter adicional. La recomendación es mantener:
+## Mercury/Inception
 
-- Normalización del ticket en `TicketDraft`.
-- Persistencia de eventos operativos en `ticket_events`.
-- Registro de pasos ejecutados y criterios de escalamiento.
-- Separación entre canal conversacional, decisión ITIL y creación en plataforma ITSM.
+La interfaz estable es:
 
-## Despliegue futuro en Vercel
+```ts
+generateITSMResponse(input)
+```
 
-No se despliega en esta primera pasada. Para un despliegue posterior:
+El adapter vive en `src/lib/llm`. Si no hay configuración Mercury, se usa un cliente local con la misma forma de respuesta.
 
-1. Revisar variables de entorno.
-2. Ejecutar `npm run build`.
-3. Conectar el repositorio a Vercel.
-4. Configurar variables en el proyecto.
-5. Validar endpoints internos y modo mock/fallback antes de habilitar integraciones reales.
+## Dataset operacional
 
-## Criterio de aceptación cubierto
+`src/data/mock/operationalCases.ts` genera 128 casos coherentes para alimentar la consola administrativa:
 
-- Landing profesional con marca, hero, arquitectura, valor y KPIs.
-- Chat flotante enterprise con casos precargados.
-- Flujo guiado con clasificación ITIL, prioridad, guía de descarte y ticket simulado.
-- Base de conocimiento mock local.
-- Supabase preparado y desacoplado.
-- Mercury/Inception preparado con fallback mock.
-- API routes internas funcionales.
-- Dashboard operativo con métricas, distribuciones y tabla de tickets.
-- Sin credenciales reales y sin dependencia externa obligatoria para correr localmente.
+- accesos
+- VPN
+- correo
+- software
+- hardware
+- red
+- aplicaciones críticas
+- permisos
+- onboarding
+- password reset
+
+Cada caso incluye usuario, área, prioridad, estado, técnico, sentimiento, duración, SLA, resolución y resumen conversacional.

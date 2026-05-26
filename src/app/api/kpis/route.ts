@@ -1,15 +1,23 @@
 import { NextResponse } from "next/server";
-import { dashboardKpis, landingKpis, priorityDistribution, ticketTypeDistribution } from "@/lib/data/kpis";
-import { listTickets } from "@/services/tickets.repository";
+import {
+  getAdminKpis,
+  getHourlyHeatmap,
+  getKnowledgeUsage,
+  getVolumeByDay,
+  groupByField,
+  listOperationalCases,
+} from "@/services/operations.repository";
 
 export async function GET() {
-  const tickets = await listTickets();
-
   return NextResponse.json({
-    landingKpis,
-    dashboardKpis,
-    ticketTypeDistribution,
-    priorityDistribution,
-    recentTickets: tickets.slice(0, 10),
+    kpis: getAdminKpis(),
+    volumeByDay: getVolumeByDay(),
+    incidentsByType: groupByField("category", 10),
+    priorities: groupByField("priority", 4),
+    heatmap: getHourlyHeatmap(),
+    topIntents: groupByField("issue_type", 10),
+    technicians: groupByField("assigned_technician", 10),
+    knowledge: getKnowledgeUsage(),
+    recentCases: listOperationalCases(100),
   });
 }

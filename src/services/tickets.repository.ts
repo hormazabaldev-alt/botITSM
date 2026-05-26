@@ -1,8 +1,8 @@
-import { demoTickets } from "@/lib/data/demoTickets";
+import { fallbackTickets } from "@/data/mock/fallbackTickets";
 import type { Ticket, TicketDraft } from "@/lib/itsm/types";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
 
-const inMemoryTickets: Ticket[] = [...demoTickets];
+const inMemoryTickets: Ticket[] = [...fallbackTickets];
 
 export async function listTickets(): Promise<Ticket[]> {
   const supabase = getSupabaseServerClient();
@@ -20,7 +20,7 @@ export async function listTickets(): Promise<Ticket[]> {
         description: row.description,
         status: row.status as Ticket["status"],
         createdAt: row.created_at,
-        requesterName: ((row.payload as { requesterName?: string })?.requesterName ?? "Usuario demo") as string,
+        requesterName: ((row.payload as { requesterName?: string })?.requesterName ?? "Usuario pendiente") as string,
         requesterEmail: ((row.payload as { requesterEmail?: string })?.requesterEmail ?? "pendiente@example.com") as string,
       }));
     }
@@ -35,7 +35,7 @@ export async function createTicket(draft: TicketDraft): Promise<Ticket> {
     id: draft.id ?? createTicketId(),
     status: draft.priority === "P1" || draft.status === "escalated" ? "escalated" : "created",
     createdAt: new Date().toISOString(),
-    requesterName: draft.requesterName ?? "Usuario demo pendiente",
+    requesterName: draft.requesterName ?? "Usuario pendiente",
     requesterEmail: draft.requesterEmail ?? "pendiente@example.com",
   };
 
@@ -61,7 +61,6 @@ export async function createTicket(draft: TicketDraft): Promise<Ticket> {
 
 function createTicketId() {
   const now = new Date();
-  const datePart = `${String(now.getFullYear()).slice(2)}${String(now.getMonth() + 1).padStart(2, "0")}`;
-  const sequence = Math.floor(100 + Math.random() * 900);
-  return `ITS-${datePart}-${sequence}`;
+  const sequence = Math.floor(10000 + Math.random() * 90000);
+  return `INC-${now.getFullYear()}-${sequence}`;
 }

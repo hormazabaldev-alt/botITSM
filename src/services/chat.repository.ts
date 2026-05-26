@@ -9,7 +9,7 @@ export async function persistChatTurn(context: SessionContext, messages: ChatMes
   if (supabase) {
     await supabase.from("chat_sessions").upsert({
       id: context.sessionId,
-      channel: "web-demo",
+      channel: "portal-web",
       status: context.awaitingResolutionConfirmation ? "active" : "open",
     });
 

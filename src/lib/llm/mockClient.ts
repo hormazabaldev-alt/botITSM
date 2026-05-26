@@ -1,4 +1,4 @@
-import { findKnowledgeMatches } from "@/lib/data/knowledgeBase";
+import { findKnowledgeMatches } from "@/data/mock/knowledgeBase";
 import {
   buildTicketDraft,
   detectIntent,
@@ -38,7 +38,7 @@ export async function generateMockITSMResponse(input: ITSMResponseInput): Promis
   if (isResolvedMessage(input.userMessage)) {
     return {
       assistantMessage:
-        "Caso cerrado en modo demo. Registro la resolución autónoma con trazabilidad: clasificación, guía aplicada y confirmación del usuario. No crearé ticket porque indicaste que el servicio quedó operativo.",
+        "Caso cerrado. Registro la resolución autónoma con trazabilidad: clasificación, guía aplicada y confirmación del usuario. No se generará ticket porque indicaste que el servicio quedó operativo.",
       classification: detectedIntent,
       priority,
       requiredFields: [],
@@ -52,7 +52,7 @@ export async function generateMockITSMResponse(input: ITSMResponseInput): Promis
 
   const guide = article
     ? `Guía aplicada: ${article.title}\n${article.resolutionSteps.map((step, index) => `${index + 1}. ${step}`).join("\n")}`
-    : "No encontré un artículo exacto, así que prepararé una clasificación operativa y pediré los datos mínimos para escalar con contexto.";
+    : "No encontré un artículo exacto. Prepararé una clasificación operativa y pediré solo los datos mínimos para resolver o escalar con contexto.";
 
   const missingData = requiredFields.length
     ? `\n\nPara dejar el caso listo si no se resuelve, necesito: ${requiredFields.join(", ")}.`
@@ -61,7 +61,7 @@ export async function generateMockITSMResponse(input: ITSMResponseInput): Promis
   const escalationNote =
     priority === "P1"
       ? "\n\nLa criticidad detectada requiere escalamiento inmediato con seguimiento ejecutivo."
-      : "\n\nEjecuta la guía y dime si quedó resuelto. Si persiste, crearé un ticket simulado con el contexto completo.";
+      : "\n\nEjecuta la guía y dime si quedó resuelto. Si persiste, registraré el caso con el contexto completo.";
 
   return {
     assistantMessage: `Clasificación ITIL: ${intentLabel(detectedIntent)} | Prioridad ${priorityLabel(priority)}.\n\n${guide}${missingData}${escalationNote}`,
@@ -69,13 +69,15 @@ export async function generateMockITSMResponse(input: ITSMResponseInput): Promis
     priority,
     requiredFields,
     suggestedActions: article?.resolutionSteps ?? ["Recopilar contexto", "Clasificar prioridad", "Escalar si persiste"],
-    operationalStatuses: [
-      "Detectando intención",
-      "Clasificando según ITIL",
-      "Consultando base de conocimiento",
-      "Ejecutando guía de descarte",
-      "Preparando ticket",
-    ],
+    operationalStatuses: shouldCreateTicket
+      ? [
+          "Detectando intención",
+          "Clasificando según ITIL",
+          "Consultando base de conocimiento",
+          "Ejecutando guía de descarte",
+          "Preparando ticket",
+        ]
+      : ["Detectando intención", "Clasificando según ITIL", "Consultando base de conocimiento", "Ejecutando guía de descarte"],
     shouldCreateTicket,
     shouldEscalate,
     ticketDraft,

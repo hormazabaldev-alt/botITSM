@@ -1,6 +1,6 @@
 import type { Ticket } from "@/lib/itsm/types";
 
-export const demoTickets: Ticket[] = [
+export const fallbackTickets: Ticket[] = [
   {
     id: "ITS-2407-031",
     type: "NETWORK_ISSUE",
@@ -10,7 +10,7 @@ export const demoTickets: Ticket[] = [
     affectedSystem: "VPN corporativa",
     affectedAsset: "Notebook corporativo",
     requesterName: "Usuario Demo",
-    requesterEmail: "usuario.demo@example.com",
+    requesterEmail: "usuario@example.com",
     businessArea: "Operaciones",
     impact: "Usuario sin acceso a sistemas internos",
     urgency: "Media",
@@ -30,7 +30,7 @@ export const demoTickets: Ticket[] = [
     affectedSystem: "Catálogo corporativo",
     affectedAsset: "Notebook corporativo",
     requesterName: "Usuario Demo",
-    requesterEmail: "usuario.demo@example.com",
+    requesterEmail: "usuario@example.com",
     businessArea: "Finanzas",
     impact: "Necesario para reporte mensual",
     urgency: "Baja",
@@ -50,7 +50,7 @@ export const demoTickets: Ticket[] = [
     affectedSystem: "Aplicación corporativa crítica",
     affectedAsset: "Servicio productivo",
     requesterName: "Usuario Demo",
-    requesterEmail: "usuario.demo@example.com",
+    requesterEmail: "usuario@example.com",
     businessArea: "Operaciones críticas",
     impact: "Proceso crítico detenido",
     urgency: "Crítica",

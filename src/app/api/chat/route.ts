@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { findKnowledgeMatches } from "@/lib/data/knowledgeBase";
+import { findKnowledgeMatches } from "@/data/mock/knowledgeBase";
 import { createSessionContext, detectIntent, extractFields } from "@/lib/itsm/engine";
 import type { ChatMessage, SessionContext } from "@/lib/itsm/types";
 import { generateITSMResponse } from "@/lib/llm";

@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Agente IA ITSM Enterprise | SONDA",
-  description: "Demo enterprise de agente IA operacional para gestión ITSM basada en ITIL.",
+  title: "Portal de soporte inteligente | SONDA",
+  description: "Plataforma enterprise de soporte ITSM asistida por inteligencia operacional.",
 };
 
 export default function RootLayout({

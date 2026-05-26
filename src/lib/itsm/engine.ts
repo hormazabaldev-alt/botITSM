@@ -147,7 +147,7 @@ export function buildTicketDraft(params: {
     description: summarizeDescription(message, article),
     affectedSystem: context.collectedFields.sistema ?? inferAffectedSystem(intent, article),
     affectedAsset: context.collectedFields.activo ?? "Pendiente por confirmar",
-    requesterName: context.collectedFields.nombre ?? "Usuario demo pendiente",
+    requesterName: context.collectedFields.nombre ?? "Usuario pendiente",
     requesterEmail: context.collectedFields.correo ?? "pendiente@example.com",
     businessArea: context.collectedFields.area ?? "Área pendiente",
     impact: context.collectedFields.impacto ?? impactByPriority(priority),

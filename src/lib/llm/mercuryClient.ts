@@ -27,7 +27,7 @@ export async function generateMercuryITSMResponse(input: ITSMResponseInput): Pro
       Authorization: `Bearer ${process.env.MERCURY_API_KEY}`,
     },
     body: JSON.stringify({
-      model: process.env.MERCURY_MODEL ?? "inception-itsm-demo",
+      model: process.env.MERCURY_MODEL ?? "inception-itsm-enterprise",
       messages: [
         { role: "system", content: itsmSystemPrompt },
         { role: "user", content: JSON.stringify(payload) },
