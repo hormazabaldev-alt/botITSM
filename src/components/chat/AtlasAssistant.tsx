@@ -19,7 +19,7 @@ import {
   X,
 } from "lucide-react";
 import type { ChatMessage, ITSMResponse, OperationalStatus, SessionContext, Ticket } from "@/lib/itsm/types";
-import { SondaIcon } from "@/components/shared/BrandMark";
+import { SondaBotIcon, SondaIcon } from "@/components/shared/BrandMark";
 
 type ChatApiResponse = {
   response: ITSMResponse;
@@ -164,7 +164,7 @@ export function SondaAssistant() {
   const [ticket, setTicket] = useState<Ticket | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [expanded, setExpanded] = useState(true);
-  const [closed, setClosed] = useState(false);
+  const [closed, setClosed] = useState(true);
 
   // Adjuntos
   const [attachedFile, setAttachedFile] = useState<{ name: string; url: string } | null>(null);
@@ -391,24 +391,36 @@ export function SondaAssistant() {
           setClosed(false);
           setExpanded(true);
         }}
-        className="inline-flex h-11 items-center gap-2.5 rounded-full px-5 text-sm font-semibold transition-all duration-200"
+        className="group relative grid h-[72px] w-[148px] place-items-center rounded-[22px] px-3 transition-all duration-200"
         style={{
-          background: "#000000",
-          border: "1px solid rgba(0, 255, 255, 0.35)",
-          color: "#00FFFF",
-          boxShadow: "0 8px 32px rgba(0, 255, 255, 0.15), inset 0 0 8px rgba(0, 255, 255, 0.05)",
+          background: "rgba(18, 33, 63, 0.92)",
+          border: "1px solid rgba(85, 244, 255, 0.45)",
+          boxShadow: "0 18px 42px rgba(2, 6, 23, 0.45), 0 0 30px rgba(85, 244, 255, 0.18)",
+          backdropFilter: "blur(18px)",
         }}
         onMouseEnter={(e) => {
-          (e.currentTarget as HTMLElement).style.borderColor = "#00FFFF";
-          (e.currentTarget as HTMLElement).style.boxShadow = "0 0 20px rgba(0, 255, 255, 0.3)";
+          (e.currentTarget as HTMLElement).style.borderColor = "#55F4FF";
+          (e.currentTarget as HTMLElement).style.transform = "translateY(-3px)";
+          (e.currentTarget as HTMLElement).style.boxShadow = "0 22px 52px rgba(2, 6, 23, 0.52), 0 0 38px rgba(85, 244, 255, 0.28)";
         }}
         onMouseLeave={(e) => {
-          (e.currentTarget as HTMLElement).style.borderColor = "rgba(0, 255, 255, 0.35)";
-          (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 32px rgba(0, 255, 255, 0.15), inset 0 0 8px rgba(0, 255, 255, 0.05)";
+          (e.currentTarget as HTMLElement).style.borderColor = "rgba(85, 244, 255, 0.45)";
+          (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
+          (e.currentTarget as HTMLElement).style.boxShadow = "0 18px 42px rgba(2, 6, 23, 0.45), 0 0 30px rgba(85, 244, 255, 0.18)";
         }}
+        aria-label="Abrir soporte SONDA"
+        title="Abrir soporte SONDA"
       >
-        <SondaIcon size={20} />
-        Soporte SONDA
+        <SondaBotIcon width={116} height={38} />
+        <span
+          aria-hidden
+          className="absolute -right-1 -top-1 size-4 rounded-full"
+          style={{
+            background: "#22C55E",
+            border: "2px solid #12213F",
+            boxShadow: "0 0 12px rgba(34, 197, 94, 0.8)",
+          }}
+        />
       </button>
     );
   }
@@ -450,10 +462,10 @@ export function SondaAssistant() {
         }}
       >
         <div className="flex items-center gap-2.5">
-          <SondaIcon size={24} />
+          <SondaBotIcon width={78} height={26} />
           <div>
             <h1
-              className="text-[13px] font-bold leading-tight tracking-[-0.01em]"
+              className="text-[13px] font-bold leading-tight"
               style={{ color: "#FFFFFF" }}
             >
               Soporte SONDA

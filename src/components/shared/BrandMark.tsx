@@ -14,7 +14,8 @@ export function SondaLogo({
 }) {
   const h = Math.round(width * 0.38);
   const textColor = inverted ? "#000000" : "#FFFFFF";
-  const bgColor   = inverted ? "transparent" : "#000000";
+  const accentColor = inverted ? "#000000" : "#55F4FF";
+  const bgColor   = inverted ? "transparent" : "#12213F";
 
   return (
     <svg
@@ -29,18 +30,19 @@ export function SondaLogo({
         <rect width="320" height="100" fill={bgColor} rx="4" />
       )}
 
-      {/* Wordmark SONDA — sans-serif bold condensado */}
       <text
         x="14"
         y="76"
         fontFamily="'Arial Black', 'Arial', 'Helvetica Neue', 'Impact', sans-serif"
         fontWeight="900"
         fontSize="72"
-        letterSpacing="-1"
+        letterSpacing="0"
         fill={textColor}
         dominantBaseline="auto"
       >
-        SONDA
+        <tspan>S</tspan>
+        <tspan fill={accentColor}>ON</tspan>
+        <tspan>DA</tspan>
       </text>
 
       {/* Punto registrado ® pequeño */}
@@ -54,6 +56,41 @@ export function SondaLogo({
         opacity="0.85"
       >
         ®
+      </text>
+    </svg>
+  );
+}
+
+/* ─── Logo usado como ícono flotante del bot ─────────────────────── */
+export function SondaBotIcon({
+  width = 120,
+  height = 42,
+}: {
+  width?: number;
+  height?: number;
+}) {
+  return (
+    <svg
+      width={width}
+      height={height}
+      viewBox="0 0 360 116"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-label="SONDA"
+      role="img"
+    >
+      <rect width="360" height="116" rx="12" fill="#12213F" />
+      <text
+        x="18"
+        y="88"
+        fontFamily="'Arial Black', 'Arial', 'Helvetica Neue', 'Impact', sans-serif"
+        fontWeight="900"
+        fontSize="78"
+        letterSpacing="0"
+        fill="#FFFFFF"
+      >
+        <tspan>S</tspan>
+        <tspan fill="#55F4FF">ON</tspan>
+        <tspan>DA</tspan>
       </text>
     </svg>
   );
@@ -80,7 +117,7 @@ export function SondaIcon({ size = 32 }: { size?: number }) {
         fontWeight="900"
         fontSize="26"
         fill="#FFFFFF"
-        letterSpacing="-0.5"
+        letterSpacing="0"
       >
         S
       </text>
