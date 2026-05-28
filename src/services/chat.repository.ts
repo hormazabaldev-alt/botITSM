@@ -11,6 +11,7 @@ export async function persistChatTurn(
   context: SessionContext,
   messages: ChatMessage[],
   outcome: SessionOutcome = "active",
+  channel = "portal-web",
 ) {
   const supabase = getSupabaseServerClient();
   const isClosed = outcome === "resolved" || outcome === "escalated";
@@ -19,7 +20,7 @@ export async function persistChatTurn(
   if (supabase) {
     const richSession = await supabase.from("chat_sessions").upsert({
       id: context.sessionId,
-      channel: "portal-web",
+      channel,
       status: outcome,
       context: context as unknown as Json,
       active_article_id: context.activeArticleId ?? null,
@@ -32,7 +33,7 @@ export async function persistChatTurn(
     if (richSession.error) {
       const basicSession = await supabase.from("chat_sessions").upsert({
         id: context.sessionId,
-        channel: "portal-web",
+        channel,
         status: outcome,
         ...(isClosed ? { closed_at: now } : {}),
       });

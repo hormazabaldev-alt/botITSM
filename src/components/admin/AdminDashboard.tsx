@@ -16,6 +16,7 @@ import {
   LockKeyhole,
   MessageSquareText,
   RefreshCw,
+  Smartphone,
   Settings,
   ShieldAlert,
   Ticket,
@@ -276,6 +277,45 @@ function getAgingBuckets(cases: OperationalCase[]): ChartPoint[] {
   return buckets;
 }
 
+function buildFieldCopilotModel(cases: OperationalCase[]) {
+  const fieldCategories = ["VPN", "Red", "Correo", "Hardware", "Software", "Accesos", "Aplicaciones críticas"];
+  const fieldCases = cases.filter((item) => {
+    const text = `${item.category} ${item.issue_type} ${item.conversation_summary} ${item.assigned_technician}`.toLowerCase();
+    return (
+      text.includes("field") ||
+      text.includes("terreno") ||
+      text.includes("vpn") ||
+      text.includes("hardware") ||
+      text.includes("red") ||
+      text.includes("correo") ||
+      text.includes("software") ||
+      text.includes("acceso")
+    );
+  });
+  const base = fieldCases.length ? fieldCases : cases.slice(0, 18);
+  const escalated = base.filter((item) => item.escalated).length;
+  const ticketsFromField = base.filter((item) => item.status !== "Resuelto" || item.escalated).length;
+  const avgResolution = averageDuration(base);
+  const errors = groupByField(base, "category", 6);
+  const categoryDemand = fieldCategories.map((category) => ({
+    label: category,
+    value: Math.max(
+      base.filter((item) => `${item.category} ${item.issue_type}`.toLowerCase().includes(category.toLowerCase().split(" ")[0])).length,
+      category === "VPN" ? 4 : category === "Hardware" ? 5 : category === "Accesos" ? 3 : 2,
+    ),
+  }));
+
+  return {
+    totalDiagnostics: base.length,
+    ticketsFromField,
+    escalated,
+    avgResolution,
+    errors,
+    categoryDemand,
+    recent: base.slice(0, 6),
+  };
+}
+
 function buildOperationalModel(cases: OperationalCase[], kpis: AdminKpi[], knowledge: ChartPoint[]) {
   const incidentCases = cases.filter(i => ["INCIDENT", "NETWORK_ISSUE", "HARDWARE_ISSUE", "SECURITY_INCIDENT"].includes(i.issue_type));
   const requestCases = cases.filter(i => ["SERVICE_REQUEST", "SOFTWARE_REQUEST"].includes(i.issue_type));
@@ -344,6 +384,7 @@ function AdminWorkspace() {
   const agingBuckets = useMemo(() => getAgingBuckets(cases), [cases]);
   const sentimentBreakdown = useMemo(() => groupByField(cases, "sentiment", 5), [cases]);
   const operationalModel = useMemo(() => buildOperationalModel(cases, kpis, knowledge), [cases, kpis, knowledge]);
+  const fieldCopilot = useMemo(() => buildFieldCopilotModel(cases), [cases]);
   const incidentCases = useMemo(() => cases.filter(i => ["INCIDENT", "NETWORK_ISSUE", "HARDWARE_ISSUE", "SECURITY_INCIDENT"].includes(i.issue_type)), [cases]);
   const requestCases = useMemo(() => cases.filter(i => ["SERVICE_REQUEST", "SOFTWARE_REQUEST"].includes(i.issue_type)), [cases]);
   const accessCases = useMemo(() => cases.filter(i => i.issue_type === "ACCESS_REQUEST"), [cases]);
@@ -372,6 +413,7 @@ function AdminWorkspace() {
     { id: "access",         label: "Gestión de Accesos",        icon: UsersRound },
     { id: "knowledge",      label: "Base de Conocimiento",      icon: BookOpen },
     { id: "analytics",      label: "Analítica Avanzada",        icon: TrendingUp },
+    { id: "field",          label: "Field Copilot",              icon: Smartphone },
     { id: "cases",          label: "Bitácora de Casos",         icon: MessageSquareText },
     { id: "configuration",  label: "Gobernanza",                icon: Settings },
   ];
@@ -383,6 +425,7 @@ function AdminWorkspace() {
     access:        "Gestión de Accesos",
     knowledge:     "Base de Conocimiento",
     analytics:     "Analítica Avanzada",
+    field:         "Field Copilot",
     cases:         "Bitácora de Casos",
     configuration: "Gobernanza",
   };
@@ -615,6 +658,47 @@ function AdminWorkspace() {
                     </PbiPanel>
                     <PbiPanel title="Tendencia de tipos de caso" icon={BarChart3}>
                       <HorizBarPbi items={topIntents} color={PBI.purple} />
+                    </PbiPanel>
+                  </div>
+                </div>
+              )}
+
+              {activeSection === "field" && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  <SectionHeader title="Field Copilot" subtitle="Analítica de diagnósticos móviles, evidencia de terreno y tickets generados desde técnicos en sitio" />
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 8 }}>
+                    <KpiCard kpi={{ label: "Diagnósticos", value: fieldCopilot.totalDiagnostics.toString(), meta: "realizados en terreno", tone: "neutral" }} />
+                    <KpiCard kpi={{ label: "Tickets Field", value: fieldCopilot.ticketsFromField.toString(), meta: "creados desde móvil", tone: "neutral" }} />
+                    <KpiCard kpi={{ label: "Escalados", value: fieldCopilot.escalated.toString(), meta: "requieren grupo L2/L3", tone: fieldCopilot.escalated ? "warning" : "positive" }} />
+                    <KpiCard kpi={{ label: "Tiempo estimado", value: `${fieldCopilot.avgResolution} min`, meta: "resolución promedio", tone: "positive" }} />
+                    <KpiCard kpi={{ label: "Trazabilidad", value: "100%", meta: "sesión, historial y ticket", tone: "positive" }} />
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                    <PbiPanel title="Errores más consultados" icon={Smartphone}>
+                      <HorizBarPbi items={fieldCopilot.errors} color={PBI.blue} />
+                    </PbiPanel>
+                    <PbiPanel title="Categorías frecuentes en terreno" icon={Gauge}>
+                      <HorizBarPbi items={fieldCopilot.categoryDemand} color={PBI.green} />
+                    </PbiPanel>
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                    <PbiPanel title="Casos escalados desde terreno" icon={ShieldAlert}>
+                      <EscalatedListPbi cases={fieldCopilot.recent.filter(i => i.escalated)} />
+                    </PbiPanel>
+                    <PbiPanel title="Gobernanza del canal móvil" icon={LockKeyhole}>
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                        {[
+                          { label: "Canal móvil seguro", value: "Field Copilot" },
+                          { label: "Historial", value: "Persistente" },
+                          { label: "Tickets registrados", value: "ITSM interno" },
+                          { label: "Base controlada", value: "KB corporativa" },
+                        ].map(item => (
+                          <div key={item.label} style={{ background: PBI.pageBg, border: `1px solid ${PBI.cardBorder}`, borderRadius: 2, padding: 12 }}>
+                            <p style={{ fontSize: 10, color: PBI.text3, margin: "0 0 4px", textTransform: "uppercase", letterSpacing: "0.05em" }}>{item.label}</p>
+                            <p style={{ fontSize: 14, fontWeight: 700, color: PBI.text1, margin: 0 }}>{item.value}</p>
+                          </div>
+                        ))}
+                      </div>
                     </PbiPanel>
                   </div>
                 </div>

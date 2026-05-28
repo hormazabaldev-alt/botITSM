@@ -12,6 +12,10 @@ type ChatRequest = {
   sessionId?: string;
   attachmentName?: string;
   attachmentUrl?: string;
+  sourceChannel?: "portal-web" | "field-copilot" | string;
+  fieldRole?: string;
+  fieldZone?: string;
+  audioNoteName?: string;
 };
 
 export async function POST(request: Request) {
@@ -23,6 +27,7 @@ export async function POST(request: Request) {
   }
 
   const sessionContext = body.sessionContext ?? (body.sessionId ? await getPersistedSessionContext(body.sessionId) : undefined) ?? createSessionContext();
+  const channel = body.sourceChannel === "field-copilot" ? "field-copilot" : "portal-web";
   
   const now = new Date().toISOString();
   const userChatMessage: ChatMessage = {
@@ -94,7 +99,7 @@ export async function POST(request: Request) {
         sessionId: sessionContextForEngine.sessionId,
         transcript: fullTranscript,
         diagnostic: sessionContextForEngine.diagnostic,
-        source: "web-demo",
+        source: channel,
       });
 
       const nextContext: SessionContext = {
@@ -104,7 +109,7 @@ export async function POST(request: Request) {
         ticketDraft: itsmResult?.ticket ?? resolvedDraft,
       };
 
-      await persistChatTurn(nextContext, [userChatMessage, assistantChatMessage], "resolved");
+      await persistChatTurn(nextContext, [userChatMessage, assistantChatMessage], "resolved", channel);
 
       return NextResponse.json({
         response: {
@@ -133,10 +138,11 @@ export async function POST(request: Request) {
     }
   }
 
-  const detectedIntent = detectTurnIntent(userMessage, sessionContextForEngine);
-  const knowledgeMatches = findKnowledgeMatches(userMessage, detectedIntent);
+  const llmUserMessage = buildChannelAwareMessage(userMessage, body);
+  const detectedIntent = detectTurnIntent(llmUserMessage, sessionContextForEngine);
+  const knowledgeMatches = findKnowledgeMatches(llmUserMessage, detectedIntent);
   const llmResponse = await generateITSMResponse({
-    userMessage,
+    userMessage: llmUserMessage,
     sessionContext: sessionContextForEngine,
     detectedIntent,
     knowledgeMatches,
@@ -188,7 +194,7 @@ export async function POST(request: Request) {
         sessionId: sessionContextForEngine.sessionId,
         transcript: fullTranscript,
         diagnostic: diagnosticForTurn,
-        source: "web-demo",
+        source: channel,
       })
     : undefined;
 
@@ -232,7 +238,7 @@ export async function POST(request: Request) {
     awaitingCloseConfirmation: isResolved ? true : undefined,
   };
 
-  await persistChatTurn(nextContext, [userChatMessage, assistantChatMessage], sessionOutcome);
+  await persistChatTurn(nextContext, [userChatMessage, assistantChatMessage], sessionOutcome, channel);
 
   return NextResponse.json({
     response: llmResponse,
@@ -248,6 +254,23 @@ export async function POST(request: Request) {
     sessionContext: nextContext,
     knowledgeMatches,
   });
+}
+
+function buildChannelAwareMessage(userMessage: string, body: ChatRequest) {
+  if (body.sourceChannel !== "field-copilot") return userMessage;
+
+  return [
+    "[Field IT Copilot]",
+    "Canal: móvil seguro para técnico en terreno.",
+    body.fieldRole ? `Rol técnico: ${body.fieldRole}.` : undefined,
+    body.fieldZone ? `Zona o cliente: ${body.fieldZone}.` : undefined,
+    body.attachmentName ? `Evidencia visual adjunta: ${body.attachmentName}.` : undefined,
+    body.audioNoteName ? `Nota de audio adjunta pendiente de transcripción STT: ${body.audioNoteName}.` : undefined,
+    "Responder con enfoque operativo de terreno: posible causa, checklist de descartes, pasos sugeridos, criticidad, criterio de escalamiento y si corresponde crear ticket.",
+    `Síntoma reportado: ${userMessage}`,
+  ]
+    .filter(Boolean)
+    .join("\n");
 }
 
 function resolveActiveArticleId(

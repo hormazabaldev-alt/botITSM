@@ -7,7 +7,7 @@ export type ITSMCreateTicketInput = {
   sessionId: string;
   transcript: ChatMessage[];
   diagnostic?: DiagnosticContext;
-  source: "web-demo" | "api" | "handoff";
+  source: "web-demo" | "portal-web" | "field-copilot" | "api" | "handoff";
 };
 
 export type ITSMCreateTicketResult = {
