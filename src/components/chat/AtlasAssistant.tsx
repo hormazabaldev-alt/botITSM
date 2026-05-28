@@ -5,9 +5,9 @@ import {
   AlertTriangle,
   CheckCircle2,
   ChevronUp,
+  HardDrive,
   KeyRound,
   Laptop,
-  Loader2,
   MessageSquareText,
   Minus,
   PackageCheck,
@@ -55,12 +55,20 @@ const smartActions = [
     border: "rgba(139,92,246,0.15)",
   },
   {
-    topic: "Mi notebook está lenta",
+    topic: "Hardware",
     title: "Hardware",
     icon: Laptop,
     color: "#10B981",
     bg: "rgba(16,185,129,0.06)",
     border: "rgba(16,185,129,0.15)",
+    replies: [
+      { label: "Notebook lento", message: "Mi notebook está lenta" },
+      { label: "Pantalla", message: "Tengo un problema con la pantalla del notebook" },
+      { label: "Mouse o teclado", message: "Tengo un problema con el mouse o teclado" },
+      { label: "Monitor externo", message: "Tengo un problema con el monitor externo" },
+      { label: "Impresora", message: "Tengo un problema con la impresora" },
+      { label: "Otro hardware", message: "Tengo otro problema de hardware" },
+    ],
   },
   {
     topic: "Necesito acceso",
@@ -216,13 +224,12 @@ export function SondaAssistant() {
       attachmentUrl: activeFile?.url,
     };
 
-    setMessages((current) => [...current, optimisticMessage]);
+    setMessages((current) => [...clearSuggestedRepliesFromMessages(current), optimisticMessage]);
 
-    const activeContext = overrideContext ?? context;
-    const startTime = Date.now();
+    const activeContext = removeSuggestedRepliesFromContext(overrideContext ?? context);
 
     try {
-      const response = await fetch("/api/chat", {
+      const response = await withMinimumDelay(fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -231,18 +238,11 @@ export function SondaAssistant() {
           attachmentName: activeFile?.name,
           attachmentUrl: activeFile?.url,
         }),
-      });
+      }));
 
       if (!response.ok) throw new Error("Error de red");
 
       const payload = (await response.json()) as ChatApiResponse;
-      
-      // Simular tiempo de pensamiento/procesamiento técnico humano (mínimo 1600ms)
-      const elapsedTime = Date.now() - startTime;
-      const minDelay = 1600;
-      if (elapsedTime < minDelay) {
-        await new Promise((resolve) => setTimeout(resolve, minDelay - elapsedTime));
-      }
 
       const refinedContext = refineAssistantTurn(payload.sessionContext, cleanMessage || `[Evidencia: ${activeFile?.name}]`);
       setContext(refinedContext);
@@ -365,6 +365,7 @@ export function SondaAssistant() {
   function handleSuggestion(topic: string) {
     if (isLoading) return;
 
+    const action = smartActions.find((item) => item.topic === topic);
     const freshContext: SessionContext = {
       sessionId: `session-${crypto.randomUUID()}`,
       collectedFields: context?.collectedFields ?? {},
@@ -378,6 +379,21 @@ export function SondaAssistant() {
     setAttachedFile(null);
     setShowAttachmentMenu(false);
     setStatus("en línea");
+
+    if (action?.replies?.length) {
+      const assistantMessage: ChatMessage = {
+        id: crypto.randomUUID(),
+        role: "assistant",
+        content: "Elige qué tipo de hardware quieres revisar:",
+        createdAt: new Date().toISOString(),
+        suggestedReplies: action.replies,
+      };
+      const nextContext = { ...freshContext, messages: [assistantMessage] };
+      setContext(nextContext);
+      setMessages([initialMessage, assistantMessage]);
+      storeSessionContext(nextContext);
+      return;
+    }
 
     void sendMessage(topic, null, freshContext);
   }
@@ -563,7 +579,7 @@ export function SondaAssistant() {
           <div ref={scrollRef} className="thin-scrollbar relative min-h-0 flex-1 overflow-y-auto px-3.5 py-3">
             <div className="space-y-3.5">
               {messages.map((message) => (
-                <Bubble key={message.id} message={message} />
+                <Bubble key={message.id} message={message} onReply={(reply) => sendMessage(reply)} />
               ))}
 
               {!hasConversation ? (
@@ -826,7 +842,7 @@ function SmartActionCard({
   );
 }
 
-function Bubble({ message }: { message: ChatMessage }) {
+function Bubble({ message, onReply }: { message: ChatMessage; onReply?: (message: string) => void }) {
   const isUser = message.role === "user";
 
   const welcomeIds = ["sonda-welcome", "sonda-welcome-personal", "atlas-welcome", "atlas-welcome-personal"];
@@ -889,6 +905,34 @@ function Bubble({ message }: { message: ChatMessage }) {
         ) : null}
         {message.content ? (
           <p className="text-[13px] leading-[1.55] whitespace-pre-line">{message.content}</p>
+        ) : null}
+        {!isUser && message.suggestedReplies?.length ? (
+          <div className="grid gap-1.5 pt-1">
+            {message.suggestedReplies.map((reply) => (
+              <button
+                key={reply.message}
+                type="button"
+                onClick={() => onReply?.(reply.message)}
+                className="inline-flex min-h-8 items-center gap-2 rounded-lg px-2.5 text-left text-[12px] font-semibold transition-all duration-150"
+                style={{
+                  border: "1px solid rgba(0, 255, 255, 0.18)",
+                  background: "rgba(0, 255, 255, 0.05)",
+                  color: "#FFFFFF",
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.borderColor = "rgba(0, 255, 255, 0.45)";
+                  (e.currentTarget as HTMLElement).style.background = "rgba(0, 255, 255, 0.1)";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.borderColor = "rgba(0, 255, 255, 0.18)";
+                  (e.currentTarget as HTMLElement).style.background = "rgba(0, 255, 255, 0.05)";
+                }}
+              >
+                <HardDrive size={12} aria-hidden />
+                <span>{reply.label}</span>
+              </button>
+            ))}
+          </div>
         ) : null}
       </div>
 
@@ -1003,6 +1047,34 @@ function CaseLine({ label, value }: { label: string; value: string }) {
 function resolveStatus(states: OperationalStatus[]) {
   const state = states.at(-1);
   return (state && statusLabels[state]) ?? "analizando...";
+}
+
+function removeSuggestedRepliesFromContext(sessionContext?: SessionContext) {
+  if (!sessionContext) return undefined;
+
+  return {
+    ...sessionContext,
+    messages: clearSuggestedRepliesFromMessages(sessionContext.messages),
+  };
+}
+
+function clearSuggestedRepliesFromMessages(messages: ChatMessage[]) {
+  return messages.map((message) => {
+    if (!message.suggestedReplies?.length) return message;
+    return { ...message, suggestedReplies: undefined };
+  });
+}
+
+async function withMinimumDelay<T>(promise: Promise<T>, minDelay = 1600) {
+  const startTime = performance.now();
+  const result = await promise;
+  const remainingDelay = minDelay - (performance.now() - startTime);
+
+  if (remainingDelay > 0) {
+    await new Promise((resolve) => setTimeout(resolve, remainingDelay));
+  }
+
+  return result;
 }
 
 function priorityText(priority: Ticket["priority"]) {

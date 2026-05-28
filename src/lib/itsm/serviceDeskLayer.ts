@@ -453,7 +453,7 @@ function resolveNotebookDisplayTurn(params: {
   }
 
   // 4. Transición final a derivación según resultado del aislamiento
-  const facts: Record<string, any> = {};
+  const facts: Record<string, DiagnosticFactValue> = {};
   const isExternalPositive = isPositiveResponse(current) || hasAnyText(current, ["el otro si", "el otro sí", "el externo si", "el externo sí", "externo funciona"]);
   let finalMessage = "";
 
@@ -895,7 +895,7 @@ function resolveNotebookSlownessTurn(params: {
 
   // 3. Transición desde run_first_check (el usuario responde o sube captura)
   if (currentStage === "run_first_check") {
-    const facts: Record<string, any> = {};
+    const facts: Record<string, DiagnosticFactValue> = {};
 
     // Si el usuario subió una captura, la procesamos a nivel técnico avanzado
     if (attachmentName) {
@@ -1326,7 +1326,7 @@ function resolvePrinterTurn(params: {
   }
 
   // 4. Transición final a derivación
-  const facts: Record<string, any> = { ...previousDiagnostic?.facts };
+  const facts: Record<string, DiagnosticFactValue> = { ...previousDiagnostic?.facts };
   const isLogicResolved = isPositiveResponse(current);
   let finalMessage = "";
 

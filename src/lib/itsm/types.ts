@@ -85,6 +85,10 @@ export type ChatMessage = {
   attachmentUrl?: string;
   attachmentName?: string;
   attachmentAnalysis?: string;
+  suggestedReplies?: {
+    label: string;
+    message: string;
+  }[];
   metadata?: {
     intent?: ITSMIntent;
     priority?: ITSMPriority;
