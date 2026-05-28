@@ -407,7 +407,7 @@ export function SondaAssistant() {
           setClosed(false);
           setExpanded(true);
         }}
-        className="sonda-bot-launcher group relative grid h-[54px] w-[118px] place-items-center rounded-[18px] px-2.5 transition-all duration-200"
+        className="sonda-bot-launcher group relative grid h-[82px] w-[106px] place-items-center overflow-hidden rounded-[20px] p-0 transition-all duration-200"
         style={{
           background: "rgba(20, 33, 63, 0.92)",
           border: "1px solid rgba(120, 247, 255, 0.46)",
@@ -427,7 +427,7 @@ export function SondaAssistant() {
         aria-label="Abrir soporte SONDA"
         title="Abrir soporte SONDA"
       >
-        <SondaBotIcon width={96} height={29} />
+        <SondaBotIcon width={106} height={82} />
         <span
           aria-hidden
           className="absolute -right-0.5 -top-0.5 size-3.5 rounded-full"
@@ -478,7 +478,7 @@ export function SondaAssistant() {
         }}
       >
         <div className="flex items-center gap-2.5">
-          <SondaBotIcon width={92} height={28} />
+          <SondaBotIcon width={62} height={48} />
           <div>
             <h1
               className="text-[13px] font-bold leading-tight"

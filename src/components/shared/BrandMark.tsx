@@ -71,7 +71,7 @@ export function SondaBotIcon({
 }) {
   return (
     <img
-      src="/sonda-bot-logo.svg"
+      src="/sonda-chatbot-icon.svg"
       width={width}
       height={height}
       aria-label="SONDA"

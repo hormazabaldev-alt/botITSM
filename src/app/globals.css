@@ -809,7 +809,7 @@ button, input, textarea, select {
   position: absolute;
   inset: 1px;
   border-radius: 17px;
-  background: linear-gradient(180deg, rgba(255,255,255,0.12), transparent 40%);
+  background: linear-gradient(180deg, rgba(255,255,255,0.14), transparent 38%);
   pointer-events: none;
   content: "";
 }
@@ -1013,6 +1013,111 @@ button, input, textarea, select {
   background: rgba(51, 65, 85, 0.76);
   transform: translateX(-50%);
   content: "";
+}
+
+.mac-real-dock {
+  gap: 11px;
+  min-height: 96px;
+  padding: 13px 18px 16px;
+  border-radius: 28px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.14)),
+    rgba(28, 37, 42, 0.42);
+  box-shadow:
+    0 26px 70px rgba(2, 6, 23, 0.32),
+    0 1px 0 rgba(255, 255, 255, 0.72) inset,
+    0 0 0 1px rgba(255, 255, 255, 0.22) inset;
+  backdrop-filter: blur(34px) saturate(1.55);
+}
+
+.mac-real-dock::before {
+  inset: 9px 16px auto;
+  height: 34px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.25), transparent);
+}
+
+.mac-real-dock .real-dock-icon {
+  width: 64px;
+  height: 64px;
+  overflow: visible;
+  border-radius: 17px;
+  background: transparent;
+  box-shadow: none;
+  transform-origin: 50% 100%;
+}
+
+.mac-real-dock .real-dock-icon::before,
+.mac-real-dock .real-dock-icon::after {
+  display: none;
+}
+
+.dock-image-icon img,
+.dock-stack-icon img,
+.dock-trash-real img {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  filter: drop-shadow(0 10px 11px rgba(0, 0, 0, 0.34));
+}
+
+.mac-real-dock .real-dock-icon:hover {
+  filter: none;
+  transform: translateY(-14px) scale(1.18);
+}
+
+.dock-open-dot {
+  position: absolute;
+  left: 50%;
+  bottom: -9px;
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(245, 247, 250, 0.92);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.32);
+  transform: translateX(-50%);
+}
+
+.dock-separator {
+  width: 1px;
+  height: 62px;
+  margin: 0 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.42);
+  box-shadow: 1px 0 0 rgba(15, 23, 42, 0.22);
+}
+
+.dock-stack-icon {
+  border-radius: 13px;
+}
+
+.mac-real-dock .dock-window-thumb {
+  overflow: hidden !important;
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  border-radius: 6px !important;
+  background: #111827;
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.34) !important;
+}
+
+.mac-real-dock .dock-window-thumb span {
+  position: absolute;
+  inset: 6px;
+  border-radius: 3px;
+  background:
+    linear-gradient(90deg, rgba(96,165,250,0.7) 0 26%, transparent 26% 100%),
+    repeating-linear-gradient(180deg, rgba(255,255,255,0.55) 0 2px, transparent 2px 8px),
+    #0F172A;
+}
+
+.mac-real-dock .dock-window-chat span {
+  background:
+    radial-gradient(circle at 70% 72%, rgba(16,185,129,0.9) 0 8%, transparent 9%),
+    repeating-linear-gradient(180deg, rgba(255,255,255,0.55) 0 2px, transparent 2px 8px),
+    #111827;
+}
+
+.dock-trash-real img {
+  width: 58px;
+  height: 58px;
 }
 
 .chat-corner-anchor {
