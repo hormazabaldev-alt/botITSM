@@ -197,6 +197,11 @@ export function SondaAssistant() {
 
   const hasConversation = useMemo(() => messages.length > 1, [messages.length]);
 
+  function openAssistant() {
+    setClosed(false);
+    setExpanded(true);
+  }
+
   async function sendMessage(
     message: string,
     fileToAttach?: { name: string; url: string } | null,
@@ -403,38 +408,36 @@ export function SondaAssistant() {
     return (
       <button
         type="button"
-        onClick={() => {
-          setClosed(false);
-          setExpanded(true);
-        }}
-        className="sonda-bot-launcher group relative grid h-[58px] w-[76px] place-items-center overflow-hidden rounded-[15px] p-0 transition-all duration-200"
+        onPointerDown={openAssistant}
+        onClick={openAssistant}
+        className="sonda-bot-launcher group relative grid h-[50px] w-[66px] place-items-center overflow-hidden rounded-xl p-0 transition-all duration-200"
         style={{
-          background: "rgba(20, 33, 63, 0.92)",
-          border: "1px solid rgba(120, 247, 255, 0.38)",
-          boxShadow: "0 14px 30px rgba(4, 10, 24, 0.42), 0 0 0 1px rgba(255,255,255,0.12) inset, 0 0 24px rgba(85, 244, 255, 0.24)",
-          backdropFilter: "blur(18px) saturate(1.18)",
+          background: "rgba(7, 13, 24, 0.82)",
+          border: "1px solid rgba(226, 232, 240, 0.18)",
+          boxShadow: "0 12px 26px rgba(2, 6, 23, 0.34), 0 1px 0 rgba(255,255,255,0.1) inset",
+          backdropFilter: "blur(14px) saturate(1.08)",
         }}
         onMouseEnter={(e) => {
-          (e.currentTarget as HTMLElement).style.borderColor = "#55F4FF";
-          (e.currentTarget as HTMLElement).style.transform = "translateY(-4px) scale(1.04)";
-          (e.currentTarget as HTMLElement).style.boxShadow = "0 18px 38px rgba(4, 10, 24, 0.5), 0 0 0 1px rgba(255,255,255,0.16) inset, 0 0 34px rgba(85, 244, 255, 0.36)";
+          (e.currentTarget as HTMLElement).style.borderColor = "rgba(85, 244, 255, 0.42)";
+          (e.currentTarget as HTMLElement).style.transform = "translateY(-2px) scale(1.02)";
+          (e.currentTarget as HTMLElement).style.boxShadow = "0 16px 30px rgba(2, 6, 23, 0.4), 0 1px 0 rgba(255,255,255,0.12) inset";
         }}
         onMouseLeave={(e) => {
-          (e.currentTarget as HTMLElement).style.borderColor = "rgba(120, 247, 255, 0.46)";
+          (e.currentTarget as HTMLElement).style.borderColor = "rgba(226, 232, 240, 0.18)";
           (e.currentTarget as HTMLElement).style.transform = "translateY(0) scale(1)";
-          (e.currentTarget as HTMLElement).style.boxShadow = "0 14px 30px rgba(4, 10, 24, 0.42), 0 0 0 1px rgba(255,255,255,0.12) inset, 0 0 24px rgba(85, 244, 255, 0.24)";
+          (e.currentTarget as HTMLElement).style.boxShadow = "0 12px 26px rgba(2, 6, 23, 0.34), 0 1px 0 rgba(255,255,255,0.1) inset";
         }}
         aria-label="Abrir soporte SONDA"
         title="Abrir soporte SONDA"
       >
-        <SondaBotIcon width={76} height={58} />
+        <SondaBotIcon width={62} height={46} />
         <span
           aria-hidden
           className="absolute -right-px -top-px size-3 rounded-full"
           style={{
             background: "#2FE56F",
-            border: "2px solid #12213F",
-            boxShadow: "0 0 12px rgba(47, 229, 111, 0.82)",
+            border: "2px solid rgba(7, 13, 24, 0.96)",
+            boxShadow: "0 0 8px rgba(47, 229, 111, 0.58)",
           }}
         />
       </button>
@@ -447,49 +450,42 @@ export function SondaAssistant() {
       className="relative flex flex-col overflow-hidden"
       style={{
         width: "min(420px, calc(100vw - 32px))",
-        height: "min(540px, calc(100dvh - 100px))",
-        borderRadius: "20px",
-        background: "linear-gradient(160deg, #0C0C0C 0%, #000000 100%)",
-        border: "1px solid rgba(0, 255, 255, 0.16)",
-        boxShadow: "0 32px 80px rgba(0,0,0,0.95), 0 0 0 1px rgba(0, 255, 255, 0.04) inset",
+        height: "min(528px, calc(100dvh - 86px))",
+        borderRadius: "16px",
+        background: "linear-gradient(180deg, rgba(14, 21, 33, 0.98) 0%, rgba(5, 8, 13, 0.98) 100%)",
+        border: "1px solid rgba(148, 163, 184, 0.22)",
+        boxShadow: "0 24px 58px rgba(2, 6, 23, 0.64), 0 1px 0 rgba(255,255,255,0.08) inset",
+        backdropFilter: "blur(18px) saturate(1.08)",
       }}
     >
-      {/* Borde superior decorativo estilo Cyber HUD */}
-      <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-[1.5px] rounded-t-[20px]"
-        style={{ background: "linear-gradient(90deg, transparent 5%, #00FFFF 35%, #FFFFFF 65%, transparent 95%)" }}
-      />
-
-      {/* Brillo radial soft cyan de fondo */}
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background: "radial-gradient(ellipse 60% 40% at 30% 0%, rgba(0,255,255,0.08), transparent 55%)",
-        }}
-      />
-
       {/* ── Header ── */}
       <header
-        className="relative flex h-[54px] shrink-0 items-center justify-between px-4"
+        className="relative flex h-[52px] shrink-0 items-center justify-between px-3.5"
         style={{
-          background: "rgba(0, 0, 0, 0.75)",
-          borderBottom: "1px solid rgba(0, 255, 255, 0.12)",
-          backdropFilter: "blur(16px)",
+          background: "rgba(8, 13, 22, 0.9)",
+          borderBottom: "1px solid rgba(148, 163, 184, 0.14)",
+          backdropFilter: "blur(14px)",
         }}
       >
-        <div className="flex items-center gap-2.5">
-          <SondaBotIcon width={62} height={48} />
+        <div className="flex min-w-0 items-center gap-2.5">
+          <span
+            className="grid size-9 shrink-0 place-items-center overflow-hidden rounded-lg"
+            style={{
+              border: "1px solid rgba(85, 244, 255, 0.22)",
+              background: "rgba(5, 10, 18, 0.84)",
+            }}
+          >
+            <SondaBotIcon width={44} height={34} />
+          </span>
           <div>
             <h1
-              className="text-[13px] font-bold leading-tight"
+              className="text-[13px] font-semibold leading-tight"
               style={{ color: "#FFFFFF" }}
             >
-              Soporte SONDA
-              <span className="mx-1.5 font-normal opacity-30">·</span>
-              <span className="font-semibold text-[11px]" style={{ color: "rgba(255,255,255,0.7)" }}>Mesa de Ayuda</span>
+              Mesa de Ayuda
             </h1>
-            <p className="text-[9.5px] font-semibold uppercase tracking-wider" style={{ color: "#00FFFF", textShadow: "0 0 8px rgba(0,255,255,0.15)" }}>
-              Asistente TI Inteligente
+            <p className="text-[10px] font-medium" style={{ color: "rgba(203, 213, 225, 0.72)" }}>
+              Asistente TI SONDA
             </p>
           </div>
         </div>
@@ -500,35 +496,35 @@ export function SondaAssistant() {
             onClick={startNewChat}
             disabled={isLoading}
             title="Nuevo caso"
-            className="inline-flex h-7 items-center gap-1.5 rounded-full px-2.5 text-[10.5px] font-semibold transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-40"
+            className="grid size-8 place-items-center rounded-lg transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-40"
             style={{
-              border: "1px solid rgba(0, 255, 255, 0.2)",
-              background: "rgba(0, 255, 255, 0.03)",
-              color: "rgba(255, 255, 255, 0.8)",
+              border: "1px solid rgba(148, 163, 184, 0.16)",
+              background: "rgba(255, 255, 255, 0.04)",
+              color: "rgba(226, 232, 240, 0.78)",
             }}
             onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.borderColor = "#00FFFF";
-              (e.currentTarget as HTMLElement).style.color = "#00FFFF";
-              (e.currentTarget as HTMLElement).style.background = "rgba(0, 255, 255, 0.08)";
+              (e.currentTarget as HTMLElement).style.borderColor = "rgba(85, 244, 255, 0.38)";
+              (e.currentTarget as HTMLElement).style.color = "#55F4FF";
+              (e.currentTarget as HTMLElement).style.background = "rgba(85, 244, 255, 0.08)";
             }}
             onMouseLeave={(e) => {
-              (e.currentTarget as HTMLElement).style.borderColor = "rgba(0, 255, 255, 0.2)";
-              (e.currentTarget as HTMLElement).style.color = "rgba(255, 255, 255, 0.8)";
-              (e.currentTarget as HTMLElement).style.background = "rgba(0, 255, 255, 0.03)";
+              (e.currentTarget as HTMLElement).style.borderColor = "rgba(148, 163, 184, 0.16)";
+              (e.currentTarget as HTMLElement).style.color = "rgba(226, 232, 240, 0.78)";
+              (e.currentTarget as HTMLElement).style.background = "rgba(255, 255, 255, 0.04)";
             }}
+            aria-label="Nuevo caso"
           >
-            <RotateCcw size={10} aria-hidden />
-            Nuevo
+            <RotateCcw size={14} aria-hidden />
           </button>
 
           <button
             type="button"
             onClick={() => setExpanded((c) => !c)}
-            className="grid size-7 place-items-center rounded-full transition-all duration-200"
-            style={{ border: "1px solid rgba(255, 255, 255, 0.1)", background: "rgba(255, 255, 255, 0.03)", color: "rgba(255, 255, 255, 0.6)" }}
+            className="grid size-8 place-items-center rounded-lg transition-all duration-200"
+            style={{ border: "1px solid rgba(148, 163, 184, 0.16)", background: "rgba(255, 255, 255, 0.04)", color: "rgba(226, 232, 240, 0.66)" }}
             aria-label={expanded ? "Minimizar" : "Expandir"}
-            onMouseEnter={(e) => (e.currentTarget as HTMLElement).style.borderColor = "rgba(0, 255, 255, 0.3)"}
-            onMouseLeave={(e) => (e.currentTarget as HTMLElement).style.borderColor = "rgba(255, 255, 255, 0.1)"}
+            onMouseEnter={(e) => (e.currentTarget as HTMLElement).style.borderColor = "rgba(85, 244, 255, 0.36)"}
+            onMouseLeave={(e) => (e.currentTarget as HTMLElement).style.borderColor = "rgba(148, 163, 184, 0.16)"}
           >
             {expanded ? <Minus size={14} aria-hidden /> : <ChevronUp size={14} aria-hidden />}
           </button>
@@ -536,11 +532,11 @@ export function SondaAssistant() {
           <button
             type="button"
             onClick={() => setClosed(true)}
-            className="grid size-7 place-items-center rounded-full transition-all duration-200"
-            style={{ border: "1px solid rgba(255, 255, 255, 0.1)", background: "rgba(255, 255, 255, 0.03)", color: "rgba(255, 255, 255, 0.6)" }}
+            className="grid size-8 place-items-center rounded-lg transition-all duration-200"
+            style={{ border: "1px solid rgba(148, 163, 184, 0.16)", background: "rgba(255, 255, 255, 0.04)", color: "rgba(226, 232, 240, 0.66)" }}
             aria-label="Cerrar"
-            onMouseEnter={(e) => (e.currentTarget as HTMLElement).style.borderColor = "rgba(0, 255, 255, 0.3)"}
-            onMouseLeave={(e) => (e.currentTarget as HTMLElement).style.borderColor = "rgba(255, 255, 255, 0.1)"}
+            onMouseEnter={(e) => (e.currentTarget as HTMLElement).style.borderColor = "rgba(248, 113, 113, 0.42)"}
+            onMouseLeave={(e) => (e.currentTarget as HTMLElement).style.borderColor = "rgba(148, 163, 184, 0.16)"}
           >
             <X size={14} aria-hidden />
           </button>
@@ -549,22 +545,22 @@ export function SondaAssistant() {
 
       {/* ── Selector POC demo ── */}
       <div
-        className="relative shrink-0 flex items-center justify-between gap-2 px-3.5 py-1.5 text-[11px] z-10"
-        style={{ background: "rgba(0, 0, 0, 0.4)", borderBottom: "1px solid rgba(0, 255, 255, 0.06)" }}
+        className="relative z-10 flex shrink-0 items-center justify-between gap-2 px-3.5 py-2 text-[11px]"
+        style={{ background: "rgba(2, 6, 23, 0.38)", borderBottom: "1px solid rgba(148, 163, 184, 0.1)" }}
       >
-        <div className="flex items-center gap-1.5" style={{ color: "rgba(255, 255, 255, 0.5)" }}>
-          <UserRound size={11} style={{ color: "#00FFFF" }} aria-hidden />
-          <span>Sesión demo:</span>
+        <div className="flex items-center gap-1.5" style={{ color: "rgba(203, 213, 225, 0.62)" }}>
+          <UserRound size={12} style={{ color: "#55F4FF" }} aria-hidden />
+          <span>Usuario</span>
         </div>
         <select
           value={selectedUserEmail}
           onChange={(e) => handleUserChange(e.target.value)}
           disabled={isLoading}
-          className="rounded-md px-2 py-0.5 text-[11px] font-semibold outline-none cursor-pointer transition-all"
+          className="min-w-0 rounded-md px-2 py-1 text-[11px] font-medium outline-none cursor-pointer transition-all"
           style={{
-            background: "#080808",
-            border: "1px solid rgba(0, 255, 255, 0.18)",
-            color: "#FFFFFF",
+            background: "rgba(15, 23, 42, 0.72)",
+            border: "1px solid rgba(148, 163, 184, 0.18)",
+            color: "#F8FAFC",
           }}
         >
           <option value="">Anónimo</option>
@@ -576,14 +572,14 @@ export function SondaAssistant() {
       {expanded ? (
         <>
           {/* ── Área de mensajes ── */}
-          <div ref={scrollRef} className="thin-scrollbar relative min-h-0 flex-1 overflow-y-auto px-3.5 py-3">
+          <div ref={scrollRef} className="thin-scrollbar relative min-h-0 flex-1 overflow-y-auto px-3.5 py-3.5">
             <div className="space-y-3.5">
               {messages.map((message) => (
                 <Bubble key={message.id} message={message} onReply={(reply) => sendMessage(reply)} />
               ))}
 
               {!hasConversation ? (
-                <div className="grid grid-cols-3 gap-1.5 pt-1">
+                <div className="grid grid-cols-2 gap-2 pt-1">
                   {smartActions.map((action) => (
                     <SmartActionCard
                       key={action.topic}
@@ -601,20 +597,20 @@ export function SondaAssistant() {
 
           {/* ── Input área ── */}
           <div
-            className="relative shrink-0 flex flex-col gap-1.5 px-3.5 py-2.5"
+            className="relative flex shrink-0 flex-col gap-1.5 px-3.5 py-2.5"
             style={{
-              background: "rgba(0, 0, 0, 0.8)",
-              borderTop: "1px solid rgba(0, 255, 255, 0.12)",
-              backdropFilter: "blur(16px)",
+              background: "rgba(4, 8, 14, 0.92)",
+              borderTop: "1px solid rgba(148, 163, 184, 0.14)",
+              backdropFilter: "blur(14px)",
             }}
           >
             {/* Preview adjunto */}
             {attachedFile && (
               <div
-                className="flex items-center justify-between gap-2 rounded-xl p-2 text-xs"
+                className="flex items-center justify-between gap-2 rounded-lg p-2 text-xs"
                 style={{
-                  border: "1px solid rgba(0, 255, 255, 0.25)",
-                  background: "rgba(0, 255, 255, 0.05)",
+                  border: "1px solid rgba(85, 244, 255, 0.2)",
+                  background: "rgba(85, 244, 255, 0.05)",
                 }}
               >
                 <div className="flex items-center gap-2 min-w-0">
@@ -633,10 +629,10 @@ export function SondaAssistant() {
             {/* Menú adjuntos demo */}
             {showAttachmentMenu && (
               <div
-                className="rounded-xl p-2 shadow-2xl flex flex-col gap-1.5 animate-fade-up"
+                className="flex flex-col gap-1.5 rounded-lg p-2 shadow-2xl animate-fade-up"
                 style={{
-                  border: "1px solid rgba(0, 255, 255, 0.15)",
-                  background: "#080808",
+                  border: "1px solid rgba(148, 163, 184, 0.16)",
+                  background: "#0B111B",
                 }}
               >
                 <div className="flex items-center justify-between px-1 mb-0.5">
@@ -656,21 +652,21 @@ export function SondaAssistant() {
                         setAttachedFile({ name: shot.name, url: shot.url });
                         setShowAttachmentMenu(false);
                       }}
-                      className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-xs font-medium transition-all duration-150"
+                      className="flex items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-xs font-medium transition-all duration-150"
                       style={{
-                        border: "1px solid rgba(255, 255, 255, 0.05)",
-                        background: "rgba(255, 255, 255, 0.02)",
-                        color: "rgba(255, 255, 255, 0.7)",
+                        border: "1px solid rgba(148, 163, 184, 0.1)",
+                        background: "rgba(255, 255, 255, 0.025)",
+                        color: "rgba(226, 232, 240, 0.78)",
                       }}
                       onMouseEnter={(e) => {
-                        (e.currentTarget as HTMLElement).style.borderColor = "rgba(0, 255, 255, 0.35)";
-                        (e.currentTarget as HTMLElement).style.background = "rgba(0, 255, 255, 0.06)";
+                        (e.currentTarget as HTMLElement).style.borderColor = "rgba(85, 244, 255, 0.32)";
+                        (e.currentTarget as HTMLElement).style.background = "rgba(85, 244, 255, 0.06)";
                         (e.currentTarget as HTMLElement).style.color = "#FFFFFF";
                       }}
                       onMouseLeave={(e) => {
-                        (e.currentTarget as HTMLElement).style.borderColor = "rgba(255, 255, 255, 0.05)";
-                        (e.currentTarget as HTMLElement).style.background = "rgba(255, 255, 255, 0.02)";
-                        (e.currentTarget as HTMLElement).style.color = "rgba(255, 255, 255, 0.7)";
+                        (e.currentTarget as HTMLElement).style.borderColor = "rgba(148, 163, 184, 0.1)";
+                        (e.currentTarget as HTMLElement).style.background = "rgba(255, 255, 255, 0.025)";
+                        (e.currentTarget as HTMLElement).style.color = "rgba(226, 232, 240, 0.78)";
                       }}
                     >
                       <span className="size-6 overflow-hidden rounded-md shrink-0" style={{ border: "1px solid rgba(255, 255, 255, 0.08)", background: "#000" }}>
@@ -681,7 +677,7 @@ export function SondaAssistant() {
                   ))}
 
                   <label
-                    className="flex items-center justify-center gap-2 rounded-lg px-2.5 py-2 text-xs font-semibold transition-all duration-150 cursor-pointer"
+                    className="flex cursor-pointer items-center justify-center gap-2 rounded-md px-2.5 py-2 text-xs font-semibold transition-all duration-150"
                     style={{
                       border: "1px dashed rgba(255, 255, 255, 0.15)",
                       background: "rgba(255, 255, 255, 0.01)",
@@ -713,14 +709,14 @@ export function SondaAssistant() {
 
             {/* Estado */}
             <div className="flex items-center justify-between text-[10.5px] font-medium mb-0.5">
-              <div className="flex items-center gap-2" style={{ color: "rgba(255, 255, 255, 0.5)" }}>
+              <div className="flex items-center gap-2" style={{ color: "rgba(203, 213, 225, 0.58)" }}>
                 <span
                   className="size-1.5 rounded-full"
                   style={{
                     background: isLoading ? "#00FFFF" : "#00FF88",
                     boxShadow: isLoading
-                      ? "0 0 8px rgba(0, 255, 255, 0.9)"
-                      : "0 0 8px rgba(0, 255, 136, 0.7)",
+                      ? "0 0 7px rgba(85, 244, 255, 0.64)"
+                      : "0 0 7px rgba(47, 229, 111, 0.52)",
                     animation: isLoading ? "pulse 1s ease-in-out infinite" : "none",
                   }}
                 />
@@ -733,11 +729,11 @@ export function SondaAssistant() {
               <button
                 type="button"
                 onClick={() => setShowAttachmentMenu((p) => !p)}
-                className="grid size-10 shrink-0 place-items-center rounded-xl transition-all duration-200"
+                className="grid size-10 shrink-0 place-items-center rounded-lg transition-all duration-200"
                 style={{
-                  border: showAttachmentMenu ? "1px solid rgba(0, 255, 255, 0.4)" : "1px solid rgba(255, 255, 255, 0.08)",
-                  background: showAttachmentMenu ? "rgba(0, 255, 255, 0.08)" : "rgba(255, 255, 255, 0.03)",
-                  color: showAttachmentMenu ? "#00FFFF" : "rgba(255, 255, 255, 0.6)",
+                  border: showAttachmentMenu ? "1px solid rgba(85, 244, 255, 0.34)" : "1px solid rgba(148, 163, 184, 0.14)",
+                  background: showAttachmentMenu ? "rgba(85, 244, 255, 0.08)" : "rgba(255, 255, 255, 0.04)",
+                  color: showAttachmentMenu ? "#55F4FF" : "rgba(226, 232, 240, 0.62)",
                 }}
                 title="Adjuntar evidencia"
               >
@@ -756,35 +752,35 @@ export function SondaAssistant() {
                 }}
                 rows={1}
                 placeholder={attachedFile ? "Agrega un comentario o envía..." : "Describe tu problema..."}
-                className="thin-scrollbar max-h-28 min-h-10 flex-1 resize-none rounded-xl px-3.5 py-2.5 text-[13px] leading-5 outline-none transition-all duration-200"
+                className="thin-scrollbar max-h-28 min-h-10 flex-1 resize-none rounded-lg px-3.5 py-2.5 text-[13px] leading-5 outline-none transition-all duration-200"
                 style={{
-                  border: "1px solid rgba(255, 255, 255, 0.08)",
-                  background: "rgba(255, 255, 255, 0.03)",
+                  border: "1px solid rgba(148, 163, 184, 0.14)",
+                  background: "rgba(15, 23, 42, 0.52)",
                   color: "#FFFFFF",
                 }}
                 onFocus={(e) => {
-                  (e.currentTarget as HTMLElement).style.borderColor = "rgba(0, 255, 255, 0.4)";
-                  (e.currentTarget as HTMLElement).style.background = "rgba(255, 255, 255, 0.05)";
+                  (e.currentTarget as HTMLElement).style.borderColor = "rgba(85, 244, 255, 0.34)";
+                  (e.currentTarget as HTMLElement).style.background = "rgba(15, 23, 42, 0.72)";
                 }}
                 onBlur={(e) => {
-                  (e.currentTarget as HTMLElement).style.borderColor = "rgba(255, 255, 255, 0.08)";
-                  (e.currentTarget as HTMLElement).style.background = "rgba(255, 255, 255, 0.03)";
+                  (e.currentTarget as HTMLElement).style.borderColor = "rgba(148, 163, 184, 0.14)";
+                  (e.currentTarget as HTMLElement).style.background = "rgba(15, 23, 42, 0.52)";
                 }}
               />
 
               <button
                 type="submit"
                 disabled={(!input.trim() && !attachedFile) || isLoading}
-                className="grid size-10 shrink-0 place-items-center rounded-xl transition-all duration-200 disabled:cursor-not-allowed"
+                className="grid size-10 shrink-0 place-items-center rounded-lg transition-all duration-200 disabled:cursor-not-allowed"
                 style={{
                   background: (!input.trim() && !attachedFile) || isLoading
                     ? "rgba(255, 255, 255, 0.04)"
-                    : "linear-gradient(135deg, #00FFFF 0%, #0088FF 100%)",
+                    : "linear-gradient(135deg, #55F4FF 0%, #38BDF8 100%)",
                   color: (!input.trim() && !attachedFile) || isLoading ? "rgba(255, 255, 255, 0.3)" : "#000000",
                   boxShadow: (!input.trim() && !attachedFile) || isLoading
                     ? "none"
-                    : "0 4px 16px rgba(0, 255, 255, 0.3)",
-                  border: "1px solid rgba(255, 255, 255, 0.06)",
+                    : "0 4px 14px rgba(56, 189, 248, 0.24)",
+                  border: "1px solid rgba(255, 255, 255, 0.08)",
                 }}
                 aria-label="Enviar"
               >
@@ -813,28 +809,31 @@ function SmartActionCard({
     <button
       type="button"
       onClick={onClick}
-      className="group relative min-h-[52px] overflow-hidden rounded-xl text-left transition-all duration-200 focus:outline-none"
+      className="group relative min-h-[58px] overflow-hidden rounded-lg text-left transition-all duration-200 focus:outline-none"
       style={{
-        border: `1px solid ${action.border}`,
-        background: action.bg,
-        padding: "8px 10px",
+        border: "1px solid rgba(148, 163, 184, 0.14)",
+        borderLeft: `3px solid ${action.color}`,
+        background: "rgba(15, 23, 42, 0.48)",
+        padding: "9px 10px",
       }}
       onMouseEnter={(e) => {
-        (e.currentTarget as HTMLElement).style.background = action.bg.replace("0.06", "0.14");
-        (e.currentTarget as HTMLElement).style.transform = "translateY(-1.5px)";
-        (e.currentTarget as HTMLElement).style.borderColor = action.color;
+        (e.currentTarget as HTMLElement).style.background = "rgba(30, 41, 59, 0.58)";
+        (e.currentTarget as HTMLElement).style.transform = "translateY(-1px)";
+        (e.currentTarget as HTMLElement).style.borderColor = "rgba(226, 232, 240, 0.2)";
+        (e.currentTarget as HTMLElement).style.borderLeftColor = action.color;
       }}
       onMouseLeave={(e) => {
-        (e.currentTarget as HTMLElement).style.background = action.bg;
+        (e.currentTarget as HTMLElement).style.background = "rgba(15, 23, 42, 0.48)";
         (e.currentTarget as HTMLElement).style.transform = "translateY(0)";
-        (e.currentTarget as HTMLElement).style.borderColor = action.border;
+        (e.currentTarget as HTMLElement).style.borderColor = "rgba(148, 163, 184, 0.14)";
+        (e.currentTarget as HTMLElement).style.borderLeftColor = action.color;
       }}
     >
-      <div className="flex flex-col gap-1.5">
-        <span className="grid size-6 shrink-0 place-items-center rounded-lg" style={{ background: "rgba(255,255,255,0.06)", color: action.color }}>
-          <Icon size={12} aria-hidden />
+      <div className="flex items-center gap-2.5">
+        <span className="grid size-7 shrink-0 place-items-center rounded-md" style={{ background: "rgba(255,255,255,0.06)", color: action.color }}>
+          <Icon size={13} aria-hidden />
         </span>
-        <span className="block text-[11px] font-semibold leading-tight" style={{ color: "#FFFFFF" }}>
+        <span className="block text-[11.5px] font-semibold leading-tight" style={{ color: "#F8FAFC" }}>
           {action.title}
         </span>
       </div>
@@ -849,11 +848,11 @@ function Bubble({ message, onReply }: { message: ChatMessage; onReply?: (message
   if (welcomeIds.includes(message.id)) {
     return (
       <div
-        className="max-w-[86%] rounded-2xl px-3.5 py-2.5 text-[13px] leading-5"
+        className="max-w-[86%] rounded-lg px-3.5 py-2.5 text-[13px] leading-5"
         style={{
-          border: "1px solid rgba(0, 255, 255, 0.22)",
-          background: "rgba(0, 255, 255, 0.05)",
-          color: "#E5E5E5",
+          border: "1px solid rgba(85, 244, 255, 0.22)",
+          background: "rgba(8, 145, 178, 0.08)",
+          color: "#E5E7EB",
         }}
       >
         <p className="whitespace-pre-line">{message.content}</p>
@@ -865,10 +864,10 @@ function Bubble({ message, onReply }: { message: ChatMessage; onReply?: (message
     <div className={`flex gap-2.5 ${isUser ? "justify-end" : "justify-start"}`}>
       {!isUser ? (
         <span
-          className="mt-0.5 grid size-[24px] shrink-0 place-items-center rounded-lg"
+          className="mt-0.5 grid size-[24px] shrink-0 place-items-center rounded-md"
           style={{
-            border: "1px solid rgba(0, 255, 255, 0.25)",
-            background: "rgba(0, 255, 255, 0.06)",
+            border: "1px solid rgba(85, 244, 255, 0.2)",
+            background: "rgba(85, 244, 255, 0.06)",
           }}
         >
           <SondaIcon size={14} />
@@ -878,19 +877,19 @@ function Bubble({ message, onReply }: { message: ChatMessage; onReply?: (message
       <div
         className="max-w-[80%] flex flex-col gap-2"
         style={{
-          borderRadius: isUser ? "16px 4px 16px 16px" : "4px 16px 16px 16px",
+          borderRadius: isUser ? "14px 6px 14px 14px" : "6px 14px 14px 14px",
           padding: "9px 13px",
           ...(isUser
             ? {
-                background: "linear-gradient(135deg, #00FFFF 0%, #0088FF 100%)",
-                border: "1px solid rgba(0, 255, 255, 0.35)",
+                background: "linear-gradient(135deg, #55F4FF 0%, #38BDF8 100%)",
+                border: "1px solid rgba(85, 244, 255, 0.28)",
                 color: "#000000",
-                boxShadow: "0 4px 16px rgba(0, 255, 255, 0.15)",
+                boxShadow: "0 4px 14px rgba(56, 189, 248, 0.14)",
                 fontWeight: 500,
               }
             : {
-                border: "1px solid rgba(255, 255, 255, 0.08)",
-                background: "rgba(255, 255, 255, 0.03)",
+                border: "1px solid rgba(148, 163, 184, 0.12)",
+                background: "rgba(15, 23, 42, 0.46)",
                 color: "#EAEAEA",
               }),
         }}
@@ -913,19 +912,19 @@ function Bubble({ message, onReply }: { message: ChatMessage; onReply?: (message
                 key={reply.message}
                 type="button"
                 onClick={() => onReply?.(reply.message)}
-                className="inline-flex min-h-8 items-center gap-2 rounded-lg px-2.5 text-left text-[12px] font-semibold transition-all duration-150"
+                className="inline-flex min-h-8 items-center gap-2 rounded-md px-2.5 text-left text-[12px] font-semibold transition-all duration-150"
                 style={{
-                  border: "1px solid rgba(0, 255, 255, 0.18)",
-                  background: "rgba(0, 255, 255, 0.05)",
+                  border: "1px solid rgba(85, 244, 255, 0.16)",
+                  background: "rgba(85, 244, 255, 0.05)",
                   color: "#FFFFFF",
                 }}
                 onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.borderColor = "rgba(0, 255, 255, 0.45)";
-                  (e.currentTarget as HTMLElement).style.background = "rgba(0, 255, 255, 0.1)";
+                  (e.currentTarget as HTMLElement).style.borderColor = "rgba(85, 244, 255, 0.38)";
+                  (e.currentTarget as HTMLElement).style.background = "rgba(85, 244, 255, 0.09)";
                 }}
                 onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.borderColor = "rgba(0, 255, 255, 0.18)";
-                  (e.currentTarget as HTMLElement).style.background = "rgba(0, 255, 255, 0.05)";
+                  (e.currentTarget as HTMLElement).style.borderColor = "rgba(85, 244, 255, 0.16)";
+                  (e.currentTarget as HTMLElement).style.background = "rgba(85, 244, 255, 0.05)";
                 }}
               >
                 <HardDrive size={12} aria-hidden />

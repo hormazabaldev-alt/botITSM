@@ -790,29 +790,29 @@ button, input, textarea, select {
 
 @keyframes sonda-bot-float {
   0%, 100% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(-4px) scale(1.008); }
+  50% { transform: translateY(-2px) scale(1.004); }
 }
 
 .sonda-bot-launcher {
-  animation: sonda-bot-float 4.8s ease-in-out infinite;
+  animation: sonda-bot-float 6s ease-in-out infinite;
 }
 
 .sonda-bot-launcher::before {
   position: absolute;
-  inset: -12px;
+  inset: -8px;
   z-index: -1;
-  border-radius: 24px;
+  border-radius: 18px;
   background:
-    radial-gradient(circle at 50% 48%, rgba(85, 244, 255, 0.38), rgba(37, 99, 235, 0.16) 42%, transparent 72%);
-  opacity: 0.9;
+    radial-gradient(circle at 50% 48%, rgba(85, 244, 255, 0.18), rgba(37, 99, 235, 0.08) 44%, transparent 72%);
+  opacity: 0.62;
   content: "";
 }
 
 .sonda-bot-launcher::after {
   position: absolute;
   inset: 1px;
-  border-radius: 14px;
-  background: linear-gradient(180deg, rgba(255,255,255,0.12), transparent 38%);
+  border-radius: 11px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.08), transparent 40%);
   pointer-events: none;
   content: "";
 }
@@ -1127,7 +1127,7 @@ button, input, textarea, select {
   position: fixed;
   z-index: 30;
   right: 24px;
-  bottom: 104px;
+  bottom: 78px;
   display: flex;
   justify-content: flex-end;
 }
@@ -1211,7 +1211,7 @@ button, input, textarea, select {
 
   .chat-corner-anchor {
     right: 14px;
-    bottom: 88px;
+    bottom: 72px;
     left: 14px;
   }
 }
