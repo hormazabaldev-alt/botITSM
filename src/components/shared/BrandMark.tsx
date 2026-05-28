@@ -70,29 +70,14 @@ export function SondaBotIcon({
   height?: number;
 }) {
   return (
-    <svg
+    <img
+      src="/sonda-bot-logo.svg"
       width={width}
       height={height}
-      viewBox="0 0 360 116"
-      xmlns="http://www.w3.org/2000/svg"
       aria-label="SONDA"
-      role="img"
-    >
-      <rect width="360" height="116" rx="12" fill="#12213F" />
-      <text
-        x="18"
-        y="88"
-        fontFamily="'Arial Black', 'Arial', 'Helvetica Neue', 'Impact', sans-serif"
-        fontWeight="900"
-        fontSize="78"
-        letterSpacing="0"
-        fill="#FFFFFF"
-      >
-        <tspan>S</tspan>
-        <tspan fill="#55F4FF">ON</tspan>
-        <tspan>DA</tspan>
-      </text>
-    </svg>
+      alt="SONDA"
+      style={{ display: "block", objectFit: "contain" }}
+    />
   );
 }
 

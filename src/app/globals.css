@@ -450,6 +450,538 @@ button, input, textarea, select {
   }
 }
 
+/* ── Escritorio macOS realista ─────────────────────────────────────── */
+
+.mac-real-desktop {
+  position: relative;
+  min-height: 100dvh;
+  overflow: hidden;
+  color: #111827;
+  background-image: url("/desktop/macos-sonoma.jpg");
+  background-position: center;
+  background-size: cover;
+}
+
+.mac-real-desktop::after {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: rgba(0, 0, 0, 0.08);
+  content: "";
+}
+
+.mac-real-menu {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  height: 28px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 13px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.32);
+  background: rgba(246, 248, 251, 0.72);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.04);
+  backdrop-filter: blur(24px) saturate(1.35);
+  color: rgba(17, 24, 39, 0.92);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Kumbh Sans", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.mac-real-menu-left,
+.mac-real-menu-right {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 18px;
+  white-space: nowrap;
+}
+
+.mac-real-menu-left strong {
+  font-weight: 800;
+}
+
+.apple-mark {
+  position: relative;
+  width: 16px;
+  overflow: hidden;
+  color: transparent;
+}
+
+.apple-mark::before {
+  position: absolute;
+  left: 2px;
+  top: 5px;
+  width: 10px;
+  height: 11px;
+  border-radius: 55% 45% 60% 50%;
+  background: #111827;
+  content: "";
+}
+
+.apple-mark::after {
+  position: absolute;
+  left: 8px;
+  top: 1px;
+  width: 6px;
+  height: 5px;
+  border-radius: 7px 0 7px 0;
+  background: #111827;
+  transform: rotate(-18deg);
+  content: "";
+}
+
+.mac-real-stage {
+  position: relative;
+  z-index: 1;
+  min-height: calc(100dvh - 28px);
+  padding: 34px 34px 116px;
+}
+
+.real-desktop-icons {
+  position: absolute;
+  right: 34px;
+  top: 46px;
+  display: grid;
+  gap: 18px;
+}
+
+.real-desktop-file {
+  display: grid;
+  width: 94px;
+  min-height: 86px;
+  place-items: center;
+  gap: 7px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #FFFFFF;
+  cursor: default;
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.2;
+  text-align: center;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.58);
+}
+
+.real-desktop-file:hover {
+  background: rgba(0, 96, 255, 0.22);
+}
+
+.desktop-file-icon {
+  display: grid;
+  width: 54px;
+  height: 46px;
+  place-items: center;
+  border-radius: 8px;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.22);
+}
+
+.desktop-file-folder {
+  background: linear-gradient(#77B9FF 0 38%, #348DFF 38% 100%);
+  color: #FFFFFF;
+}
+
+.desktop-file-file {
+  background: linear-gradient(135deg, #FFFFFF, #DDE6F5);
+  color: #3B82F6;
+}
+
+.desktop-file-drive {
+  background: linear-gradient(#F9FAFB, #C7D2E0);
+  color: #475569;
+}
+
+.finder-window {
+  position: absolute;
+  left: 64px;
+  top: 74px;
+  width: min(780px, calc(100vw - 420px));
+  min-height: 496px;
+  overflow: hidden;
+  border: 1px solid rgba(45, 55, 72, 0.3);
+  border-radius: 12px;
+  background: rgba(246, 248, 251, 0.78);
+  box-shadow: 0 28px 80px rgba(15, 23, 42, 0.28), 0 1px 0 rgba(255, 255, 255, 0.8) inset;
+  backdrop-filter: blur(28px) saturate(1.28);
+}
+
+.finder-titlebar {
+  min-height: 54px;
+  border-bottom: 1px solid rgba(71, 85, 105, 0.18);
+  background: rgba(237, 241, 247, 0.72);
+}
+
+.traffic-lights {
+  position: absolute;
+  left: 14px;
+  top: 14px;
+  display: flex;
+  gap: 8px;
+}
+
+.traffic-lights span {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.09) inset;
+}
+
+.traffic-lights .red { background: #FF5F57; }
+.traffic-lights .yellow { background: #FEBC2E; }
+.traffic-lights .green { background: #28C840; }
+
+.finder-toolbar {
+  display: grid;
+  min-height: 54px;
+  grid-template-columns: 34px 34px 1fr 180px;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px 0 80px;
+}
+
+.finder-toolbar button {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border: 1px solid rgba(100, 116, 139, 0.18);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.48);
+  color: rgba(51, 65, 85, 0.78);
+  font-size: 22px;
+  line-height: 1;
+}
+
+.finder-title {
+  justify-self: center;
+  color: rgba(15, 23, 42, 0.76);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.finder-search {
+  display: flex;
+  height: 28px;
+  align-items: center;
+  gap: 7px;
+  padding: 0 9px;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.58);
+  color: rgba(71, 85, 105, 0.6);
+  font-size: 12px;
+}
+
+.finder-body {
+  display: grid;
+  min-height: 442px;
+  grid-template-columns: 206px 1fr;
+}
+
+.finder-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 12px;
+  border-right: 1px solid rgba(100, 116, 139, 0.16);
+  background: rgba(232, 238, 247, 0.5);
+}
+
+.sidebar-label {
+  margin: 11px 8px 4px;
+  color: rgba(71, 85, 105, 0.62);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.finder-sidebar a {
+  display: flex;
+  height: 30px;
+  align-items: center;
+  gap: 9px;
+  padding: 0 9px;
+  border-radius: 7px;
+  color: rgba(15, 23, 42, 0.74);
+  font-size: 13px;
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.finder-sidebar a.active {
+  background: rgba(0, 112, 255, 0.18);
+  color: #0F172A;
+}
+
+.finder-content {
+  padding: 14px 18px;
+  background: rgba(255, 255, 255, 0.68);
+}
+
+.finder-columns,
+.finder-row {
+  display: grid;
+  grid-template-columns: 1.35fr 0.72fr 0.78fr;
+  align-items: center;
+  gap: 12px;
+}
+
+.finder-columns {
+  height: 28px;
+  border-bottom: 1px solid rgba(100, 116, 139, 0.18);
+  color: rgba(71, 85, 105, 0.62);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.finder-row {
+  width: 100%;
+  height: 42px;
+  border: 0;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+  background: transparent;
+  color: rgba(15, 23, 42, 0.82);
+  font-size: 13px;
+  text-align: left;
+}
+
+.finder-row:hover {
+  background: rgba(0, 112, 255, 0.08);
+}
+
+.finder-row span:first-child {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-weight: 700;
+}
+
+.calendar-widget {
+  position: absolute;
+  left: 92px;
+  top: 594px;
+  display: flex;
+  width: 170px;
+  min-height: 82px;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.42);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18);
+  backdrop-filter: blur(22px) saturate(1.2);
+}
+
+.calendar-widget span {
+  display: block;
+  color: rgba(51, 65, 85, 0.74);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.calendar-widget strong {
+  display: block;
+  color: #111827;
+  font-size: 34px;
+  line-height: 1;
+}
+
+.mac-real-dock {
+  position: absolute;
+  z-index: 6;
+  left: 50%;
+  bottom: 16px;
+  display: flex;
+  align-items: end;
+  gap: 10px;
+  min-height: 76px;
+  padding: 10px 13px;
+  transform: translateX(-50%);
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  border-radius: 22px;
+  background: rgba(238, 242, 247, 0.38);
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.26), 0 1px 0 rgba(255, 255, 255, 0.78) inset;
+  backdrop-filter: blur(24px) saturate(1.35);
+}
+
+.real-dock-icon {
+  position: relative;
+  display: grid;
+  width: 54px;
+  height: 54px;
+  place-items: center;
+  overflow: hidden;
+  border: 0;
+  border-radius: 14px;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.24), 0 1px 0 rgba(255, 255, 255, 0.58) inset;
+  transition: transform 0.16s ease;
+}
+
+.real-dock-icon:hover {
+  transform: translateY(-6px) scale(1.04);
+}
+
+.dock-finder {
+  background: linear-gradient(90deg, #75BFFF 0 50%, #1D74FF 50% 100%);
+}
+
+.dock-finder::before {
+  position: absolute;
+  inset: 12px 10px;
+  border: 2px solid rgba(3, 7, 18, 0.72);
+  border-top: 0;
+  border-radius: 0 0 12px 12px;
+  content: "";
+}
+
+.dock-finder::after {
+  position: absolute;
+  top: 16px;
+  width: 34px;
+  height: 12px;
+  border-top: 2px solid rgba(3, 7, 18, 0.72);
+  content: "";
+}
+
+.dock-safari {
+  background: radial-gradient(circle, #FFFFFF 0 19%, #38BDF8 20% 58%, #1D4ED8 59% 100%);
+}
+
+.dock-safari::after {
+  width: 6px;
+  height: 34px;
+  border-radius: 999px;
+  background: #EF4444;
+  transform: rotate(42deg);
+  content: "";
+}
+
+.dock-mail {
+  background: linear-gradient(135deg, #60A5FA, #2563EB);
+}
+
+.dock-mail::after {
+  width: 33px;
+  height: 21px;
+  border: 2px solid #FFFFFF;
+  border-radius: 4px;
+  content: "";
+}
+
+.dock-calendar {
+  background: linear-gradient(#F43F5E 0 26%, #FFFFFF 26% 100%);
+}
+
+.dock-calendar::after {
+  color: #111827;
+  content: "28";
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.dock-terminal {
+  background: #111827;
+  color: #E5E7EB;
+}
+
+.dock-settings {
+  background: linear-gradient(135deg, #E2E8F0, #64748B);
+  color: #0F172A;
+}
+
+.chat-corner-anchor {
+  position: fixed;
+  z-index: 20;
+  right: 24px;
+  bottom: 104px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media (max-width: 980px) {
+  .finder-window {
+    left: 24px;
+    width: calc(100vw - 190px);
+  }
+
+  .real-desktop-icons {
+    right: 20px;
+  }
+}
+
+@media (max-width: 760px) {
+  .mac-real-menu-left span:not(.apple-mark),
+  .mac-real-menu-right svg {
+    display: none;
+  }
+
+  .mac-real-stage {
+    padding: 18px 14px 104px;
+  }
+
+  .real-desktop-icons {
+    display: none;
+  }
+
+  .finder-window {
+    position: relative;
+    left: auto;
+    top: auto;
+    width: 100%;
+    min-height: 430px;
+  }
+
+  .finder-toolbar {
+    grid-template-columns: 28px 28px 1fr;
+    padding-left: 74px;
+  }
+
+  .finder-search {
+    display: none;
+  }
+
+  .finder-body {
+    grid-template-columns: 1fr;
+  }
+
+  .finder-sidebar {
+    display: none;
+  }
+
+  .finder-columns,
+  .finder-row {
+    grid-template-columns: 1fr 0.7fr;
+  }
+
+  .finder-columns span:nth-child(3),
+  .finder-row span:nth-child(3) {
+    display: none;
+  }
+
+  .calendar-widget {
+    display: none;
+  }
+
+  .mac-real-dock {
+    right: 12px;
+    left: 12px;
+    bottom: 12px;
+    justify-content: center;
+    transform: none;
+  }
+
+  .real-dock-icon {
+    width: 46px;
+    height: 46px;
+  }
+
+  .chat-corner-anchor {
+    right: 14px;
+    bottom: 88px;
+    left: 14px;
+  }
+}
+
 /* ── Animaciones micro ──────────────────────────────────────────────── */
 
 @keyframes pulse-amber {

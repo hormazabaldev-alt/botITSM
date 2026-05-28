@@ -411,7 +411,7 @@ export function SondaAssistant() {
         aria-label="Abrir soporte SONDA"
         title="Abrir soporte SONDA"
       >
-        <SondaBotIcon width={116} height={38} />
+        <SondaBotIcon width={128} height={38} />
         <span
           aria-hidden
           className="absolute -right-1 -top-1 size-4 rounded-full"
@@ -462,7 +462,7 @@ export function SondaAssistant() {
         }}
       >
         <div className="flex items-center gap-2.5">
-          <SondaBotIcon width={78} height={26} />
+          <SondaBotIcon width={88} height={26} />
           <div>
             <h1
               className="text-[13px] font-bold leading-tight"
